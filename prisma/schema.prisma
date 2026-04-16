@@ -7,28 +7,77 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  novels    Novel[]  // 작가로서의 소설들
+  readTags  UserTagRead[] // 읽은 태그 통계
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String @default("#6B7280") // 기본 회색
+
+  // Relations
+  novels NovelTag[]
+  reads  UserTagRead[]
+}
+
 model Novel {
   id         Int       @id @default(autoincrement())
   title      String
-  author     String
+  authorId   String    // Supabase User ID
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   genre      String
   coverImage String    @default("/placeholder-cover.svg")
   views      Int       @default(0)
-  rating     Float
+  rating     Float     @default(0)
   synopsis   String    @db.Text
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  episodes   Episode[]
+
+  // Relations
+  episodes Episode[]
+  tags     NovelTag[]
 }
 
 model Episode {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   novelId   Int
-  novel     Novel  @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  novel     Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
   chapterNo Int
   title     String
-  content   String @db.Text
+  content   String  @db.Text
+  createdAt DateTime @default(now())
 
   @@unique([novelId, chapterNo])
   @@index([novelId])
+}
+
+model NovelTag {
+  novelId Int
+  tagId   Int
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([novelId, tagId])
+}
+
+model UserTagRead {
+  userId String
+  tagId  Int
+  count  Int @default(1) // 읽은 횟수
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tagId])
 }

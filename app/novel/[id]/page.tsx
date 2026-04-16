@@ -1,20 +1,77 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star } from "lucide-react";
-import { getNovelWithEpisodes } from "@/lib/novel-service";
+import { BookOpen, ChevronRight, Eye, Star, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
-export const dynamic = "force-dynamic";
+type Novel = {
+  id: number;
+  title: string;
+  authorId: string;
+  author: string;
+  genre: string;
+  coverImage: string;
+  views: number;
+  rating: number;
+  synopsis: string;
+  episodes: {
+    id: number;
+    chapterNo: number;
+    title: string;
+  }[];
+};
 
-type Props = { params: Promise<{ id: string }> };
+export default function NovelDetailPage() {
+  const params = useParams();
+  const id = Number(params.id);
+  const [novel, setNovel] = useState<Novel | null>(null);
+  const [isAuthor, setIsAuthor] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-export default async function NovelDetailPage({ params }: Props) {
-  const { id: idStr } = await params;
-  const id = Number(idStr);
-  if (!Number.isFinite(id)) notFound();
+  useEffect(() => {
+    loadNovel();
+  }, [id]);
 
-  const novel = await getNovelWithEpisodes(id);
-  if (!novel) notFound();
+  const loadNovel = async () => {
+    try {
+      const response = await fetch(`/api/novel/${id}`);
+      if (response.ok) {
+        const novelData = await response.json();
+        setNovel(novelData);
+
+        // 현재 사용자와 작가 비교
+        const supabase = getSupabaseClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        setIsAuthor(user?.id === novelData.authorId);
+      } else {
+        notFound();
+      }
+    } catch (error) {
+      console.error("작품 로드 실패:", error);
+      notFound();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="hero-gradient flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-white">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!novel) {
+    notFound();
+  }
 
   const firstEpisode = novel.episodes[0];
 
@@ -57,15 +114,26 @@ export default async function NovelDetailPage({ params }: Props) {
             className="mt-6 reader-content text-foreground/90 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: novel.synopsis }}
           />
-          {firstEpisode && (
-            <Link
-              href={`/novel/${novel.id}/episode/${firstEpisode.id}`}
-              className="inline-flex items-center gap-2 mt-8 px-5 py-2.5 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 transition-colors shadow-card"
-            >
-              <BookOpen size={18} aria-hidden />
-              첫 화부터 읽기
-            </Link>
-          )}
+          <div className="flex gap-3 mt-8">
+            {firstEpisode && (
+              <Link
+                href={`/novel/${novel.id}/episode/${firstEpisode.id}`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 transition-colors shadow-card"
+              >
+                <BookOpen size={18} aria-hidden />
+                첫 화부터 읽기
+              </Link>
+            )}
+            {isAuthor && (
+              <Link
+                href={`/novel/${novel.id}/episode/create`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition-colors shadow-card"
+              >
+                <Plus size={18} aria-hidden />
+                연재하기
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
