@@ -12,11 +12,29 @@ const prisma = new PrismaClient({ adapter: new PrismaPg(url) });
 async function main() {
   await prisma.episode.deleteMany();
   await prisma.novel.deleteMany();
+  await prisma.user.deleteMany();
+
+  // 테스트 사용자 생성
+  const user1 = await prisma.user.create({
+    data: {
+      id: "test-user-1",
+      email: "author1@example.com",
+      name: "임정희",
+    },
+  });
+
+  const user2 = await prisma.user.create({
+    data: {
+      id: "test-user-2",
+      email: "author2@example.com",
+      name: "김민수",
+    },
+  });
 
   await prisma.novel.create({
     data: {
       title: "회생한 마왕의 일상",
-      author: "임정희",
+      authorId: user1.id,
       genre: "판타지",
       coverImage: "/placeholder-cover.svg",
       views: 125_000,
@@ -45,7 +63,7 @@ async function main() {
   await prisma.novel.create({
     data: {
       title: "아카데미의 최강 요리사",
-      author: "김민수",
+      authorId: user2.id,
       genre: "일상",
       coverImage: "/placeholder-cover.svg",
       views: 89_000,
@@ -65,10 +83,18 @@ async function main() {
     },
   });
 
+  const user3 = await prisma.user.create({
+    data: {
+      id: "test-user-3",
+      email: "author3@example.com",
+      name: "박지훈",
+    },
+  });
+
   await prisma.novel.create({
     data: {
       title: "나만 아는 던전",
-      author: "박지훈",
+      authorId: user3.id,
       genre: "액션",
       coverImage: "/placeholder-cover.svg",
       views: 203_000,

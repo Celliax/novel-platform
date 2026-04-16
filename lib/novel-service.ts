@@ -11,10 +11,25 @@ function isDbConnectionError(err: unknown): boolean {
   return false;
 }
 
-export async function listNovelsForHome(): Promise<Novel[]> {
+export type NovelWithAuthor = Novel & {
+  author: {
+    name: string | null;
+    email: string;
+  };
+};
+
+export async function listNovelsForHome(): Promise<NovelWithAuthor[]> {
   try {
     return await getPrisma().novel.findMany({
       orderBy: { id: "asc" },
+      include: {
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
   } catch (err) {
     // 개발 환경에서 DB가 아직 준비되지 않은 경우(로컬 postgres 미기동 등)

@@ -42,7 +42,16 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
             {novels.map((novel) => (
-              <NovelCard key={novel.id} {...novel} />
+              <NovelCard
+                key={novel.id}
+                id={novel.id}
+                title={novel.title}
+                author={novel.author.name || novel.author.email}
+                genre={novel.genre}
+                coverImage={novel.coverImage}
+                views={novel.views}
+                rating={novel.rating}
+              />
             ))}
           </div>
         )}

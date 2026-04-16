@@ -12,7 +12,7 @@ export async function createNovelAction(input: {
   tagIds: number[];
 }) {
   // Supabase에서 사용자 정보 가져오기
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
