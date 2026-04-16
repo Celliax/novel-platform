@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { createNovelAction } from "@/app/actions/novel";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import TagSelector from "@/components/TagSelector";
-import { Tag } from "@/lib/generated/prisma/client";
+import { Tag } from "@/lib/novel-service";
 
 const Editor = dynamic(() => import("@/components/Editor"), {
   ssr: false,

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { User, Tag, Novel } from "@/lib/generated/prisma/client";
+import { User, Tag, Novel } from "@/lib/novel-service";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,

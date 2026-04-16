@@ -1,13 +1,7 @@
 import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../lib/generated/prisma/client";
+import { getPrisma } from "../lib/prisma";
 
-const url = process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL;
-if (!url) {
-  throw new Error("DATABASE_URL이 필요합니다. seed 실행 전 .env를 설정하세요.");
-}
-
-const prisma = new PrismaClient({ adapter: new PrismaPg(url) });
+const prisma = getPrisma();
 
 async function main() {
   await prisma.episode.deleteMany();

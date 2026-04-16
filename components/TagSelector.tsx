@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Tag } from "@/lib/generated/prisma/client";
+import { Tag } from "@/lib/novel-service";
 
 interface TagSelectorProps {
   selectedTags: Tag[];

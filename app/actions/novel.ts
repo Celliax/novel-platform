@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getPrisma } from "@/lib/prisma";
+import { createNovel, getTags } from "@/lib/novel-service";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function createNovelAction(input: {
@@ -19,22 +19,6 @@ export async function createNovelAction(input: {
     throw new Error("로그인이 필요합니다.");
   }
 
-  // 사용자 정보가 DB에 없는 경우 생성
-  let dbUser = await getPrisma().user.findUnique({
-    where: { id: user.id },
-  });
-
-  if (!dbUser) {
-    dbUser = await getPrisma().user.create({
-      data: {
-        id: user.id,
-        email: user.email!,
-        name: user.user_metadata?.name || user.email?.split('@')[0],
-        avatar: user.user_metadata?.avatar_url,
-      },
-    });
-  }
-
   const title = input.title.trim();
   const genre = input.genre.trim();
   const synopsis = input.synopsis?.trim() || "<p></p>";
@@ -47,21 +31,19 @@ export async function createNovelAction(input: {
     throw new Error("최소 1개의 태그를 선택해주세요.");
   }
 
+  // 태그 이름들 가져오기
+  const allTags = await getTags();
+  const selectedTags = allTags
+    .filter(tag => input.tagIds.includes(tag.id))
+    .map(tag => tag.name);
+
   // 소설 생성
-  const novel = await getPrisma().novel.create({
-    data: {
-      title,
-      authorId: user.id,
-      genre,
-      synopsis,
-      rating: 0,
-      views: 0,
-      tags: {
-        create: input.tagIds.map(tagId => ({
-          tagId,
-        })),
-      },
-    },
+  const novel = await createNovel({
+    title,
+    authorId: user.id,
+    genre,
+    synopsis,
+    tags: selectedTags,
   });
 
   revalidatePath("/");

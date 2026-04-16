@@ -39,7 +39,6 @@ export interface Episode {
 export interface Tag {
   id: number;
   name: string;
-  color?: string;
   createdAt: string;
 }
 
@@ -69,6 +68,7 @@ interface Database {
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
 
+// 기본 데이터
 const defaultData: Database = {
   users: [
     {
@@ -134,7 +134,7 @@ const defaultData: Database = {
     {
       id: 1,
       novelId: 1,
-      novel: {} as Novel,
+      novel: {} as Novel, // 순환 참조 방지
       chapterNo: 1,
       title: '프롤로그 — 오븐 앞의 마왕',
       content: '<p>새벽 빵 냄새가 마을 골목을 감쌌다. 루시안은 밀가루 묻은 손으로 오븐 문을 열었다.</p><p><strong>「오늘은 호밀빵이다.」</strong></p><p>그의 목소리는 더 이상 군대를 움직이지 않았지만, 여전히 사람의 마음을 움직일 줄 알았다.</p>',
@@ -179,11 +179,15 @@ function saveDatabase(data: Database): void {
 
 let database = loadDatabase();
 
+// 관계 데이터 채우기
 function populateRelations() {
   database.novels.forEach(novel => {
     novel.author = database.users.find(u => u.id === novel.authorId)!;
     novel.episodes = database.episodes.filter(e => e.novelId === novel.id);
-    novel.tags = database.novelTags.filter(nt => nt.novelId === novel.id);
+    novel.tags = database.novelTags
+      .filter(nt => nt.novelId === novel.id)
+      .map(nt => database.tags.find(t => t.id === nt.tagId)!)
+      .filter(Boolean);
   });
 
   database.episodes.forEach(episode => {
@@ -274,6 +278,7 @@ export async function createNovel(data: {
 
   database.novels.push(newNovel);
 
+  // 태그 연결
   data.tags.forEach(tagName => {
     let tag = database.tags.find(t => t.name === tagName);
     if (!tag) {
@@ -325,6 +330,9 @@ export async function createEpisode(data: {
   populateRelations();
 
   return newEpisode;
+}
+    throw err;
+  }
 }
 
 export async function getEpisodeNavigation(

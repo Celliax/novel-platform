@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPrisma } from "@/lib/prisma";
+import { getNovelWithEpisodes } from "@/lib/novel-service";
 
 export async function GET(
   request: NextRequest,
@@ -16,26 +16,7 @@ export async function GET(
       );
     }
 
-    const novel = await getPrisma().novel.findUnique({
-      where: { id: novelId },
-      include: {
-        episodes: {
-          orderBy: { chapterNo: "asc" },
-          select: {
-            id: true,
-            chapterNo: true,
-            title: true,
-          },
-        },
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
+    const novel = await getNovelWithEpisodes(novelId);
 
     if (!novel) {
       return NextResponse.json(
@@ -44,25 +25,28 @@ export async function GET(
       );
     }
 
-    // 응답 형식 맞추기
-    const response = {
-      id: novel.id,
-      title: novel.title,
-      authorId: novel.authorId,
-      author: novel.author.name || novel.author.email,
-      genre: novel.genre,
-      coverImage: novel.coverImage,
-      views: novel.views,
-      rating: novel.rating,
-      synopsis: novel.synopsis,
-      episodes: novel.episodes,
-    };
-
-    return NextResponse.json(response);
+    return NextResponse.json({
+      novel: {
+        id: novel.id,
+        title: novel.title,
+        author: novel.author,
+        genre: novel.genre,
+        coverImage: novel.coverImage,
+        views: novel.views,
+        rating: novel.rating,
+        synopsis: novel.synopsis,
+        episodes: novel.episodes.map(episode => ({
+          id: episode.id,
+          chapterNo: episode.chapterNo,
+          title: episode.title,
+        })),
+        tags: novel.tags.map(nt => nt.tag),
+      },
+    });
   } catch (error) {
     console.error("작품 조회 오류:", error);
     return NextResponse.json(
-      { error: "작품을 불러오는데 실패했습니다." },
+      { error: "서버 오류가 발생했습니다." },
       { status: 500 }
     );
   }

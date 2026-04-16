@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getPrisma } from "@/lib/prisma";
+import { createEpisode, getNovelWithEpisodes } from "@/lib/novel-service";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function createEpisodeAction(input: {
@@ -20,10 +20,7 @@ export async function createEpisodeAction(input: {
   }
 
   // 작품 존재 확인 및 권한 체크
-  const novel = await getPrisma().novel.findUnique({
-    where: { id: input.novelId },
-    include: { episodes: true },
-  });
+  const novel = await getNovelWithEpisodes(input.novelId);
 
   if (!novel) {
     throw new Error("작품을 찾을 수 없습니다.");
@@ -34,38 +31,17 @@ export async function createEpisodeAction(input: {
   }
 
   // 회차 번호 중복 체크
-  const existingEpisode = await getPrisma().episode.findUnique({
-    where: {
-      novelId_chapterNo: {
-        novelId: input.novelId,
-        chapterNo: input.chapterNo,
-      },
-    },
-  });
-
+  const existingEpisode = novel.episodes.find(e => e.chapterNo === input.chapterNo);
   if (existingEpisode) {
     throw new Error(`회차 ${input.chapterNo}는 이미 존재합니다.`);
   }
 
-  const title = input.title.trim();
-  const content = input.content?.trim() || "<p></p>";
-
-  if (!title) {
-    throw new Error("회차 제목을 입력해주세요.");
-  }
-
-  if (!content || content === "<p></p>") {
-    throw new Error("회차 내용을 입력해주세요.");
-  }
-
   // 회차 생성
-  const episode = await getPrisma().episode.create({
-    data: {
-      novelId: input.novelId,
-      chapterNo: input.chapterNo,
-      title,
-      content,
-    },
+  await createEpisode({
+    novelId: input.novelId,
+    chapterNo: input.chapterNo,
+    title: input.title,
+    content: input.content,
   });
 
   revalidatePath(`/novel/${input.novelId}`);
