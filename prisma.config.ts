@@ -10,8 +10,7 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    // Prisma migrations should prefer direct DB connection (non-pooler).
-    // Runtime app can still use pooled DATABASE_URL.
-    url: process.env["DIRECT_DATABASE_URL"] || process.env["DATABASE_URL"],
+    // Use pooled connection for both migrations and runtime
+    url: process.env["DATABASE_URL"],
   },
 });
