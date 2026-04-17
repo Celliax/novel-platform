@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { User as UserIcon, Camera, Loader2 } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
 export default function ProfileSetupPage() {
   const [nickname, setNickname] = useState("");
   const [gender, setGender] = useState("");
+  const [age, setAge] = useState<number | "">("");
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,21 +28,68 @@ export default function ProfileSetupPage() {
       const meta = session.user.user_metadata;
       setNickname(meta?.nickname || meta?.full_name || "");
       setGender(meta?.gender || "");
+      setAvatar(meta?.avatar_url || null);
       setInitializing(false);
     }
     loadUser();
   }, [router, supabase]);
 
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 250;
+        const MAX_HEIGHT = 250;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setAvatar(dataUrl);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!age || Number(age) < 1) {
+      setError("올바른 나이를 입력해주세요.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
+    const trimNickname = nickname.trim();
 
     // Supabase auth metadata 업데이트
     const { error: updateError } = await supabase.auth.updateUser({
       data: { 
-        nickname: nickname.trim(),
-        gender: gender 
+        nickname: trimNickname,
+        gender: gender,
+        avatar_url: avatar,
+        age: Number(age)
       }
     });
 
@@ -53,11 +103,12 @@ export default function ProfileSetupPage() {
     const res = await fetch("/api/user/setup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nickname: nickname.trim(), gender })
+      body: JSON.stringify({ nickname: trimNickname, gender, age: Number(age), avatar })
     });
 
     if (!res.ok) {
-      setError("프로필 저장에 실패했습니다.");
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "프로필 저장에 실패했습니다. 입력값을 확인해주세요.");
       setLoading(false);
       return;
     }
@@ -75,9 +126,35 @@ export default function ProfileSetupPage() {
       <div className="w-full max-w-md rounded-2xl bg-surface p-8 shadow-card-hover ring-1 ring-border/60">
         <h1 className="text-2xl font-bold text-foreground text-center">프로필 설정</h1>
         <p className="mt-2 text-sm text-muted text-center">
-          환영합니다! 플랫폼에서 사용할 닉네임과 성별을 입력해주세요.
+          환영합니다! 원활한 서비스 이용을 위해 추가 정보를 입력해주세요.
         </p>
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+          <div className="flex flex-col items-center mb-6">
+            <div 
+              className="relative group cursor-pointer w-24 h-24 mb-2"
+              onClick={() => document.getElementById("avatar-input")?.click()}
+            >
+              {avatar ? (
+                <img src={avatar} alt="미리보기" className="w-24 h-24 rounded-full object-cover border border-border" />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-canvas border border-border flex items-center justify-center">
+                  <UserIcon size={40} className="text-muted" />
+                </div>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-black/30">
+                <Camera className="text-white" size={24} />
+              </div>
+              <input 
+                id="avatar-input"
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleImageChange} 
+              />
+            </div>
+            <span className="text-xs text-muted">프로필 사진 등록 (선택)</span>
+          </div>
+
           <div>
             <label htmlFor="nickname" className="block text-sm font-medium text-foreground mb-2">
               표시 닉네임
@@ -93,22 +170,39 @@ export default function ProfileSetupPage() {
             />
           </div>
           
-          <div>
-            <label htmlFor="gender" className="block text-sm font-medium text-foreground mb-2">
-              성별
-            </label>
-            <select
-              id="gender"
-              required
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="w-full rounded-xl border border-border bg-canvas px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 appearance-none"
-            >
-              <option value="" disabled>선택해주세요</option>
-              <option value="MALE">남성</option>
-              <option value="FEMALE">여성</option>
-              <option value="OTHER">선택 안 함 / 기타</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="gender" className="block text-sm font-medium text-foreground mb-2">
+                성별
+              </label>
+              <select
+                id="gender"
+                required
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full rounded-xl border border-border bg-canvas px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 appearance-none"
+              >
+                <option value="" disabled>선택</option>
+                <option value="MALE">남성</option>
+                <option value="FEMALE">여성</option>
+                <option value="OTHER">기타</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="age" className="block text-sm font-medium text-foreground mb-2">
+                나이
+              </label>
+              <input
+                id="age"
+                type="number"
+                required
+                min="1"
+                value={age}
+                onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : "")}
+                className="w-full rounded-xl border border-border bg-canvas px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
+                placeholder="세"
+              />
+            </div>
           </div>
 
           {error && (
