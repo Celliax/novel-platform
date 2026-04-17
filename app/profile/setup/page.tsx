@@ -87,9 +87,8 @@ export default function ProfileSetupPage() {
     const { error: updateError } = await supabase.auth.updateUser({
       data: { 
         nickname: trimNickname,
-        gender: gender,
-        avatar_url: avatar,
-        age: Number(age)
+        // 대용량 Base64 데이터는 Auth metadata에 저장하지 않는 것이 안전합니다.
+        // avatar_url: avatar 
       }
     });
 

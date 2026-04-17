@@ -33,6 +33,18 @@ export async function GET(request: Request) {
           user = await prisma.user.findUnique({
             where: { id: data.session.user.id }
           });
+
+          // 유저 레코드가 없다면 기본 정보로 생성 (최초 로그인 대응)
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                id: data.session.user.id,
+                email: data.session.user.email!,
+                nickname: data.session.user.user_metadata?.nickname || data.session.user.user_metadata?.full_name || "User",
+                isProfileComplete: false
+              }
+            });
+          }
         } catch (dbError) {
           console.error("Prisma findUnique error:", dbError);
           // DB 에러가 발생해도 일단 로그인은 성공했으니 프로필 설정으로 보내도록 처리
