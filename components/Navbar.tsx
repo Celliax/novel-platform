@@ -62,9 +62,9 @@ export default function Navbar() {
           {!loading && (
             user ? (
               <>
-                <Link href="/profile/setup" className="hover:text-brand-600 transition-colors flex items-center gap-1">
+                <Link href="/profile" className="hover:text-brand-600 transition-colors flex items-center gap-1">
                   <User size={18} aria-hidden />
-                  {user.user_metadata?.nickname || user.user_metadata?.full_name || "프로필 설정"}
+                  {user.user_metadata?.nickname || user.user_metadata?.full_name || "프로필"}
                 </Link>
                 <button
                   onClick={handleLogout}

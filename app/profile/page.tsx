@@ -1,218 +1,93 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getPrisma } from "@/lib/prisma";
 import Link from "next/link";
-import { getSupabaseClient } from "@/lib/supabase/client";
-import { User, Tag, Novel } from "@/lib/novel-service";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { Settings, BookOpen } from "lucide-react";
+import AvatarUpload from "@/components/AvatarUpload";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+export default async function ProfilePage() {
+  const supabase = await getSupabaseServerClient();
+  const { data: { session } } = await supabase.auth.getSession();
 
-interface TagReadStats {
-  tag: Tag;
-  count: number;
-}
-
-export default function ProfilePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [novels, setNovels] = useState<Novel[]>([]);
-  const [tagStats, setTagStats] = useState<TagReadStats[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const supabase = getSupabaseClient();
-    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
-
-    if (!supabaseUser) {
-      router.push("/login");
-      return;
-    }
-
-    // 사용자 정보와 통계 가져오기
-    await loadUserData(supabaseUser.id);
-  };
-
-  const loadUserData = async (userId: string) => {
-    try {
-      // 사용자 정보 가져오기
-      const userResponse = await fetch(`/api/user/${userId}`);
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        setUser(userData.user);
-        setNovels(userData.novels);
-        setTagStats(userData.tagStats);
-      }
-    } catch (error) {
-      console.error("사용자 데이터 로드 실패:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    const supabase = getSupabaseClient();
-    await supabase.auth.signOut();
-    router.push("/");
-  };
-
-  if (loading) {
-    return (
-      <div className="hero-gradient flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-white">프로필 로딩 중...</p>
-        </div>
-      </div>
-    );
+  if (!session?.user) {
+    redirect("/login");
   }
 
-  if (!user) {
-    return (
-      <div className="hero-gradient flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-white text-xl">사용자를 찾을 수 없습니다.</p>
-          <Link href="/" className="mt-4 inline-block text-blue-300 hover:text-blue-100">
-            홈으로 돌아가기
-          </Link>
-        </div>
-      </div>
-    );
+  const prisma = getPrisma();
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { 
+      novels: {
+        orderBy: { updatedAt: 'desc' }
+      } 
+    },
+  });
+
+  if (!user || !user.isProfileComplete) {
+    redirect("/profile/setup");
   }
-
-  // 차트 데이터 준비
-  const chartData = {
-    labels: tagStats.slice(0, 5).map(stat => stat.tag.name),
-    datasets: [
-      {
-        label: "읽은 회차 수",
-        data: tagStats.slice(0, 5).map(stat => stat.count),
-        backgroundColor: tagStats.slice(0, 5).map(stat => stat.tag.color),
-        borderColor: tagStats.slice(0, 5).map(stat => stat.tag.color),
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: "가장 많이 읽은 태그 TOP 5",
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-        },
-      },
-    },
-  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-white shadow">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{user.name || "사용자"}</h1>
-                <p className="text-gray-600">{user.email}</p>
-              </div>
-            </div>
-            <div className="flex space-x-4">
-              <Link
-                href="/novel/create"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                새 소설 쓰기
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                로그아웃
-              </button>
-            </div>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Profile Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-border pb-6">
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            <AvatarUpload user={{ id: user.id, avatar: user.avatar, name: user.name }} />
+            <button className="absolute bottom-0 right-0 p-1.5 bg-surface border border-border rounded-full shadow-sm hover:bg-canvas transition-colors">
+              <Settings size={16} className="text-muted" />
+            </button>
           </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <span>{user.name}</span>
+              <span className="text-lg font-normal text-muted">님의 회원카드</span>
+            </h1>
+            <p className="text-muted mt-1">안녕하세요</p>
+          </div>
+        </div>
+        
+        <div className="flex gap-2 mt-6 md:mt-0">
+          <button className="px-5 py-2 rounded-full bg-ink text-canvas font-medium text-sm">프로필</button>
+          <button className="px-5 py-2 rounded-full text-muted hover:bg-surface font-medium text-sm transition-colors">연재소설</button>
+          <button className="px-5 py-2 rounded-full text-muted hover:bg-surface font-medium text-sm transition-colors">취향</button>
+          <button className="px-5 py-2 rounded-full text-muted hover:bg-surface font-medium text-sm transition-colors">댓글</button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 연재 작품 */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">연재 작품</h2>
-            {novels.length === 0 ? (
-              <p className="text-gray-500">아직 연재 중인 작품이 없습니다.</p>
-            ) : (
-              <div className="space-y-4">
-                {novels.map((novel) => (
-                  <div key={novel.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <div className="w-12 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-500">
-                      📖
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{novel.title}</h3>
-                      <p className="text-sm text-gray-600">{novel.genre}</p>
-                      <p className="text-sm text-gray-500">조회수: {novel.views}</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Link
-                        href={`/novel/${novel.id}`}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        보기
-                      </Link>
-                      <Link
-                        href={`/novel/${novel.id}/episode/create`}
-                        className="text-green-600 hover:text-green-800 text-sm font-medium"
-                      >
-                        연재하기
-                      </Link>
-                    </div>
-                  </div>
+      {/* Grid Content */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        
+        {/* 연재중인 소설 */}
+        <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border flex flex-col h-[300px]">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="font-bold text-lg text-foreground">연재중인 소설</h2>
+            <Link href="/novel/create" className="text-xs font-medium px-3 py-1.5 bg-canvas border border-border rounded-full hover:bg-surface transition-colors">
+              연재소설
+            </Link>
+          </div>
+          
+          <div className="flex-1 flex flex-col items-center justify-center text-center overflow-hidden">
+            {user.novels.length > 0 ? (
+              <div className="w-full space-y-3 overflow-y-auto max-h-[200px] pr-2">
+                {user.novels.map(novel => (
+                  <Link key={novel.id} href={`/novel/${novel.id}`} className="block p-3 rounded-xl border border-border hover:bg-canvas transition-colors text-left group">
+                    <div className="font-medium text-foreground truncate group-hover:text-brand-600 transition-colors">{novel.title}</div>
+                    <div className="text-xs text-muted mt-1">조회수 {novel.views} · 별점 {novel.rating}</div>
+                  </Link>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* 읽은 태그 통계 그래프 */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">읽기 통계</h2>
-            {tagStats.length === 0 ? (
-              <p className="text-gray-500">아직 읽은 태그가 없습니다.</p>
             ) : (
-              <div className="h-64">
-                <Bar data={chartData} options={chartOptions} />
-              </div>
+              <>
+                <div className="w-16 h-16 bg-canvas rounded-full flex items-center justify-center mb-3 text-muted/50">
+                  <BookOpen size={32} />
+                </div>
+                <p className="text-sm text-muted font-medium">연재중인 소설이 없습니다.</p>
+              </>
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
