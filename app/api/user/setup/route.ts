@@ -12,24 +12,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { nickname, gender } = body;
+    const { nickname, gender, age, avatar } = body;
 
     const prisma = getPrisma();
-    
-    // upsert로 해당 아이디의 유저가 있으면 업데이트, 없으면 생성
-    const user = await prisma.user.upsert({
+
+    // DB 업데이트 및 프로필 완료 상태 변경
+    const user = await prisma.user.update({
       where: { id: session.user.id },
-      update: {
-        name: nickname,
-        gender: gender,
-        isProfileComplete: true,
-      },
-      create: {
-        id: session.user.id,
-        email: session.user.email ?? "",
-        name: nickname,
-        gender: gender,
-        avatar: session.user.user_metadata?.avatar_url,
+      data: {
+        nickname,
+        gender,
+        age: age ? Number(age) : null,
+        avatar,
         isProfileComplete: true,
       },
     });
