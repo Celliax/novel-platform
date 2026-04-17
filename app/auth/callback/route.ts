@@ -7,6 +7,15 @@ export async function GET(request: Request) {
   // next 파라미터가 있으면 해당 경로로, 없으면 메인 페이지로 이동
   const next = searchParams.get("next") ?? "/";
 
+  // Render와 같은 프록시 환경에서는 x-forwarded-host 헤더를 확인해야 실제 도메인(fptnovel.onrender.com)을 알 수 있습니다.
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const isLocalEnv = process.env.NODE_ENV === "development";
+  
+  let baseUrl = origin;
+  if (!isLocalEnv && forwardedHost) {
+    baseUrl = `https://${forwardedHost}`;
+  }
+
   if (code) {
     const supabase = await getSupabaseServerClient();
     
@@ -14,10 +23,10 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${baseUrl}${next}`);
     }
   }
 
   // 인증 코드가 없거나 교환에 실패한 경우 로그인 페이지로 에러와 함께 리다이렉트
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+  return NextResponse.redirect(`${baseUrl}/login?error=auth_callback_failed`);
 }
