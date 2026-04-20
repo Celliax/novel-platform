@@ -16,13 +16,17 @@ export async function POST(request: Request) {
 
     const prisma = getPrisma();
 
+    const existingUser = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    });
+
     // DB 업데이트 및 프로필 완료 상태 변경 (upsert를 사용하여 없으면 생성)
     const user = await prisma.user.upsert({
       where: { id: session.user.id },
       update: {
         nickname,
         gender,
-        age: age ? Number(age) : null,
+        ...( (!existingUser?.age) && { age: age ? Number(age) : null } ),
         avatar,
         isProfileComplete: true,
       },

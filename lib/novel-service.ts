@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getPrisma } from './prisma';
 
 export interface User {
   id: string;
@@ -244,6 +245,22 @@ export async function getTags(): Promise<Tag[]> {
   return database.tags;
 }
 
+export async function createTag(name: string, color: string = "#6B7280"): Promise<Tag> {
+  let tag = database.tags.find(t => t.name === name);
+  if (tag) {
+    throw new Error('이미 존재하는 태그입니다.');
+  }
+  tag = {
+    id: Math.max(...database.tags.map(t => t.id), 0) + 1,
+    name,
+    color,
+    createdAt: new Date().toISOString(),
+  };
+  database.tags.push(tag);
+  saveDatabase(database);
+  return tag;
+}
+
 export async function createNovel(data: {
   title: string;
   authorId: string;
@@ -251,9 +268,22 @@ export async function createNovel(data: {
   synopsis: string;
   tags: string[];
 }): Promise<Novel> {
-  const author = database.users.find(u => u.id === data.authorId);
+  let author = database.users.find(u => u.id === data.authorId);
   if (!author) {
-    throw new Error('작가를 찾을 수 없습니다.');
+    const prisma = getPrisma();
+    const prismaUser = await prisma.user.findUnique({ where: { id: data.authorId } });
+    if (prismaUser) {
+      author = {
+        id: data.authorId,
+        email: prismaUser.email,
+        name: prismaUser.nickname || "작자미상",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      database.users.push(author);
+    } else {
+      throw new Error('작가를 찾을 수 없습니다.');
+    }
   }
 
   const newNovel: Novel = {
