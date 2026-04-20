@@ -13,7 +13,7 @@ async function main() {
     data: {
       id: "test-user-1",
       email: "author1@example.com",
-      name: "임정희",
+      nickname: "임정희",
     },
   });
 
@@ -21,7 +21,7 @@ async function main() {
     data: {
       id: "test-user-2",
       email: "author2@example.com",
-      name: "김민수",
+      nickname: "김민수",
     },
   });
 
@@ -81,7 +81,7 @@ async function main() {
     data: {
       id: "test-user-3",
       email: "author3@example.com",
-      name: "박지훈",
+      nickname: "박지훈",
     },
   });
 

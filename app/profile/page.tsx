@@ -33,14 +33,14 @@ export default async function ProfilePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-border pb-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <AvatarUpload user={{ id: user.id, avatar: user.avatar, name: user.name }} />
+            <AvatarUpload user={{ id: user.id, avatar: user.avatar, name: user.nickname }} />
             <button className="absolute bottom-0 right-0 p-1.5 bg-surface border border-border rounded-full shadow-sm hover:bg-canvas transition-colors">
               <Settings size={16} className="text-muted" />
             </button>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <span>{user.name}</span>
+              <span>{user.nickname}</span>
               <span className="text-lg font-normal text-muted">님의 회원카드</span>
             </h1>
             <p className="text-muted mt-1">안녕하세요</p>
