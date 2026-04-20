@@ -251,11 +251,11 @@ export async function checkTitleAvailable(title: string): Promise<boolean> {
 }
 
 export async function createTag(name: string, color: string = "#6B7280"): Promise<Tag> {
-  let tag = database.tags.find(t => t.name === name);
-  if (tag) {
-    throw new Error('이미 존재하는 태그입니다.');
+  const existing = database.tags.find(t => t.name === name);
+  if (existing) {
+    throw Object.assign(new Error('이미 존재하는 태그입니다.'), { existingTag: existing });
   }
-  tag = {
+  const tag: Tag = {
     id: Math.max(...database.tags.map(t => t.id), 0) + 1,
     name,
     color,
@@ -264,6 +264,10 @@ export async function createTag(name: string, color: string = "#6B7280"): Promis
   database.tags.push(tag);
   saveDatabase(database);
   return tag;
+}
+
+export async function getTagByName(name: string): Promise<Tag | null> {
+  return database.tags.find(t => t.name === name) || null;
 }
 
 export async function createNovel(data: {
