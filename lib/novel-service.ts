@@ -96,7 +96,16 @@ const defaultData: Database = {
   users: [],
   novels: [],
   episodes: [],
-  tags: [],
+  tags: [
+    { id: 1, name: '판타지', createdAt: new Date().toISOString() },
+    { id: 2, name: '현대판타지', createdAt: new Date().toISOString() },
+    { id: 3, name: '로맨스', createdAt: new Date().toISOString() },
+    { id: 4, name: '로맨스판타지', createdAt: new Date().toISOString() },
+    { id: 5, name: '무협', createdAt: new Date().toISOString() },
+    { id: 6, name: '일상', createdAt: new Date().toISOString() },
+    { id: 7, name: '액션', createdAt: new Date().toISOString() },
+    { id: 8, name: 'TS', createdAt: new Date().toISOString() },
+  ],
   novelTags: [],
   userTagReads: [],
   comments: [],
@@ -152,6 +161,8 @@ populateRelations();
 export type NovelWithAuthor = Novel & { author: User };
 
 export async function listNovelsForHome(): Promise<NovelWithAuthor[]> {
+  database = loadDatabase();
+  populateRelations();
   return database.novels.map(novel => ({
     ...novel,
     author: novel.author,
@@ -159,6 +170,10 @@ export async function listNovelsForHome(): Promise<NovelWithAuthor[]> {
 }
 
 export async function getNovelWithEpisodes(id: number): Promise<Novel | null> {
+  // 최신 데이터 반영을 위해 데이터베이스 다시 로드
+  database = loadDatabase();
+  populateRelations();
+  
   const novel = database.novels.find(n => n.id === id);
   if (!novel) return null;
 
@@ -187,6 +202,7 @@ export async function getUserTagStats(userId: string): Promise<{ tag: Tag; count
 }
 
 export async function getTags(): Promise<Tag[]> {
+  database = loadDatabase();
   return database.tags;
 }
 
@@ -349,6 +365,8 @@ export async function getEpisodeNavigation(
 }
 
 export async function getUserNovels(userId: string): Promise<Novel[]> {
+  database = loadDatabase();
+  populateRelations();
   return database.novels.filter(novel => novel.authorId === userId);
 }
 
