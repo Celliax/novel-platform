@@ -16,16 +16,25 @@ export async function POST(request: Request) {
 
     const prisma = getPrisma();
 
-    // DB 업데이트 및 프로필 완료 상태 변경
-    const user = await prisma.user.update({
+    // DB 업데이트 및 프로필 완료 상태 변경 (upsert를 사용하여 없으면 생성)
+    const user = await prisma.user.upsert({
       where: { id: session.user.id },
-      data: {
+      update: {
         nickname,
         gender,
         age: age ? Number(age) : null,
         avatar,
         isProfileComplete: true,
       },
+      create: {
+        id: session.user.id,
+        email: session.user.email || "",
+        nickname,
+        gender,
+        age: age ? Number(age) : null,
+        avatar,
+        isProfileComplete: true,
+      }
     });
 
     return NextResponse.json({ success: true, user });
