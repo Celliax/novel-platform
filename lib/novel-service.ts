@@ -245,6 +245,11 @@ export async function getTags(): Promise<Tag[]> {
   return database.tags;
 }
 
+export async function checkTitleAvailable(title: string): Promise<boolean> {
+  const duplicate = database.novels.find(n => n.title === title);
+  return !duplicate;
+}
+
 export async function createTag(name: string, color: string = "#6B7280"): Promise<Tag> {
   let tag = database.tags.find(t => t.name === name);
   if (tag) {
@@ -268,6 +273,12 @@ export async function createNovel(data: {
   synopsis: string;
   tags: string[];
 }): Promise<Novel> {
+  // 제목 중복 체크
+  const duplicate = database.novels.find(n => n.title === data.title);
+  if (duplicate) {
+    throw new Error('이미 같은 제목의 소설이 존재합니다. 다른 제목을 사용해주세요.');
+  }
+
   let author = database.users.find(u => u.id === data.authorId);
   if (!author) {
     const prisma = getPrisma();
