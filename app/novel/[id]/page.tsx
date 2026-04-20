@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star, Plus } from "lucide-react";
+import { BookOpen, ChevronRight, Eye, Star, Plus, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -31,6 +31,8 @@ export default function NovelDetailPage() {
   const [novel, setNovel] = useState<Novel | null>(null);
   const [isAuthor, setIsAuthor] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     loadNovel();
@@ -47,6 +49,14 @@ export default function NovelDetailPage() {
         const supabase = getSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
         setIsAuthor(user?.id === novelData.authorId);
+
+        if (user) {
+          const favRes = await fetch(`/api/novel/${id}/favorite`);
+          if (favRes.ok) {
+            const favData = await favRes.json();
+            setIsFavorited(favData.isFavorited);
+          }
+        }
       } else {
         notFound();
       }
@@ -55,6 +65,23 @@ export default function NovelDetailPage() {
       notFound();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    setFavoriteLoading(true);
+    try {
+      const res = await fetch(`/api/novel/${id}/favorite`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setIsFavorited(data.isFavorited);
+      } else if (res.status === 401) {
+        alert("로그인이 필요합니다.");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setFavoriteLoading(false);
     }
   };
 
@@ -109,6 +136,14 @@ export default function NovelDetailPage() {
               <Star size={16} className="text-amber-400 fill-amber-400" aria-hidden />
               {novel.rating.toFixed(1)}
             </span>
+            <button 
+              onClick={toggleFavorite} 
+              disabled={favoriteLoading}
+              className={`flex items-center gap-1.5 transition-colors ${isFavorited ? "text-red-500" : "text-muted hover:text-red-400"}`}
+            >
+              <Heart size={16} className={isFavorited ? "fill-red-500" : ""} aria-hidden />
+              선호작
+            </button>
           </div>
           <div
             className="mt-6 reader-content text-foreground/90 leading-relaxed"

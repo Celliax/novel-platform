@@ -16,6 +16,7 @@ model User {
   gender    String?
   age       Int?
   bio       String?
+  isPrivate Boolean @default(false)
   isProfileComplete Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -23,6 +24,7 @@ model User {
   // Relations
   novels    Novel[]  // 작가로서의 소설들
   readTags  UserTagRead[] // 읽은 태그 통계
+  favorites UserFavorite[] // 선호작
 }
 
 model Tag {
@@ -49,8 +51,9 @@ model Novel {
   updatedAt  DateTime  @updatedAt
 
   // Relations
-  episodes Episode[]
-  tags     NovelTag[]
+  episodes   Episode[]
+  tags       NovelTag[]
+  favoritedBy UserFavorite[] // 선호하는 유저들
 }
 
 model Episode {
@@ -85,4 +88,15 @@ model UserTagRead {
   tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([userId, tagId])
+}
+
+model UserFavorite {
+  userId  String
+  novelId Int
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
 }

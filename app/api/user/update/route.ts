@@ -12,7 +12,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { avatar, bio } = body;
+    const { avatar, bio, isPrivate } = body;
 
     const prisma = getPrisma();
     
@@ -21,7 +21,8 @@ export async function PATCH(request: Request) {
       where: { id: session.user.id },
       data: { 
         ...(avatar && { avatar }),
-        ...(bio !== undefined && { bio })
+        ...(bio !== undefined && { bio }),
+        ...(isPrivate !== undefined && { isPrivate }),
       },
     });
 

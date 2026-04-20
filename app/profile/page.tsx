@@ -19,7 +19,21 @@ export default async function ProfilePage() {
     include: { 
       novels: {
         orderBy: { updatedAt: 'desc' }
-      } 
+      },
+      favorites: {
+        include: {
+          novel: {
+            include: {
+              tags: {
+                include: {
+                  tag: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }
     },
   });
 
