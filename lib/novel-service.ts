@@ -66,96 +66,41 @@ interface Database {
   tags: Tag[];
   novelTags: NovelTag[];
   userTagReads: UserTagRead[];
+  comments: Comment[];
+  reports: Report[];
+}
+
+export interface Comment {
+  id: number;
+  novelId: number;
+  userId: string;
+  userName: string;
+  content: string;
+  recommends: number;
+  dislikes: number;
+  createdAt: string;
+}
+
+export interface Report {
+  id: number;
+  type: 'COMMENT' | 'NOVEL';
+  targetId: number;
+  userId: string;
+  reason: string;
+  createdAt: string;
 }
 
 const DB_PATH = path.join(process.cwd(), 'data.json');
 
 const defaultData: Database = {
-  users: [
-    {
-      id: 'test-user-1',
-      email: 'author1@example.com',
-      name: '임정희',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: 'test-user-2',
-      email: 'author2@example.com',
-      name: '김민수',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ],
-  novels: [
-    {
-      id: 1,
-      title: '회생한 마왕의 일상',
-      authorId: 'test-user-1',
-      author: {
-        id: 'test-user-1',
-        email: 'author1@example.com',
-        name: '임정희',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      genre: '판타지',
-      coverImage: '/placeholder-cover.svg',
-      views: 125000,
-      rating: 4.8,
-      synopsis: '<p>한때 세계를 뒤흔든 마왕이 조용한 마을에서 빵 굽는 삶을 선택했다. 그런데 과거 부하들이 하나둘 찾아오기 시작한다.</p>',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      episodes: [],
-      tags: [],
-    },
-    {
-      id: 2,
-      title: '나만 아는 던전',
-      authorId: 'test-user-2',
-      author: {
-        id: 'test-user-2',
-        email: 'author2@example.com',
-        name: '김민수',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      genre: '액션',
-      coverImage: '/placeholder-cover.svg',
-      views: 203000,
-      rating: 4.6,
-      synopsis: '<p>던전 탐험가로 살아가는 청년의 이야기. 다른 사람은 모르는 던전의 비밀을 간직한 채 모험을 계속한다.</p>',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      episodes: [],
-      tags: [],
-    },
-  ],
-  episodes: [
-    {
-      id: 1,
-      novelId: 1,
-      novel: {} as Novel,
-      chapterNo: 1,
-      title: '프롤로그 — 오븐 앞의 마왕',
-      content: '<p>새벽 빵 냄새가 마을 골목을 감쌌다. 루시안은 밀가루 묻은 손으로 오븐 문을 열었다.</p><p><strong>「오늘은 호밀빵이다.」</strong></p><p>그의 목소리는 더 이상 군대를 움직이지 않았지만, 여전히 사람의 마음을 움직일 줄 알았다.</p>',
-      createdAt: new Date().toISOString(),
-    },
-  ],
-  tags: [
-    { id: 1, name: '판타지', createdAt: new Date().toISOString() },
-    { id: 2, name: '로맨스', createdAt: new Date().toISOString() },
-    { id: 3, name: '액션', createdAt: new Date().toISOString() },
-    { id: 4, name: '일상', createdAt: new Date().toISOString() },
-    { id: 5, name: '모험', createdAt: new Date().toISOString() },
-  ],
-  novelTags: [
-    { novelId: 1, tagId: 1, novel: {} as Novel, tag: {} as Tag },
-    { novelId: 1, tagId: 4, novel: {} as Novel, tag: {} as Tag },
-    { novelId: 2, tagId: 3, novel: {} as Novel, tag: {} as Tag },
-    { novelId: 2, tagId: 5, novel: {} as Novel, tag: {} as Tag },
-  ],
+  users: [],
+  novels: [],
+  episodes: [],
+  tags: [],
+  novelTags: [],
   userTagReads: [],
+  comments: [],
+  reports: [],
 };
 
 function loadDatabase(): Database {
@@ -405,4 +350,50 @@ export async function getEpisodeNavigation(
 
 export async function getUserNovels(userId: string): Promise<Novel[]> {
   return database.novels.filter(novel => novel.authorId === userId);
+}
+
+export async function getComments(novelId: number): Promise<Comment[]> {
+  return (database.comments || []).filter(c => c.novelId === novelId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export async function createComment(data: { novelId: number, userId: string, userName: string, content: string }): Promise<Comment> {
+  if (!database.comments) database.comments = [];
+  const newComment: Comment = {
+    id: Math.max(...database.comments.map(c => c.id), 0) + 1,
+    ...data,
+    recommends: 0,
+    dislikes: 0,
+    createdAt: new Date().toISOString(),
+  };
+  database.comments.push(newComment);
+  saveDatabase(database);
+  return newComment;
+}
+
+export async function recommendComment(commentId: number): Promise<number> {
+  const comment = (database.comments || []).find(c => c.id === commentId);
+  if (!comment) throw new Error('댓글을 찾을 수 없습니다.');
+  comment.recommends = (comment.recommends || 0) + 1;
+  saveDatabase(database);
+  return comment.recommends;
+}
+
+export async function dislikeComment(commentId: number): Promise<number> {
+  const comment = (database.comments || []).find(c => c.id === commentId);
+  if (!comment) throw new Error('댓글을 찾을 수 없습니다.');
+  comment.dislikes = (comment.dislikes || 0) + 1;
+  saveDatabase(database);
+  return comment.dislikes;
+}
+
+export async function createReport(data: { type: 'COMMENT' | 'NOVEL', targetId: number, userId: string, reason: string }): Promise<Report> {
+  if (!database.reports) database.reports = [];
+  const newReport: Report = {
+    id: Math.max(...database.reports.map(r => r.id), 0) + 1,
+    ...data,
+    createdAt: new Date().toISOString(),
+  };
+  database.reports.push(newReport);
+  saveDatabase(database);
+  return newReport;
 }

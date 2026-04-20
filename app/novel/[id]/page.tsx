@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Bell, Share2, MessageSquare, ArrowDownUp } from "lucide-react";
+import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -11,6 +11,23 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 type Tag = {
   id: number;
   name: string;
+};
+
+type Episode = {
+  id: number;
+  chapterNo: number;
+  title: string;
+};
+
+type Comment = {
+  id: number;
+  novelId: number;
+  userId: string;
+  userName: string;
+  content: string;
+  recommends: number;
+  dislikes: number;
+  createdAt: string;
 };
 
 type Novel = {
@@ -24,25 +41,29 @@ type Novel = {
   rating: number;
   synopsis: string;
   tags: Tag[];
-  episodes: {
-    id: number;
-    chapterNo: number;
-    title: string;
-  }[];
+  episodes: Episode[];
 };
 
 export default function NovelDetailPage() {
   const params = useParams();
   const id = Number(params.id);
   const [novel, setNovel] = useState<Novel | null>(null);
+  const [recommendedNovels, setRecommendedNovels] = useState<Novel[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [isAuthor, setIsAuthor] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [sortAsc, setSortAsc] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ type: 'COMMENT' | 'NOVEL', id: number } | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     loadNovel();
+    loadRecommendedNovels();
+    loadComments();
   }, [id]);
 
   const loadNovel = async () => {
@@ -50,9 +71,8 @@ export default function NovelDetailPage() {
       const response = await fetch(`/api/novel/${id}`);
       if (response.ok) {
         const novelData = await response.json();
-        setNovel(novelData.novel); // FIX: correctly extract novel object
+        setNovel(novelData.novel);
 
-        // 현재 사용자와 작가 비교
         const supabase = getSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
         setIsAuthor(user?.id === novelData.novel.authorId);
@@ -75,6 +95,30 @@ export default function NovelDetailPage() {
     }
   };
 
+  const loadRecommendedNovels = async () => {
+    try {
+      const res = await fetch('/api/novel/list'); // Need to ensure this exists or use home list
+      if (res.ok) {
+        const data = await res.json();
+        setRecommendedNovels(data.novels.filter((n: Novel) => n.id !== id).slice(0, 3));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const loadComments = async () => {
+    try {
+      const res = await fetch(`/api/novel/${id}/comments`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data.comments);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const toggleFavorite = async () => {
     setFavoriteLoading(true);
     try {
@@ -92,12 +136,66 @@ export default function NovelDetailPage() {
     }
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("사이트 링크가 복사되었습니다.");
+  };
+
+  const handleCommentAction = async (commentId: number, action: 'recommend' | 'dislike') => {
+    try {
+      const res = await fetch(`/api/comment/${commentId}/${action}`, { method: 'POST' });
+      if (res.ok) {
+        loadComments();
+      } else if (res.status === 401) {
+        alert("로그인이 필요합니다.");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const openReportModal = (type: 'COMMENT' | 'NOVEL', targetId: number) => {
+    setReportTarget({ type, id: targetId });
+    setReportReason("");
+    setShowReportModal(true);
+  };
+
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      alert("신고 사유를 입력해주세요.");
+      return;
+    }
+    setReporting(true);
+    try {
+      const res = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: reportTarget?.type,
+          targetId: reportTarget?.id,
+          reason: reportReason,
+        }),
+      });
+      if (res.ok) {
+        alert("신고되었습니다.");
+        setShowReportModal(false);
+      } else {
+        alert("신고에 실패했습니다.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("오류가 발생했습니다.");
+    } finally {
+      setReporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto"></div>
-          <p className="mt-4 text-muted">로딩 중...</p>
+          <p className="mt-4 text-muted text-sm">로딩 중...</p>
         </div>
       </div>
     );
@@ -112,7 +210,7 @@ export default function NovelDetailPage() {
   const firstEpisode = novel.episodes[0];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12 bg-white">
+    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12 bg-white min-h-screen">
       
       {/* Top Section: Novel Info */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
@@ -138,10 +236,7 @@ export default function NovelDetailPage() {
              <button onClick={toggleFavorite} className={`flex items-center justify-center w-10 h-10 rounded-full border ${isFavorited ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}>
                <Heart size={18} className={isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-700'} />
              </button>
-             <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
-               <Bell size={18} className="text-gray-700" />
-             </button>
-             <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
+             <button onClick={handleShare} className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
                <Share2 size={18} className="text-gray-700" />
              </button>
           </div>
@@ -151,8 +246,6 @@ export default function NovelDetailPage() {
           <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
             <span className="font-bold text-gray-800 mr-1">{authorName}</span>
             <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] rounded font-bold">15</span>
-            <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[10px] rounded font-bold tracking-wider">PLUS</span>
-            <span className="px-1.5 py-0.5 bg-green-600 text-white text-[10px] rounded font-bold tracking-wider">독점</span>
           </div>
           
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 font-medium mb-4">
@@ -170,15 +263,13 @@ export default function NovelDetailPage() {
 
           <div className="w-full bg-gray-50 rounded-xl p-5 mb-6 border border-gray-100/50">
             <div className="flex flex-wrap items-center gap-6 mb-4 text-sm font-bold text-gray-800">
-              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호 <span className="font-medium text-gray-600">6,292</span></span>
-              <span className="flex items-center gap-1.5"><Bell size={16} className="text-gray-400"/> 알람 <span className="font-medium text-gray-600">484</span></span>
+              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호 <span className="font-medium text-gray-600">{(novel.views / 20).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></span>
               <span className="flex items-center gap-1.5"><BookOpen size={16} className="text-gray-400"/> 회차 <span className="font-medium text-gray-600">{novel.episodes.length}회차</span></span>
             </div>
             <div className="text-sm text-gray-600 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: novel.synopsis }} />
           </div>
 
           <div className="flex flex-col gap-3 w-full lg:w-auto">
-            {/* 독자용 메인 버튼 */}
             <div className="flex gap-3">
               <Link 
                 href={firstEpisode ? `/novel/${novel.id}/episode/${firstEpisode.id}` : '#'}
@@ -187,7 +278,6 @@ export default function NovelDetailPage() {
                 {firstEpisode ? `EP.${firstEpisode.chapterNo}. 이어보기` : '첫화보기'}
               </Link>
             </div>
-            {/* 작가 전용: 회차 등록하기 버튼 */}
             {isAuthor && (
               <div className="w-full lg:w-auto">
                 <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg mb-2">
@@ -209,7 +299,7 @@ export default function NovelDetailPage() {
         {/* Top Right Action Icons (Desktop) */}
         <div className="hidden lg:flex flex-col gap-6 items-center lg:ml-auto shrink-0 pr-4">
           <div className="flex gap-5 text-center">
-            <button className="flex flex-col items-center gap-2 group">
+            <button onClick={handleShare} className="flex flex-col items-center gap-2 group">
               <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-gray-50 transition shadow-sm">
                 <Share2 size={22} className="text-gray-600" />
               </div>
@@ -219,13 +309,7 @@ export default function NovelDetailPage() {
               <div className={`w-[52px] h-[52px] rounded-full border flex items-center justify-center transition shadow-sm ${isFavorited ? 'border-red-500 bg-red-50' : 'border-gray-200 group-hover:bg-gray-50'}`}>
                 <Heart size={22} className={isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'} />
               </div>
-              <span className="text-xs font-bold text-gray-500">6,292</span>
-            </button>
-            <button className="flex flex-col items-center gap-2 group">
-              <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-gray-50 transition shadow-sm">
-                <Bell size={22} className="text-gray-600" />
-              </div>
-              <span className="text-xs font-bold text-gray-500">484</span>
+              <span className="text-xs font-bold text-gray-500">{(novel.views / 20).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </button>
           </div>
         </div>
@@ -247,28 +331,12 @@ export default function NovelDetailPage() {
             </button>
           </div>
           
-          {/* Notice Box Dummy */}
-          <div className="bg-yellow-50/60 p-4 border-b border-yellow-100/50 mb-2 rounded-t-lg">
-             <div className="font-extrabold text-[15px] text-gray-900">연재 지연 공지(30분 예정입니다)</div>
-             <div className="flex justify-between items-center mt-1.5">
-               <div className="text-xs text-gray-400 font-medium flex items-center gap-3">
-                 <span className="flex items-center gap-1"><Eye size={12}/> 94회</span>
-                 <span className="flex items-center gap-1"><MessageSquare size={12}/> 4개</span>
-                 <span className="flex items-center gap-1"><Heart size={12}/> 3회</span>
-               </div>
-               <div className="text-[10px] text-gray-400 font-bold text-right">
-                 공지시간<br/>04.17
-               </div>
-             </div>
-          </div>
-          
           {/* Episode List */}
           <ul className="divide-y divide-gray-100">
             {displayedEpisodes.length > 0 ? (
               displayedEpisodes.map(ep => (
                 <li key={ep.id} className="group">
                   <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
-                    <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[9px] rounded font-extrabold mt-1 tracking-widest">PLUS</span>
                     <div className="flex-1">
                       <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
                       <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
@@ -287,143 +355,109 @@ export default function NovelDetailPage() {
             )}
           </ul>
 
-          {/* Dummy Comments Section */}
+          {/* Comments Section */}
           <div className="mt-20">
             <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-4">
               <h2 className="text-[19px] font-extrabold text-gray-900">소설 전체 댓글</h2>
-              <div className="flex gap-3 text-xs text-gray-400 font-bold">
-                <button className="text-gray-900 flex items-center gap-1"><span className="text-purple-600">✓</span> 최신순</button>
-                <button className="hover:text-gray-700">등록순</button>
-                <button className="hover:text-gray-700">추천순</button>
-              </div>
             </div>
             
             <div className="space-y-0 divide-y divide-gray-100 pt-2">
-              <div className="flex gap-4 py-6">
-                <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">라</div>
-                <div className="flex-1">
-                   <div className="flex items-center gap-2 mb-1.5">
-                     <span className="font-extrabold text-[14px] text-gray-900">라히스</span>
-                     <span className="text-[11px] font-medium text-gray-400">3분전 작성됨</span>
-                   </div>
-                   <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
-                     너무 재미있어요! 다음 화도 기대됩니다. 주인공 활약이 미쳤네요.
-                   </div>
-                   <div className="flex gap-3 mt-3 text-[11px] text-red-500 font-bold justify-end w-full">
-                     <button className="hover:text-red-600">추천 (12)</button>
-                     <button className="hover:text-red-600">비추 (0)</button>
-                     <button className="hover:text-red-600">신고</button>
-                   </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 py-6">
-                <div className="w-10 h-10 bg-orange-100 text-orange-500 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">T</div>
-                <div className="flex-1">
-                   <div className="flex items-center gap-2 mb-1.5">
-                     <span className="font-extrabold text-[14px] text-gray-900">Tae Yong Kim</span>
-                     <span className="text-[11px] font-medium text-gray-400">30분전 작성됨</span>
-                   </div>
-                   <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
-                     스스로 장착한 성검 50000배
-                   </div>
-                   <div className="flex gap-3 mt-3 text-[11px] text-red-500 font-bold justify-end w-full">
-                     <button className="hover:text-red-600">추천 (0)</button>
-                     <button className="hover:text-red-600">비추 (0)</button>
-                     <button className="hover:text-red-600">신고</button>
-                   </div>
-                </div>
-              </div>
+              {comments.length > 0 ? (
+                comments.map(comment => (
+                  <div key={comment.id} className="flex gap-4 py-6">
+                    <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">
+                      {comment.userName.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                       <div className="flex items-center gap-2 mb-1.5">
+                         <span className="font-extrabold text-[14px] text-gray-900">{comment.userName}</span>
+                         <span className="text-[11px] font-medium text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                       </div>
+                       <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
+                         {comment.content}
+                       </div>
+                       <div className="flex gap-3 mt-3 text-[11px] text-red-500 font-bold justify-end w-full">
+                         <button onClick={() => handleCommentAction(comment.id, 'recommend')} className="hover:text-red-600 transition-colors">추천 ({comment.recommends})</button>
+                         <button onClick={() => handleCommentAction(comment.id, 'dislike')} className="hover:text-red-600 transition-colors">비추 ({comment.dislikes})</button>
+                         <button onClick={() => openReportModal('COMMENT', comment.id)} className="hover:text-red-600 transition-colors">신고</button>
+                       </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="py-10 text-center text-gray-400 text-sm">아직 댓글이 없습니다.</p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Right: Sidebar */}
         <div className="space-y-10">
-          
-          {/* Support Author */}
-          <div>
-            <h2 className="text-[17px] font-extrabold text-gray-900 mb-4">작가 후원</h2>
-            <div className="border border-gray-200 p-4 rounded-xl shadow-sm">
-              <div className="flex justify-between items-center bg-gray-50 p-3.5 rounded-lg mb-4 text-sm border border-gray-100">
-                <span className="flex items-center gap-2 font-bold text-gray-700">
-                  <div className="w-4 h-4 border-[3px] border-gray-300 rounded-full"></div> 내 누적 후원 코인
-                </span>
-                <span className="font-extrabold text-purple-600">0 코인</span>
-              </div>
-              <button className="w-full py-3 bg-[#1e1e3f] hover:bg-[#15152c] transition-colors text-white font-extrabold rounded-lg text-sm mb-4 shadow-sm">
-                작가후원하기
-              </button>
-              
-              <div className="flex text-center text-xs border border-gray-200 rounded-lg mb-4 overflow-hidden">
-                <button className="flex-1 py-2.5 bg-gray-50 font-extrabold text-gray-800 border-r border-gray-200">최근 30일</button>
-                <button className="flex-1 py-2.5 bg-white font-bold text-gray-400 hover:bg-gray-50">누적 후원</button>
-              </div>
-              
-              <ul className="text-[13px] space-y-4 px-2 pb-2">
-                <li className="flex justify-between items-center">
-                  <span className="text-purple-600 font-extrabold w-6">1위</span> 
-                  <span className="flex-1 text-gray-700 font-bold truncate">미츠하시파르시</span> 
-                  <span className="text-purple-600 font-extrabold">500 코인</span>
-                </li>
-                <li className="flex justify-between items-center">
-                  <span className="text-purple-600 font-extrabold w-6">2위</span> 
-                  <span className="flex-1 text-gray-700 font-bold truncate">스라</span> 
-                  <span className="text-purple-600 font-extrabold">111 코인</span>
-                </li>
-                <li className="flex justify-between items-center">
-                  <span className="text-purple-600 font-extrabold w-6">3위</span> 
-                  <span className="flex-1 text-gray-700 font-bold truncate">치킨파인애플</span> 
-                  <span className="text-purple-600 font-extrabold">100 코인</span>
-                </li>
-              </ul>
-              <button className="w-full mt-2 py-2.5 border border-gray-200 text-xs font-bold text-gray-500 rounded-lg hover:bg-gray-50 transition-colors">
-                더보기
-              </button>
-            </div>
-          </div>
-
           {/* Recommended Works */}
           <div>
             <h2 className="text-[17px] font-extrabold text-gray-900 mb-4">추천 작품</h2>
             <div className="border border-gray-200 p-4 rounded-xl shadow-sm space-y-5">
-              
-              <div className="flex gap-3 group cursor-pointer">
-                <div className="w-16 h-20 bg-gray-200 rounded-md overflow-hidden shrink-0 relative">
-                  <Image src="/placeholder-cover.svg" alt="rec1" fill className="object-cover group-hover:scale-105 transition-transform" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-[13px] text-gray-900 leading-tight mb-2 truncate group-hover:text-purple-700 transition-colors">빚을 갚기 위해 아이돌이 되었습니다.</div>
-                  <div className="flex gap-1.5 mb-2">
-                    <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[9px] rounded font-extrabold tracking-wider">PLUS</span>
-                    <span className="px-1.5 py-0.5 bg-green-600 text-white text-[9px] rounded font-extrabold tracking-wider">독점</span>
-                  </div>
-                  <div className="text-[10px] text-gray-400 font-bold">#현대판타지 #TS #아이돌</div>
-                </div>
-              </div>
-              
-              <div className="flex gap-3 group cursor-pointer">
-                <div className="w-16 h-20 bg-gray-200 rounded-md overflow-hidden shrink-0 relative">
-                  <Image src="/placeholder-cover.svg" alt="rec2" fill className="object-cover group-hover:scale-105 transition-transform" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-[13px] text-gray-900 leading-tight mb-2 truncate group-hover:text-purple-700 transition-colors">히로인에게 회귀를 빼앗겼다</div>
-                  <div className="flex gap-1.5 mb-2">
-                    <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[9px] rounded font-extrabold tracking-wider">PLUS</span>
-                    <span className="px-1.5 py-0.5 bg-green-600 text-white text-[9px] rounded font-extrabold tracking-wider">독점</span>
-                  </div>
-                  <div className="text-[10px] text-gray-400 font-bold">#현대판타지 #마족 #착각</div>
-                </div>
-              </div>
-              
-              <button className="w-full mt-2 py-2.5 border border-gray-200 text-xs font-bold text-gray-500 rounded-lg hover:bg-gray-50 transition-colors">
-                더보기
+              {recommendedNovels.length > 0 ? (
+                recommendedNovels.map(rec => (
+                  <Link key={rec.id} href={`/novel/${rec.id}`} className="flex gap-3 group cursor-pointer">
+                    <div className="w-16 h-20 bg-gray-200 rounded-md overflow-hidden shrink-0 relative">
+                      <Image src={rec.coverImage || "/placeholder-cover.svg"} alt={rec.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-[13px] text-gray-900 leading-tight mb-2 truncate group-hover:text-purple-700 transition-colors">{rec.title}</div>
+                      <div className="flex gap-1.5 mb-2">
+                        <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] rounded font-bold">15</span>
+                      </div>
+                      <div className="text-[10px] text-gray-400 font-bold truncate">
+                        {rec.tags?.slice(0, 3).map(t => `#${t.name}`).join(' ')}
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-4">추천 작품이 없습니다.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center gap-2 text-red-600 mb-4">
+              <AlertCircle size={24} />
+              <h3 className="text-lg font-bold">신고하기</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              {reportTarget?.type === 'COMMENT' ? '이 댓글을 신고하시겠습니까?' : '이 작품을 신고하시겠습니까?'}
+              <br/>신고 사유를 간단히 적어주세요.
+            </p>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 min-h-[100px] resize-none mb-6"
+              placeholder="신고 사유를 입력하세요..."
+            />
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowReportModal(false)}
+                className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button 
+                onClick={handleReport}
+                disabled={reporting}
+                className="flex-1 py-3 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {reporting ? "처리 중..." : "확인"}
               </button>
             </div>
           </div>
-          
         </div>
-      </div>
+      )}
     </div>
   );
 }
