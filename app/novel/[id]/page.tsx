@@ -177,20 +177,31 @@ export default function NovelDetailPage() {
             <div className="text-sm text-gray-600 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: novel.synopsis }} />
           </div>
 
-          <div className="flex gap-3 w-full lg:w-auto">
-            <Link 
-              href={firstEpisode ? `/novel/${novel.id}/episode/${firstEpisode.id}` : '#'}
-              className="flex-1 lg:flex-none px-12 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded text-center transition-colors shadow-sm"
-            >
-              {firstEpisode ? `EP.${firstEpisode.chapterNo}. 이어보기` : '첫화보기'}
-            </Link>
-            {isAuthor && (
-              <Link
-                href={`/novel/${novel.id}/episode/create`}
-                className="px-6 py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded text-center transition-colors shadow-sm"
+          <div className="flex flex-col gap-3 w-full lg:w-auto">
+            {/* 독자용 메인 버튼 */}
+            <div className="flex gap-3">
+              <Link 
+                href={firstEpisode ? `/novel/${novel.id}/episode/${firstEpisode.id}` : '#'}
+                className="flex-1 lg:flex-none px-12 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded text-center transition-colors shadow-sm"
               >
-                연재하기
+                {firstEpisode ? `EP.${firstEpisode.chapterNo}. 이어보기` : '첫화보기'}
               </Link>
+            </div>
+            {/* 작가 전용: 회차 등록하기 버튼 */}
+            {isAuthor && (
+              <div className="w-full lg:w-auto">
+                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg mb-2">
+                  <span className="text-xs font-extrabold text-amber-700">✦ 작가 전용</span>
+                  <span className="text-xs text-amber-600">회차를 등록하고 독자들과 함께하세요.</span>
+                </div>
+                <Link
+                  href={`/novel/${novel.id}/episode/create`}
+                  className="flex items-center justify-center gap-2 w-full lg:w-auto px-8 py-3.5 bg-gray-900 hover:bg-black text-white font-extrabold rounded text-center transition-colors shadow-sm text-sm"
+                >
+                  <Plus size={16} />
+                  회차 등록하기
+                </Link>
+              </div>
             )}
           </div>
         </div>

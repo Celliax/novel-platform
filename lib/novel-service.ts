@@ -272,6 +272,7 @@ export async function createNovel(data: {
   genre: string;
   synopsis: string;
   tags: string[];
+  coverImage?: string;
 }): Promise<Novel> {
   // 제목 중복 체크
   const duplicate = database.novels.find(n => n.title === data.title);
@@ -303,7 +304,7 @@ export async function createNovel(data: {
     authorId: data.authorId,
     author,
     genre: data.genre,
-    coverImage: '/placeholder-cover.svg',
+    coverImage: data.coverImage || '/placeholder-cover.svg',
     views: 0,
     rating: 0,
     synopsis: data.synopsis,

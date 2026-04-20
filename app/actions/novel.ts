@@ -10,6 +10,7 @@ export async function createNovelAction(input: {
   genre: string;
   synopsis: string;
   tagIds: number[];
+  coverImage?: string;
 }) {
   // Supabase에서 사용자 정보 가져오기
   const supabase = await getSupabaseServerClient();
@@ -21,7 +22,7 @@ export async function createNovelAction(input: {
 
   const title = input.title.trim();
   const genre = input.genre.trim();
-  const synopsis = input.synopsis?.trim() || "<p></p>";
+  const synopsis = input.synopsis?.trim() || "";
 
   if (!title || !genre) {
     throw new Error("제목과 장르는 필수입니다.");
@@ -44,6 +45,7 @@ export async function createNovelAction(input: {
     genre,
     synopsis,
     tags: selectedTags,
+    coverImage: input.coverImage,
   });
 
   revalidatePath("/");
