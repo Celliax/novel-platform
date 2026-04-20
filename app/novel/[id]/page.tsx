@@ -3,21 +3,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star, Plus, Heart } from "lucide-react";
+import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Bell, Share2, MessageSquare, ArrowDownUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase/client";
+
+type Tag = {
+  id: number;
+  name: string;
+};
 
 type Novel = {
   id: number;
   title: string;
   authorId: string;
-  author: string;
+  author: { name: string, nickname?: string };
   genre: string;
   coverImage: string;
   views: number;
   rating: number;
   synopsis: string;
+  tags: Tag[];
   episodes: {
     id: number;
     chapterNo: number;
@@ -33,6 +39,7 @@ export default function NovelDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
     loadNovel();
@@ -43,12 +50,12 @@ export default function NovelDetailPage() {
       const response = await fetch(`/api/novel/${id}`);
       if (response.ok) {
         const novelData = await response.json();
-        setNovel(novelData);
+        setNovel(novelData.novel); // FIX: correctly extract novel object
 
         // 현재 사용자와 작가 비교
         const supabase = getSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
-        setIsAuthor(user?.id === novelData.authorId);
+        setIsAuthor(user?.id === novelData.novel.authorId);
 
         if (user) {
           const favRes = await fetch(`/api/novel/${id}/favorite`);
@@ -87,10 +94,10 @@ export default function NovelDetailPage() {
 
   if (loading) {
     return (
-      <div className="hero-gradient flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-white">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto"></div>
+          <p className="mt-4 text-muted">로딩 중...</p>
         </div>
       </div>
     );
@@ -100,103 +107,312 @@ export default function NovelDetailPage() {
     notFound();
   }
 
+  const authorName = novel.author?.nickname || novel.author?.name || "작자미상";
+  const displayedEpisodes = sortAsc ? novel.episodes : [...novel.episodes].reverse();
   const firstEpisode = novel.episodes[0];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
-      <div className="grid md:grid-cols-[220px_1fr] gap-8 lg:gap-12 items-start">
-        <div className="mx-auto w-full max-w-[220px]">
-          <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-card ring-1 ring-border/60">
+    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12 bg-white">
+      
+      {/* Top Section: Novel Info */}
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
+        {/* Cover Image */}
+        <div className="w-full max-w-[280px] shrink-0 mx-auto lg:mx-0">
+          <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-lg border border-gray-100">
             <Image
               src={novel.coverImage}
               alt={novel.title}
               fill
               className="object-cover"
-              sizes="220px"
+              sizes="280px"
               priority
             />
           </div>
         </div>
 
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="text-xs font-medium bg-brand-50 text-brand-700 px-2.5 py-1 rounded-md">
-              {novel.genre}
-            </span>
-            <span className="text-sm text-muted">{novel.author}</span>
+        {/* Info Box */}
+        <div className="flex-1 w-full flex flex-col items-start">
+          
+          {/* Top Actions for mobile */}
+          <div className="flex lg:hidden w-full justify-end gap-3 mb-4">
+             <button onClick={toggleFavorite} className={`flex items-center justify-center w-10 h-10 rounded-full border ${isFavorited ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}>
+               <Heart size={18} className={isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-700'} />
+             </button>
+             <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
+               <Bell size={18} className="text-gray-700" />
+             </button>
+             <button className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
+               <Share2 size={18} className="text-gray-700" />
+             </button>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-            {novel.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-muted">
-            <span className="flex items-center gap-1.5">
-              <Eye size={16} aria-hidden /> {novel.views.toLocaleString()} 조회
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Star size={16} className="text-amber-400 fill-amber-400" aria-hidden />
-              {novel.rating.toFixed(1)}
-            </span>
-            <button 
-              onClick={toggleFavorite} 
-              disabled={favoriteLoading}
-              className={`flex items-center gap-1.5 transition-colors ${isFavorited ? "text-red-500" : "text-muted hover:text-red-400"}`}
+
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900">{novel.title}</h1>
+          
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
+            <span className="font-bold text-gray-800 mr-1">{authorName}</span>
+            <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] rounded font-bold">15</span>
+            <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[10px] rounded font-bold tracking-wider">PLUS</span>
+            <span className="px-1.5 py-0.5 bg-green-600 text-white text-[10px] rounded font-bold tracking-wider">독점</span>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 font-medium mb-4">
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">조회 <span className="font-normal text-gray-600">{novel.views.toLocaleString()}</span></span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">추천 <span className="font-normal text-gray-600">{Math.floor(novel.views / 8).toLocaleString()}</span></span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">인생픽 <span className="font-normal text-gray-600">공개전</span></span>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mb-6">
+            {novel.tags && novel.tags.map(t => (
+              <span key={t.id} className="px-2.5 py-1 bg-gray-100/80 text-gray-500 text-xs font-bold rounded">#{t.name}</span>
+            ))}
+            <button className="px-2.5 py-1 bg-blue-50/50 text-blue-500 text-xs font-bold rounded border border-blue-100">+나만의 태그 추가</button>
+          </div>
+
+          <div className="w-full bg-gray-50 rounded-xl p-5 mb-6 border border-gray-100/50">
+            <div className="flex flex-wrap items-center gap-6 mb-4 text-sm font-bold text-gray-800">
+              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호 <span className="font-medium text-gray-600">6,292</span></span>
+              <span className="flex items-center gap-1.5"><Bell size={16} className="text-gray-400"/> 알람 <span className="font-medium text-gray-600">484</span></span>
+              <span className="flex items-center gap-1.5"><BookOpen size={16} className="text-gray-400"/> 회차 <span className="font-medium text-gray-600">{novel.episodes.length}회차</span></span>
+            </div>
+            <div className="text-sm text-gray-600 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: novel.synopsis }} />
+          </div>
+
+          <div className="flex gap-3 w-full lg:w-auto">
+            <Link 
+              href={firstEpisode ? `/novel/${novel.id}/episode/${firstEpisode.id}` : '#'}
+              className="flex-1 lg:flex-none px-12 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded text-center transition-colors shadow-sm"
             >
-              <Heart size={16} className={isFavorited ? "fill-red-500" : ""} aria-hidden />
-              선호작
-            </button>
-          </div>
-          <div
-            className="mt-6 reader-content text-foreground/90 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: novel.synopsis }}
-          />
-          <div className="flex gap-3 mt-8">
-            {firstEpisode && (
-              <Link
-                href={`/novel/${novel.id}/episode/${firstEpisode.id}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 transition-colors shadow-card"
-              >
-                <BookOpen size={18} aria-hidden />
-                첫 화부터 읽기
-              </Link>
-            )}
+              {firstEpisode ? `EP.${firstEpisode.chapterNo}. 이어보기` : '첫화보기'}
+            </Link>
             {isAuthor && (
               <Link
                 href={`/novel/${novel.id}/episode/create`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition-colors shadow-card"
+                className="px-6 py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded text-center transition-colors shadow-sm"
               >
-                <Plus size={18} aria-hidden />
                 연재하기
               </Link>
             )}
           </div>
         </div>
+
+        {/* Top Right Action Icons (Desktop) */}
+        <div className="hidden lg:flex flex-col gap-6 items-center lg:ml-auto shrink-0 pr-4">
+          <div className="flex gap-5 text-center">
+            <button className="flex flex-col items-center gap-2 group">
+              <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-gray-50 transition shadow-sm">
+                <Share2 size={22} className="text-gray-600" />
+              </div>
+              <span className="text-xs font-bold text-gray-500">공유</span>
+            </button>
+            <button onClick={toggleFavorite} disabled={favoriteLoading} className="flex flex-col items-center gap-2 group">
+              <div className={`w-[52px] h-[52px] rounded-full border flex items-center justify-center transition shadow-sm ${isFavorited ? 'border-red-500 bg-red-50' : 'border-gray-200 group-hover:bg-gray-50'}`}>
+                <Heart size={22} className={isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'} />
+              </div>
+              <span className="text-xs font-bold text-gray-500">6,292</span>
+            </button>
+            <button className="flex flex-col items-center gap-2 group">
+              <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-gray-50 transition shadow-sm">
+                <Bell size={22} className="text-gray-600" />
+              </div>
+              <span className="text-xs font-bold text-gray-500">484</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <section className="mt-14">
-        <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
-          목차
-          <span className="text-sm font-normal text-muted">({novel.episodes.length}화)</span>
-        </h2>
-        <ul className="rounded-2xl bg-surface ring-1 ring-border/60 shadow-card divide-y divide-border/80 overflow-hidden">
-          {novel.episodes.map((ep) => (
-            <li key={ep.id}>
-              <Link
-                href={`/novel/${novel.id}/episode/${ep.id}`}
-                className="flex items-center justify-between gap-4 px-4 py-4 hover:bg-brand-50/50 transition-colors group"
-              >
-                <span className="font-medium text-foreground group-hover:text-brand-700">
-                  {ep.chapterNo}화. {ep.title}
+      {/* Middle Section: Episodes & Sidebar */}
+      <div className="mt-16 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10">
+        
+        {/* Left: Episodes & Comments */}
+        <div>
+          {/* Episode List Header */}
+          <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-2">
+            <h2 className="text-[19px] font-extrabold text-gray-900">회차리스트</h2>
+            <button 
+              onClick={() => setSortAsc(!sortAsc)} 
+              className="text-xs font-bold text-gray-500 flex items-center gap-1 hover:text-gray-800 transition-colors"
+            >
+              {sortAsc ? '첫화부터' : '최신화부터'} <ArrowDownUp size={12}/>
+            </button>
+          </div>
+          
+          {/* Notice Box Dummy */}
+          <div className="bg-yellow-50/60 p-4 border-b border-yellow-100/50 mb-2 rounded-t-lg">
+             <div className="font-extrabold text-[15px] text-gray-900">연재 지연 공지(30분 예정입니다)</div>
+             <div className="flex justify-between items-center mt-1.5">
+               <div className="text-xs text-gray-400 font-medium flex items-center gap-3">
+                 <span className="flex items-center gap-1"><Eye size={12}/> 94회</span>
+                 <span className="flex items-center gap-1"><MessageSquare size={12}/> 4개</span>
+                 <span className="flex items-center gap-1"><Heart size={12}/> 3회</span>
+               </div>
+               <div className="text-[10px] text-gray-400 font-bold text-right">
+                 공지시간<br/>04.17
+               </div>
+             </div>
+          </div>
+          
+          {/* Episode List */}
+          <ul className="divide-y divide-gray-100">
+            {displayedEpisodes.length > 0 ? (
+              displayedEpisodes.map(ep => (
+                <li key={ep.id} className="group">
+                  <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
+                    <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[9px] rounded font-extrabold mt-1 tracking-widest">PLUS</span>
+                    <div className="flex-1">
+                      <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
+                      <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
+                        <span>EP.{ep.chapterNo}</span>
+                        <span className="flex items-center gap-1"><Eye size={12}/> {(Math.floor(Math.random() * 5000) + 1000).toLocaleString()}</span>
+                        <span className="flex items-center gap-1"><MessageSquare size={12}/> {Math.floor(Math.random() * 100)}</span>
+                        <span className="flex items-center gap-1"><Heart size={12}/> {Math.floor(Math.random() * 1000)}</span>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-gray-400 font-medium mt-1">26.03.24</div>
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <li className="py-12 text-center text-gray-400 font-medium">등록된 회차가 없습니다.</li>
+            )}
+          </ul>
+
+          {/* Dummy Comments Section */}
+          <div className="mt-20">
+            <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-4">
+              <h2 className="text-[19px] font-extrabold text-gray-900">소설 전체 댓글</h2>
+              <div className="flex gap-3 text-xs text-gray-400 font-bold">
+                <button className="text-gray-900 flex items-center gap-1"><span className="text-purple-600">✓</span> 최신순</button>
+                <button className="hover:text-gray-700">등록순</button>
+                <button className="hover:text-gray-700">추천순</button>
+              </div>
+            </div>
+            
+            <div className="space-y-0 divide-y divide-gray-100 pt-2">
+              <div className="flex gap-4 py-6">
+                <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">라</div>
+                <div className="flex-1">
+                   <div className="flex items-center gap-2 mb-1.5">
+                     <span className="font-extrabold text-[14px] text-gray-900">라히스</span>
+                     <span className="text-[11px] font-medium text-gray-400">3분전 작성됨</span>
+                   </div>
+                   <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
+                     너무 재미있어요! 다음 화도 기대됩니다. 주인공 활약이 미쳤네요.
+                   </div>
+                   <div className="flex gap-3 mt-3 text-[11px] text-red-500 font-bold justify-end w-full">
+                     <button className="hover:text-red-600">추천 (12)</button>
+                     <button className="hover:text-red-600">비추 (0)</button>
+                     <button className="hover:text-red-600">신고</button>
+                   </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4 py-6">
+                <div className="w-10 h-10 bg-orange-100 text-orange-500 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">T</div>
+                <div className="flex-1">
+                   <div className="flex items-center gap-2 mb-1.5">
+                     <span className="font-extrabold text-[14px] text-gray-900">Tae Yong Kim</span>
+                     <span className="text-[11px] font-medium text-gray-400">30분전 작성됨</span>
+                   </div>
+                   <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
+                     스스로 장착한 성검 50000배
+                   </div>
+                   <div className="flex gap-3 mt-3 text-[11px] text-red-500 font-bold justify-end w-full">
+                     <button className="hover:text-red-600">추천 (0)</button>
+                     <button className="hover:text-red-600">비추 (0)</button>
+                     <button className="hover:text-red-600">신고</button>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Sidebar */}
+        <div className="space-y-10">
+          
+          {/* Support Author */}
+          <div>
+            <h2 className="text-[17px] font-extrabold text-gray-900 mb-4">작가 후원</h2>
+            <div className="border border-gray-200 p-4 rounded-xl shadow-sm">
+              <div className="flex justify-between items-center bg-gray-50 p-3.5 rounded-lg mb-4 text-sm border border-gray-100">
+                <span className="flex items-center gap-2 font-bold text-gray-700">
+                  <div className="w-4 h-4 border-[3px] border-gray-300 rounded-full"></div> 내 누적 후원 코인
                 </span>
-                <ChevronRight
-                  size={18}
-                  className="text-muted shrink-0 group-hover:text-brand-600"
-                  aria-hidden
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+                <span className="font-extrabold text-purple-600">0 코인</span>
+              </div>
+              <button className="w-full py-3 bg-[#1e1e3f] hover:bg-[#15152c] transition-colors text-white font-extrabold rounded-lg text-sm mb-4 shadow-sm">
+                작가후원하기
+              </button>
+              
+              <div className="flex text-center text-xs border border-gray-200 rounded-lg mb-4 overflow-hidden">
+                <button className="flex-1 py-2.5 bg-gray-50 font-extrabold text-gray-800 border-r border-gray-200">최근 30일</button>
+                <button className="flex-1 py-2.5 bg-white font-bold text-gray-400 hover:bg-gray-50">누적 후원</button>
+              </div>
+              
+              <ul className="text-[13px] space-y-4 px-2 pb-2">
+                <li className="flex justify-between items-center">
+                  <span className="text-purple-600 font-extrabold w-6">1위</span> 
+                  <span className="flex-1 text-gray-700 font-bold truncate">미츠하시파르시</span> 
+                  <span className="text-purple-600 font-extrabold">500 코인</span>
+                </li>
+                <li className="flex justify-between items-center">
+                  <span className="text-purple-600 font-extrabold w-6">2위</span> 
+                  <span className="flex-1 text-gray-700 font-bold truncate">스라</span> 
+                  <span className="text-purple-600 font-extrabold">111 코인</span>
+                </li>
+                <li className="flex justify-between items-center">
+                  <span className="text-purple-600 font-extrabold w-6">3위</span> 
+                  <span className="flex-1 text-gray-700 font-bold truncate">치킨파인애플</span> 
+                  <span className="text-purple-600 font-extrabold">100 코인</span>
+                </li>
+              </ul>
+              <button className="w-full mt-2 py-2.5 border border-gray-200 text-xs font-bold text-gray-500 rounded-lg hover:bg-gray-50 transition-colors">
+                더보기
+              </button>
+            </div>
+          </div>
+
+          {/* Recommended Works */}
+          <div>
+            <h2 className="text-[17px] font-extrabold text-gray-900 mb-4">추천 작품</h2>
+            <div className="border border-gray-200 p-4 rounded-xl shadow-sm space-y-5">
+              
+              <div className="flex gap-3 group cursor-pointer">
+                <div className="w-16 h-20 bg-gray-200 rounded-md overflow-hidden shrink-0 relative">
+                  <Image src="/placeholder-cover.svg" alt="rec1" fill className="object-cover group-hover:scale-105 transition-transform" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[13px] text-gray-900 leading-tight mb-2 truncate group-hover:text-purple-700 transition-colors">빚을 갚기 위해 아이돌이 되었습니다.</div>
+                  <div className="flex gap-1.5 mb-2">
+                    <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[9px] rounded font-extrabold tracking-wider">PLUS</span>
+                    <span className="px-1.5 py-0.5 bg-green-600 text-white text-[9px] rounded font-extrabold tracking-wider">독점</span>
+                  </div>
+                  <div className="text-[10px] text-gray-400 font-bold">#현대판타지 #TS #아이돌</div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 group cursor-pointer">
+                <div className="w-16 h-20 bg-gray-200 rounded-md overflow-hidden shrink-0 relative">
+                  <Image src="/placeholder-cover.svg" alt="rec2" fill className="object-cover group-hover:scale-105 transition-transform" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[13px] text-gray-900 leading-tight mb-2 truncate group-hover:text-purple-700 transition-colors">히로인에게 회귀를 빼앗겼다</div>
+                  <div className="flex gap-1.5 mb-2">
+                    <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[9px] rounded font-extrabold tracking-wider">PLUS</span>
+                    <span className="px-1.5 py-0.5 bg-green-600 text-white text-[9px] rounded font-extrabold tracking-wider">독점</span>
+                  </div>
+                  <div className="text-[10px] text-gray-400 font-bold">#현대판타지 #마족 #착각</div>
+                </div>
+              </div>
+              
+              <button className="w-full mt-2 py-2.5 border border-gray-200 text-xs font-bold text-gray-500 rounded-lg hover:bg-gray-50 transition-colors">
+                더보기
+              </button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
     </div>
   );
 }
