@@ -15,6 +15,7 @@ model User {
   avatar    String?
   gender    String?
   age       Int?
+  bio       String?
   isProfileComplete Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

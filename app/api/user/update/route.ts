@@ -12,14 +12,17 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { avatar } = body;
+    const { avatar, bio } = body;
 
     const prisma = getPrisma();
     
     // DB 업데이트
     const user = await prisma.user.update({
       where: { id: session.user.id },
-      data: { ...(avatar && { avatar }) },
+      data: { 
+        ...(avatar && { avatar }),
+        ...(bio !== undefined && { bio })
+      },
     });
 
     return NextResponse.json({ success: true, user });
