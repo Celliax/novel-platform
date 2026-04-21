@@ -401,16 +401,41 @@ export async function getEpisodeNavigation(
 
   return {
     novel: {
-      ...novel,
+      id: novel.id,
+      title: novel.title,
+      authorId: novel.authorId,
+      genre: novel.genre,
+      coverImage: novel.coverImage,
+      views: novel.views,
+      rating: novel.rating,
+      synopsis: novel.synopsis,
+      ageRating: novel.ageRating,
       createdAt: novel.createdAt.toISOString(),
       updatedAt: novel.updatedAt.toISOString(),
     },
     episode: {
-      ...episode,
+      id: episode.id,
+      novelId: episode.novelId,
+      chapterNo: episode.chapterNo,
+      title: episode.title,
+      content: episode.content,
+      image: episode.image || undefined,
+      views: episode.views,
+      recommends: episode.recommends,
       createdAt: episode.createdAt.toISOString(),
     },
-    prev: prev ? { ...prev, createdAt: prev.createdAt.toISOString() } : undefined,
-    next: next ? { ...next, createdAt: next.createdAt.toISOString() } : undefined,
+    prev: prev ? {
+      id: prev.id,
+      chapterNo: prev.chapterNo,
+      title: prev.title,
+      createdAt: prev.createdAt.toISOString(),
+    } : undefined,
+    next: next ? {
+      id: next.id,
+      chapterNo: next.chapterNo,
+      title: next.title,
+      createdAt: next.createdAt.toISOString(),
+    } : undefined,
   };
 }
 
