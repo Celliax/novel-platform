@@ -41,7 +41,7 @@ export default async function EpisodePage({ params }: Props) {
         <EpisodeReader 
           title={episode.title} 
           contentHtml={episode.content} 
-          image={episode.image}
+          image={episode.image || undefined}
           novelId={novel.id}
           episodeId={episode.id}
         />
