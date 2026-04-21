@@ -17,6 +17,20 @@ interface EditorProps {
 function Toolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null;
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target?.result as string;
+      editor.chain().focus().setImage({ src: base64 }).run();
+    };
+    reader.readAsDataURL(file);
+    // Reset input
+    e.target.value = "";
+  };
+
   return (
     <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-canvas rounded-t-xl">
       <button
@@ -101,17 +115,25 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       >
         링크
       </button>
-      <button
-        type="button"
-        onClick={() => {
-          const url = window.prompt("이미지 URL", "https://");
-          if (!url) return;
-          editor.chain().focus().setImage({ src: url }).run();
-        }}
-        className="px-2.5 py-1.5 text-sm rounded-lg font-medium transition-colors hover:bg-border/60"
-      >
-        이미지
-      </button>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => {
+            const input = document.getElementById('editor-image-upload') as HTMLInputElement;
+            input?.click();
+          }}
+          className="px-2.5 py-1.5 text-sm rounded-lg font-medium transition-colors hover:bg-border/60"
+        >
+          삽화
+        </button>
+        <input
+          id="editor-image-upload"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
+      </div>
     </div>
   );
 }

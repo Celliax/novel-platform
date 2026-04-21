@@ -206,11 +206,11 @@ export default function EpisodeCreatePage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white"
               >
-                <Settings size={16} /> 에피소드 삽화 추가하기 (선택)
+                <Settings size={16} /> 메인 삽화 설정 (선택)
               </button>
             ) : (
               <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
-                <img src={image} alt="에피소드 삽화" className="w-full h-full object-cover" />
+                <img src={image} alt="메인 삽화" className="w-full h-full object-cover" />
                 <button 
                   type="button"
                   onClick={() => setImage(null)}

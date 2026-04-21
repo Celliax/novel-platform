@@ -29,7 +29,7 @@ export default function EpisodeReader({ title, contentHtml, image, authorNote, n
       </header>
       {image && (
         <div className="mb-8 rounded-2xl overflow-hidden shadow-lg border border-border">
-          <img src={image} alt="에피소드 삽화" className="w-full h-auto" />
+          <img src={image} alt="메인 삽화" className="w-full h-auto" />
         </div>
       )}
       <div
