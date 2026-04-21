@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dislikeComment } from "@/lib/novel-service";
+import { handleCommentVote } from "@/lib/novel-service";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(
@@ -16,8 +16,13 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const dislikes = await dislikeComment(commentId);
-    return NextResponse.json({ dislikes });
+    const result = await handleCommentVote(commentId, session.user.id, 'dislike');
+    
+    if (!result.success) {
+      return NextResponse.json({ error: result.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Comment dislike error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -94,9 +94,13 @@ export default function CommentSection({
       const res = await fetch(`/api/comment/${commentId}/${action}`, { method: "POST" });
       if (res.ok) {
         fetchComments();
+      } else {
+        const data = await res.json();
+        alert(data.error || "처리 중 오류가 발생했습니다.");
       }
     } catch (e) {
       console.error(e);
+      alert("오류가 발생했습니다.");
     }
   };
 

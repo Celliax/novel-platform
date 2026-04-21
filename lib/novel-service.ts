@@ -45,6 +45,12 @@ export interface Tag {
   createdAt: string;
 }
 
+export interface CommentVote {
+  userId: string;
+  commentId: number;
+  type: 'recommend' | 'dislike';
+}
+
 export interface NovelTag {
   novelId: number;
   tagId: number;
@@ -64,6 +70,7 @@ interface Database {
   novelTags: NovelTag[];
   userTagReads: UserTagRead[];
   comments: Comment[];
+  commentVotes: CommentVote[];
   reports: Report[];
 }
 
@@ -107,6 +114,7 @@ const defaultData: Database = {
   novelTags: [],
   userTagReads: [],
   comments: [],
+  commentVotes: [],
   reports: [],
 };
 
@@ -152,6 +160,30 @@ export async function listNovelsForHome() {
       author: author!,
     };
   });
+}
+
+export async function handleCommentVote(commentId: number, userId: string, type: 'recommend' | 'dislike'): Promise<{ success: boolean; message?: string }> {
+  database = loadDatabase();
+  if (!database.commentVotes) database.commentVotes = [];
+  
+  // 이미 투표했는지 확인
+  const existingVote = database.commentVotes.find(v => v.userId === userId && v.commentId === commentId);
+  if (existingVote) {
+    return { success: false, message: "이미 참여하셨습니다." };
+  }
+
+  const comment = database.comments?.find(c => c.id === commentId);
+  if (!comment) return { success: false, message: "댓글을 찾을 수 없습니다." };
+
+  if (type === 'recommend') {
+    comment.recommends = (comment.recommends || 0) + 1;
+  } else {
+    comment.dislikes = (comment.dislikes || 0) + 1;
+  }
+
+  database.commentVotes.push({ userId, commentId, type });
+  saveDatabase(database);
+  return { success: true };
 }
 
 export async function getNovelWithEpisodes(id: number) {
@@ -466,7 +498,14 @@ export async function getUserNovels(userId: string): Promise<Novel[]> {
 export async function getComments(novelId: number, episodeId?: number): Promise<Comment[]> {
   database = loadDatabase();
   return (database.comments || [])
-    .filter(c => c.novelId === novelId && (episodeId ? c.episodeId === episodeId : !c.episodeId))
+    .filter(c => {
+      const matchNovel = c.novelId === novelId;
+      if (episodeId) {
+        return matchNovel && c.episodeId === episodeId;
+      }
+      // episodeId가 없으면 해당 소설의 모든 댓글(회차 댓글 포함)을 반환
+      return matchNovel;
+    })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
@@ -491,21 +530,6 @@ export async function createComment(data: {
   return newComment;
 }
 
-export async function recommendComment(commentId: number): Promise<number> {
-  const comment = (database.comments || []).find(c => c.id === commentId);
-  if (!comment) throw new Error('댓글을 찾을 수 없습니다.');
-  comment.recommends = (comment.recommends || 0) + 1;
-  saveDatabase(database);
-  return comment.recommends;
-}
-
-export async function dislikeComment(commentId: number): Promise<number> {
-  const comment = (database.comments || []).find(c => c.id === commentId);
-  if (!comment) throw new Error('댓글을 찾을 수 없습니다.');
-  comment.dislikes = (comment.dislikes || 0) + 1;
-  saveDatabase(database);
-  return comment.dislikes;
-}
 
 export async function createReport(data: { type: 'COMMENT' | 'NOVEL', targetId: number, userId: string, reason: string }): Promise<Report> {
   if (!database.reports) database.reports = [];

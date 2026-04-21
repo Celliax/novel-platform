@@ -279,7 +279,7 @@ export default function NovelDetailPage() {
           
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 font-medium mb-4">
             <span className="flex items-center gap-1.5 font-bold text-gray-800">조회 <span className="font-normal text-gray-600">{novel.views.toLocaleString()}</span></span>
-            <span className="flex items-center gap-1.5 font-bold text-gray-800">추천 <span className="font-normal text-gray-600">{Math.floor(novel.views / 8).toLocaleString()}</span></span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">추천 <span className="font-normal text-gray-600">{novel.rating.toLocaleString()}</span></span>
             <span className="flex items-center gap-1.5 font-bold text-gray-800">댓글 <span className="font-normal text-gray-600">{novel.commentCount.toLocaleString()}</span></span>
           </div>
           
@@ -292,7 +292,7 @@ export default function NovelDetailPage() {
 
           <div className="w-full bg-gray-50 rounded-xl p-5 mb-6 border border-gray-100/50">
             <div className="flex flex-wrap items-center gap-6 mb-4 text-sm font-bold text-gray-800">
-              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호 <span className="font-medium text-gray-600">{novel.favoriteCount.toLocaleString()}</span></span>
+              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호</span>
               <span className="flex items-center gap-1.5"><BookOpen size={16} className="text-gray-400"/> 회차 <span className="font-medium text-gray-600">{novel.episodes.length}회차</span></span>
             </div>
             <div className="text-sm text-gray-600 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: novel.synopsis }} />
