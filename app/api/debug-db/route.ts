@@ -1,32 +1,40 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { listNovelsForHome } from "@/lib/novel-service";
 
 export async function GET() {
   const prisma = getPrisma();
   const dbUrl = process.env.DATABASE_URL || "MISSING";
-  
-  // 보안을 위해 비밀번호 일부 마스킹
   const maskedUrl = dbUrl.replace(/:([^@]+)@/, ":****@");
 
   try {
-    // 단순 쿼리 실행 시도
+    // 1. 단순 연결 테스트
     await prisma.$queryRaw`SELECT 1`;
     
+    // 2. 실제 데이터 패칭 테스트
+    let novels = [];
+    try {
+      novels = await listNovelsForHome();
+    } catch (fetchError: any) {
+      return NextResponse.json({
+        status: "connected_but_fetch_failed",
+        message: "DB connection OK, but listNovelsForHome failed.",
+        fetch_error: fetchError.message,
+        url_used: maskedUrl
+      }, { status: 500 });
+    }
+    
     return NextResponse.json({
-      status: "connected",
-      message: "Database connection successful!",
+      status: "success",
+      message: "Everything is working!",
+      novel_count: novels.length,
       url_used: maskedUrl
     });
   } catch (error: any) {
-    console.error("Debug DB Error:", error);
-    
     return NextResponse.json({
       status: "failed",
       error: error.message,
-      code: error.code,
-      meta: error.meta,
-      url_used: maskedUrl,
-      hint: "Check if your IP is allowed in Supabase and if the password is correctly encoded."
+      url_used: maskedUrl
     }, { status: 500 });
   }
 }
