@@ -61,6 +61,7 @@ export default async function EpisodePage({ params }: Props) {
           title={episode.title} 
           contentHtml={episode.content} 
           image={episode.image || undefined}
+          authorNote={episode.authorNote || undefined}
           novelId={novel.id}
           episodeId={episode.id}
         />

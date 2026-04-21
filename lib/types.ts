@@ -30,6 +30,7 @@ export interface Episode {
   title: string;
   content: string;
   image?: string;
+  authorNote?: string;
   views: number;
   recommends: number;
   createdAt: string;

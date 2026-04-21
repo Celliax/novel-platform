@@ -131,7 +131,8 @@ export default function EpisodeCreatePage() {
           chapterNo, 
           title: epTitle.trim(), 
           content,
-          image: image || undefined 
+          image: image || undefined,
+          authorNote: authorNote.trim() || undefined
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -268,16 +269,6 @@ export default function EpisodeCreatePage() {
             </select>
             <span className="text-gray-700 font-extrabold ml-1">작가명</span>
             <span className="ml-auto text-gray-400">{wordCount.toLocaleString()}자</span>
-
-            {/* Save button on the row level too */}
-            <button
-              type="submit"
-              disabled={pending}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs rounded transition-colors disabled:opacity-60 shadow-sm"
-            >
-              {pending ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-              {pending ? "저장 중" : "지장보관"}
-            </button>
           </div>
         </div>
 

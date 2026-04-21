@@ -124,6 +124,7 @@ export async function getNovelWithEpisodes(id: number) {
       title: ep.title,
       content: ep.content,
       image: ep.image || undefined,
+      authorNote: ep.authorNote || undefined,
       views: ep.views,
       recommends: ep.recommends,
       createdAt: ep.createdAt.toISOString(),
@@ -169,6 +170,7 @@ export async function getEpisode(novelId: number, episodeId: number): Promise<Ep
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
+    authorNote: ep.authorNote || undefined,
     views: ep.views,
     recommends: ep.recommends,
     createdAt: ep.createdAt.toISOString(),
@@ -293,6 +295,7 @@ export async function createEpisode(data: {
   title: string;
   content: string;
   image?: string;
+  authorNote?: string;
 }): Promise<Episode> {
   const ep = await prisma.episode.create({
     data: {
@@ -301,6 +304,7 @@ export async function createEpisode(data: {
       title: data.title,
       content: data.content,
       image: data.image,
+      authorNote: data.authorNote,
     }
   });
 
@@ -311,6 +315,7 @@ export async function createEpisode(data: {
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
+    authorNote: ep.authorNote || undefined,
     views: ep.views,
     recommends: ep.recommends,
     createdAt: ep.createdAt.toISOString(),
@@ -358,6 +363,7 @@ export async function getEpisodeNavigation(
       title: episode.title,
       content: episode.content,
       image: episode.image || undefined,
+      authorNote: episode.authorNote || undefined,
       views: episode.views,
       recommends: episode.recommends,
       createdAt: episode.createdAt.toISOString(),

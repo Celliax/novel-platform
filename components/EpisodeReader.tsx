@@ -6,11 +6,12 @@ interface EpisodeReaderProps {
   title: string;
   contentHtml: string;
   image?: string;
+  authorNote?: string;
   novelId: number;
   episodeId: number;
 }
 
-export default function EpisodeReader({ title, contentHtml, image, novelId, episodeId }: EpisodeReaderProps) {
+export default function EpisodeReader({ title, contentHtml, image, authorNote, novelId, episodeId }: EpisodeReaderProps) {
   const viewed = useRef(false);
 
   useEffect(() => {
@@ -35,6 +36,14 @@ export default function EpisodeReader({ title, contentHtml, image, novelId, epis
         className="reader-content text-foreground/95 text-lg leading-[1.85] space-y-6"
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
+      {authorNote && (
+        <div className="mt-12 p-6 rounded-2xl bg-amber-50/50 border border-amber-200/50 text-amber-900">
+          <div className="flex items-center gap-2 mb-3 text-amber-700">
+            <span className="font-extrabold text-sm tracking-tight">작가의 말</span>
+          </div>
+          <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{authorNote}</p>
+        </div>
+      )}
     </article>
   );
 }

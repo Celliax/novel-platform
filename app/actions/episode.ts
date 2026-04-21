@@ -11,6 +11,7 @@ export async function createEpisodeAction(input: {
   title: string;
   content: string;
   image?: string;
+  authorNote?: string;
 }) {
   // Supabase에서 사용자 정보 가져오기
   const supabase = await getSupabaseServerClient();
@@ -44,6 +45,7 @@ export async function createEpisodeAction(input: {
     title: input.title,
     content: input.content,
     image: input.image,
+    authorNote: input.authorNote,
   });
 
   revalidatePath(`/novel/${input.novelId}`);
