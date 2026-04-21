@@ -26,7 +26,7 @@ function isNextRedirectError(e: unknown): boolean {
 type TitleStatus = "idle" | "checking" | "available" | "taken";
 
 const GENRE_OPTIONS = ["자유판타지", "현대판타지", "무협", "로맨스", "로맨스판타지", "BL", "GL", "일상", "공포/스릴러", "SF", "역사", "스포츠", "기타"];
-const AGE_OPTIONS = ["전체이용가", "15세 이용가", "청소년 불가"];
+const AGE_OPTIONS = ["전체 이용가", "15세 이용가", "19세 이용가"];
 
 export default function NovelCreatePage() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function NovelCreatePage() {
 
   const [title, setTitle] = useState("");
   const [genre, setGenre] = useState("자유판타지");
-  const [age, setAge] = useState("전체이용가");
+  const [age, setAge] = useState("전체 이용가");
   const [synopsis, setSynopsis] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
@@ -110,6 +110,7 @@ export default function NovelCreatePage() {
           title,
           genre,
           synopsis,
+          ageRating: age,
           tagIds: selectedTags.map(t => t.id),
           coverImage: coverImage || undefined,
         });

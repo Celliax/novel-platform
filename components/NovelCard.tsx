@@ -7,6 +7,7 @@ interface NovelCardProps {
   title: string;
   author: string;
   genre: string;
+  ageRating?: string;
   coverImage: string;
   views: number;
   rating: number;
@@ -17,6 +18,7 @@ export default function NovelCard({
   title,
   author,
   genre,
+  ageRating,
   coverImage,
   views,
   rating,
@@ -36,10 +38,18 @@ export default function NovelCard({
           />
         </div>
         <div className="p-4">
-          <span className="text-xs bg-brand-50 text-brand-700 px-2 py-1 rounded-md font-medium">
-            {genre}
-          </span>
-          <h3 className="font-bold text-lg mt-2 line-clamp-1 text-foreground">{title}</h3>
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="text-xs bg-brand-50 text-brand-700 px-2 py-1 rounded-md font-medium">
+              {genre}
+            </span>
+            {ageRating === "15세 이용가" && (
+              <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] rounded font-bold">15</span>
+            )}
+            {ageRating === "19세 이용가" && (
+              <span className="px-1.5 py-0.5 bg-red-600 text-white text-[9px] rounded font-bold">19</span>
+            )}
+          </div>
+          <h3 className="font-bold text-lg line-clamp-1 text-foreground">{title}</h3>
           <p className="text-sm text-muted">{author}</p>
           <div className="flex items-center gap-4 mt-2 text-sm text-muted">
             <span className="flex items-center gap-1">

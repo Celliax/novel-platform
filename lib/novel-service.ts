@@ -21,6 +21,7 @@ export interface Novel {
   views: number;
   rating: number;
   synopsis: string;
+  ageRating: string;
   createdAt: string;
   updatedAt: string;
   episodes: Episode[];
@@ -236,6 +237,7 @@ export async function createNovel(data: {
   authorId: string;
   genre: string;
   synopsis: string;
+  ageRating: string;
   tags: string[];
   coverImage?: string;
 }): Promise<Novel> {
@@ -273,6 +275,7 @@ export async function createNovel(data: {
     views: 0,
     rating: 0,
     synopsis: data.synopsis,
+    ageRating: data.ageRating,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     episodes: [],

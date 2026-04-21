@@ -35,6 +35,7 @@ export async function GET(
         views: novel.views,
         rating: novel.rating,
         synopsis: novel.synopsis,
+        ageRating: novel.ageRating,
         episodes: novel.episodes.map(episode => ({
           id: episode.id,
           chapterNo: episode.chapterNo,

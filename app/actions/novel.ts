@@ -9,6 +9,7 @@ export async function createNovelAction(input: {
   title: string;
   genre: string;
   synopsis: string;
+  ageRating: string;
   tagIds: number[];
   coverImage?: string;
 }) {
@@ -23,6 +24,7 @@ export async function createNovelAction(input: {
   const title = input.title.trim();
   const genre = input.genre.trim();
   const synopsis = input.synopsis?.trim() || "";
+  const ageRating = input.ageRating;
 
   if (!title || !genre) {
     throw new Error("제목과 장르는 필수입니다.");
@@ -44,6 +46,7 @@ export async function createNovelAction(input: {
     authorId: user.id,
     genre,
     synopsis,
+    ageRating,
     tags: selectedTags,
     coverImage: input.coverImage,
   });

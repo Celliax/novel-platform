@@ -134,13 +134,13 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
             return (
               <button
                 key={tag.id}
+                type="button"
                 onClick={() => toggleTag(tag)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
                   isSelected
-                    ? "text-white border-2 border-transparent"
-                    : "text-gray-700 border-2 border-gray-300 hover:border-gray-400"
+                    ? "text-purple-700 border-2 border-purple-500 bg-purple-50 shadow-sm"
+                    : "text-gray-700 border-2 border-gray-200 hover:border-purple-300 hover:bg-gray-50"
                 }`}
-                style={isSelected ? { backgroundColor: tag.color } : {}}
                 disabled={!isSelected && selectedTags.length >= maxTags}
               >
                 {tag.name}
@@ -154,6 +154,7 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
       <div>
         {!showAddForm ? (
           <button
+            type="button"
             onClick={() => setShowAddForm(true)}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             disabled={selectedTags.length >= maxTags}
@@ -190,6 +191,7 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
             </div>
             <div className="flex justify-end space-x-2 mt-4">
               <button
+                type="button"
                 onClick={() => {
                   setShowAddForm(false);
                   setNewTagName("");
@@ -200,6 +202,7 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
                 취소
               </button>
               <button
+                type="button"
                 onClick={addTag}
                 disabled={loading || !newTagName.trim()}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"

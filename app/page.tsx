@@ -48,6 +48,7 @@ export default async function Home() {
                 title={novel.title}
                 author={novel.author?.name || novel.author?.email || "작자미상"}
                 genre={novel.genre}
+                ageRating={novel.ageRating}
                 coverImage={novel.coverImage}
                 views={novel.views}
                 rating={novel.rating}

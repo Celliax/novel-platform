@@ -40,6 +40,7 @@ type Novel = {
   views: number;
   rating: number;
   synopsis: string;
+  ageRating: string;
   tags: Tag[];
   episodes: Episode[];
 };
@@ -245,7 +246,12 @@ export default function NovelDetailPage() {
           
           <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
             <span className="font-bold text-gray-800 mr-1">{authorName}</span>
-            <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] rounded font-bold">15</span>
+            {novel.ageRating === "15세 이용가" && (
+              <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] rounded font-bold">15</span>
+            )}
+            {novel.ageRating === "19세 이용가" && (
+              <span className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] rounded font-bold">19</span>
+            )}
           </div>
           
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 font-medium mb-4">
