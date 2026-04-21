@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Tag } from "@/lib/novel-service";
+import { Tag } from "@/lib/types";
 
 interface TagSelectorProps {
   selectedTags: Tag[];

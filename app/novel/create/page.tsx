@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { createNovelAction } from "@/app/actions/novel";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import TagSelector from "@/components/TagSelector";
-import { Tag } from "@/lib/novel-service";
+import { Tag } from "@/lib/types";
 import { CheckCircle, XCircle, Loader2, Camera, ImagePlus } from "lucide-react";
 
 const Editor = dynamic(() => import("@/components/Editor"), {
