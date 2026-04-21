@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model User {
@@ -47,6 +48,7 @@ model Novel {
   views      Int       @default(0)
   rating     Float     @default(0)
   synopsis   String
+  ageRating  String    @default("전체 이용가")
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
@@ -54,6 +56,7 @@ model Novel {
   episodes   Episode[]
   tags       NovelTag[]
   favoritedBy UserFavorite[] // 선호하는 유저들
+  comments   Comment[]     // 댓글들
 }
 
 model Episode {
@@ -63,6 +66,9 @@ model Episode {
   chapterNo Int
   title     String
   content   String
+  image     String?
+  views     Int      @default(0)
+  recommends Int      @default(0)
   createdAt DateTime @default(now())
 
   @@unique([novelId, chapterNo])
@@ -99,4 +105,39 @@ model UserFavorite {
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
 
   @@id([userId, novelId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  novelId   Int
+  episodeId Int?
+  userId    String
+  userName  String
+  content   String
+  recommends Int     @default(0)
+  dislikes  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  votes     CommentVote[]
+}
+
+model CommentVote {
+  userId    String
+  commentId Int
+  type      String   // "recommend" | "dislike"
+  createdAt DateTime @default(now())
+
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+}
+
+model Report {
+  id        Int      @id @default(autoincrement())
+  type      String   // "COMMENT" | "NOVEL"
+  targetId  Int
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
 }
