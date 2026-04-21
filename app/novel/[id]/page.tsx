@@ -372,16 +372,16 @@ export default function NovelDetailPage() {
           <ul className="divide-y divide-gray-100">
             {displayedEpisodes.length > 0 ? (
               displayedEpisodes.map(ep => (
-                <li key={ep.id} className="group">
-                  <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
-                      <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
-                        <span>EP.{ep.chapterNo}</span>
-                        <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
-                        <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
-                      </div>
+                <li key={ep.id} className="group py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
+                  <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="flex-1">
+                    <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
+                    <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
+                      <span>EP.{ep.chapterNo}</span>
+                      <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
+                      <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
                     </div>
+                  </Link>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     <div className="text-[11px] text-gray-400 font-medium mt-1">
                       {ep.createdAt ? new Date(ep.createdAt).toLocaleDateString('ko-KR', { 
                         year: '2-digit', 
@@ -393,7 +393,15 @@ export default function NovelDetailPage() {
                         day: '2-digit' 
                       })}
                     </div>
-                  </Link>
+                    {isAuthor && (
+                      <Link 
+                        href={`/novel/${novel.id}/episode/${ep.id}/edit`}
+                        className="text-[11px] text-purple-600 font-bold hover:underline"
+                      >
+                        수정하기
+                      </Link>
+                    )}
+                  </div>
                 </li>
               ))
             ) : (

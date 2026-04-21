@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createEpisode, getNovelWithEpisodes } from "@/lib/novel-service";
+import { createEpisode, updateEpisode, getNovelWithEpisodes, getEpisode } from "@/lib/novel-service";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function createEpisodeAction(input: {
@@ -49,5 +49,38 @@ export async function createEpisodeAction(input: {
   });
 
   revalidatePath(`/novel/${input.novelId}`);
+  redirect(`/novel/${input.novelId}`);
+}
+
+export async function updateEpisodeAction(input: {
+  id: number;
+  novelId: number;
+  title: string;
+  content: string;
+  image?: string;
+  authorNote?: string;
+}) {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("로그인이 필요합니다.");
+
+  const episode = await getEpisode(input.novelId, input.id);
+  if (!episode) throw new Error("회차를 찾을 수 없습니다.");
+
+  const novel = await getNovelWithEpisodes(input.novelId);
+  if (!novel || novel.authorId !== user.id) {
+    throw new Error("수정 권한이 없습니다.");
+  }
+
+  await updateEpisode(input.id, {
+    title: input.title,
+    content: input.content,
+    image: input.image,
+    authorNote: input.authorNote,
+  });
+
+  revalidatePath(`/novel/${input.novelId}`);
+  revalidatePath(`/novel/${input.novelId}/episode/${input.id}`);
   redirect(`/novel/${input.novelId}`);
 }

@@ -322,6 +322,38 @@ export async function createEpisode(data: {
   };
 }
 
+export async function updateEpisode(id: number, data: {
+  title?: string;
+  content?: string;
+  image?: string;
+  authorNote?: string;
+  chapterNo?: number;
+}): Promise<Episode> {
+  const ep = await prisma.episode.update({
+    where: { id },
+    data: {
+      title: data.title,
+      content: data.content,
+      image: data.image,
+      authorNote: data.authorNote,
+      chapterNo: data.chapterNo,
+    }
+  });
+
+  return {
+    id: ep.id,
+    novelId: ep.novelId,
+    chapterNo: ep.chapterNo,
+    title: ep.title,
+    content: ep.content,
+    image: ep.image || undefined,
+    authorNote: ep.authorNote || undefined,
+    views: ep.views,
+    recommends: ep.recommends,
+    createdAt: ep.createdAt.toISOString(),
+  };
+}
+
 export async function getEpisodeNavigation(
   novelId: number,
   episodeId: number,
