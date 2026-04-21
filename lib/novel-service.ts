@@ -7,6 +7,7 @@ export interface User {
   email: string;
   name?: string;
   avatar?: string;
+  age?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +33,8 @@ export interface Episode {
   title: string;
   content: string;
   image?: string;
+  views: number;
+  recommends: number;
   createdAt: string;
 }
 
@@ -157,8 +160,13 @@ export async function getNovelWithEpisodes(id: number) {
     const novelTags = database.novelTags.filter(nt => nt.novelId === id);
     const tags = novelTags.map(nt => database.tags.find(t => t.id === nt.tagId)).filter(Boolean) as Tag[];
 
+    const totalViews = episodes.reduce((sum, ep) => sum + (ep.views || 0), 0);
+    const totalRecommends = episodes.reduce((sum, ep) => sum + (ep.recommends || 0), 0);
+
     return {
       ...novel,
+      views: totalViews, // 에피소드 조회수 합계로 덮어쓰기
+      rating: totalRecommends, // 추천수 합계로 활용
       author: author!,
       episodes,
       tags,
@@ -170,11 +178,20 @@ export async function getNovelWithEpisodes(id: number) {
   }
 }
 
-export async function incrementNovelViews(id: number) {
+export async function incrementEpisodeViews(novelId: number, episodeId: number) {
   database = loadDatabase();
-  const novel = database.novels.find(n => n.id === id);
-  if (novel) {
-    novel.views = (novel.views || 0) + 1;
+  const episode = database.episodes.find(e => e.novelId === novelId && e.id === episodeId);
+  if (episode) {
+    episode.views = (episode.views || 0) + 1;
+    saveDatabase(database);
+  }
+}
+
+export async function incrementEpisodeRecommends(novelId: number, episodeId: number) {
+  database = loadDatabase();
+  const episode = database.episodes.find(e => e.novelId === novelId && e.id === episodeId);
+  if (episode) {
+    episode.recommends = (episode.recommends || 0) + 1;
     saveDatabase(database);
   }
 }
@@ -191,7 +208,34 @@ export async function getEpisode(novelId: number, episodeId: number): Promise<Ep
 }
 
 export async function getUserById(id: string): Promise<User | null> {
-  return database.users.find(u => u.id === id) || null;
+  let user = database.users.find(u => u.id === id) || null;
+  
+  // 데이터베이스에 없거나 최신 정보를 위해 Prisma에서 확인
+  const prisma = getPrisma();
+  const prismaUser = await prisma.user.findUnique({ where: { id } });
+  
+  if (prismaUser) {
+    const updatedUser: User = {
+      id: prismaUser.id,
+      email: prismaUser.email,
+      name: prismaUser.nickname || "작자미상",
+      avatar: prismaUser.avatar || undefined,
+      age: prismaUser.age || undefined,
+      createdAt: prismaUser.createdAt.toISOString(),
+      updatedAt: prismaUser.updatedAt.toISOString(),
+    };
+    
+    if (user) {
+      const idx = database.users.findIndex(u => u.id === id);
+      database.users[idx] = updatedUser;
+    } else {
+      database.users.push(updatedUser);
+    }
+    saveDatabase(database);
+    return updatedUser;
+  }
+  
+  return user;
 }
 
 export async function getUserTagStats(userId: string): Promise<{ tag: Tag; count: number }[]> {
@@ -326,6 +370,8 @@ export async function createEpisode(data: {
     title: data.title,
     content: data.content,
     image: data.image,
+    views: 0,
+    recommends: 0,
     createdAt: new Date().toISOString(),
   };
 

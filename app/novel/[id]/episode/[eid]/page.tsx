@@ -37,7 +37,13 @@ export default async function EpisodePage({ params }: Props) {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14">
-        <EpisodeReader title={episode.title} contentHtml={episode.content} image={episode.image} />
+        <EpisodeReader 
+          title={episode.title} 
+          contentHtml={episode.content} 
+          image={episode.image}
+          novelId={novel.id}
+          episodeId={episode.id}
+        />
 
         <nav
           className="mt-14 flex flex-col sm:flex-row gap-3 sm:justify-between"

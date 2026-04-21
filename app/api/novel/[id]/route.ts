@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNovelWithEpisodes, incrementNovelViews, getFavoriteCount } from "@/lib/novel-service";
+import { getNovelWithEpisodes, getFavoriteCount } from "@/lib/novel-service";
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +16,6 @@ export async function GET(
       );
     }
 
-    await incrementNovelViews(novelId);
     const novel = await getNovelWithEpisodes(novelId);
     const favoriteCount = await getFavoriteCount(novelId);
 

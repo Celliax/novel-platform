@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createEpisodeAction } from "@/app/actions/episode";
 import { getSupabaseClient } from "@/lib/supabase/client";

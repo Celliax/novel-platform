@@ -1,10 +1,26 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
 interface EpisodeReaderProps {
   title: string;
   contentHtml: string;
   image?: string;
+  novelId: number;
+  episodeId: number;
 }
 
-export default function EpisodeReader({ title, contentHtml, image }: EpisodeReaderProps) {
+export default function EpisodeReader({ title, contentHtml, image, novelId, episodeId }: EpisodeReaderProps) {
+  const viewed = useRef(false);
+
+  useEffect(() => {
+    if (!viewed.current) {
+      viewed.current = true;
+      fetch(`/api/novel/${novelId}/episode/${episodeId}/view`, { method: "POST" })
+        .catch(err => console.error("View increment failed:", err));
+    }
+  }, [novelId, episodeId]);
+
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-10 pb-8 border-b border-border">

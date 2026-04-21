@@ -17,6 +17,9 @@ type Episode = {
   id: number;
   chapterNo: number;
   title: string;
+  views: number;
+  recommends: number;
+  createdAt: string;
 };
 
 type Comment = {
@@ -366,12 +369,11 @@ export default function NovelDetailPage() {
                       <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
                       <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
                         <span>EP.{ep.chapterNo}</span>
-                        <span className="flex items-center gap-1"><Eye size={12}/> {(Math.floor(Math.random() * 5000) + 1000).toLocaleString()}</span>
-                        <span className="flex items-center gap-1"><MessageSquare size={12}/> {Math.floor(Math.random() * 100)}</span>
-                        <span className="flex items-center gap-1"><Heart size={12}/> {Math.floor(Math.random() * 1000)}</span>
+                        <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
+                        <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
                       </div>
                     </div>
-                    <div className="text-[11px] text-gray-400 font-medium mt-1">26.03.24</div>
+                    <div className="text-[11px] text-gray-400 font-medium mt-1">{new Date(ep.createdAt).toLocaleDateString()}</div>
                   </Link>
                 </li>
               ))
