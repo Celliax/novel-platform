@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ChevronRight, List } from "lucide-react";
+import { ChevronLeft, ChevronRight, List, AlertCircle } from "lucide-react";
 import EpisodeReader from "@/components/EpisodeReader";
 import CommentSection from "@/components/CommentSection";
 import { getEpisodeNavigation } from "@/lib/novel-service";
@@ -15,7 +15,26 @@ export default async function EpisodePage({ params }: Props) {
   const episodeId = Number(episodeIdStr);
   if (!Number.isFinite(novelId) || !Number.isFinite(episodeId)) notFound();
 
-  const data = await getEpisodeNavigation(novelId, episodeId);
+  let data = null;
+  try {
+    data = await getEpisodeNavigation(novelId, episodeId);
+  } catch (error) {
+    console.error("Episode page fetch error:", error);
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
+        <div className="bg-red-50 text-red-900 p-6 rounded-2xl ring-1 ring-red-200 inline-block text-left max-w-md">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle className="text-red-600" />
+            <h3 className="font-bold text-lg">데이터베이스 연결 실패</h3>
+          </div>
+          <p className="text-sm opacity-90 leading-relaxed">
+            회차 정보를 가져오는 도중 에러가 발생했습니다. Render 대시보드에서 DATABASE_URL 설정을 확인해 주세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!data) notFound();
 
   const { novel, episode, prev, next } = data;

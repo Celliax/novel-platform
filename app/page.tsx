@@ -6,11 +6,27 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const hasDbConfig = Boolean(process.env.DATABASE_URL);
-  const novels = await listNovelsForHome();
+  let novels = [];
+  let dbError = false;
+
+  try {
+    novels = await listNovelsForHome();
+  } catch (error) {
+    console.error("Home page data fetch error:", error);
+    dbError = true;
+  }
 
   return (
     <div className="hero-gradient">
       <div className="max-w-6xl mx-auto px-4 py-10 sm:py-14">
+        {dbError && (
+          <div className="mb-8 rounded-xl bg-red-50 text-red-900 px-4 py-4 ring-1 ring-red-200 shadow-sm">
+            <h3 className="font-bold text-lg mb-1">데이터베이스 연결 오류</h3>
+            <p className="text-sm opacity-90">
+              데이터베이스에 연결할 수 없습니다. Render 대시보드에서 DATABASE_URL 설정이 올바른지 확인해 주세요.
+            </p>
+          </div>
+        )}
         <div className="max-w-2xl mb-10">
           <p className="text-sm font-medium text-brand-600 mb-2">웹소설 · 연재 · 독립 출판</p>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
