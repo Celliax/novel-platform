@@ -1,12 +1,13 @@
 import Link from "next/link";
 import NovelCard from "@/components/NovelCard";
 import { listNovelsForHome } from "@/lib/novel-service";
+import { NovelWithAuthor } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const hasDbConfig = Boolean(process.env.DATABASE_URL);
-  let novels = [];
+  let novels: NovelWithAuthor[] = [];
   let dbError = false;
 
   try {
