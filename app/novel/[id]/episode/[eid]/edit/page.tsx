@@ -50,11 +50,11 @@ export default function EpisodeEditPage() {
     if (!user) { router.push("/login"); return; }
 
     try {
-      // 1. Fetch novel and episode
-      const response = await fetch(`/api/novel/${novelId}`);
-      if (!response.ok) throw new Error("작품을 찾을 수 없습니다.");
-      const data = await response.json();
-      const novel = data.novel;
+      // 1. Fetch novel for title and author check
+      const novelRes = await fetch(`/api/novel/${novelId}`);
+      if (!novelRes.ok) throw new Error("작품을 찾을 수 없습니다.");
+      const novelData = await novelRes.json();
+      const novel = novelData.novel;
       
       if (novel.authorId !== user.id) {
         setError("수정 권한이 없습니다.");
@@ -65,8 +65,11 @@ export default function EpisodeEditPage() {
       setIsAuthor(true);
       setNovelTitle(novel.title);
 
-      const ep = novel.episodes.find((e: any) => e.id === episodeId);
-      if (!ep) throw new Error("회차를 찾을 수 없습니다.");
+      // 2. Fetch full episode data (including content)
+      const epRes = await fetch(`/api/novel/${novelId}/episode/${episodeId}`);
+      if (!epRes.ok) throw new Error("회차를 찾을 수 없습니다.");
+      const epData = await epRes.json();
+      const ep = epData.episode;
 
       setEpTitle(ep.title);
       setContent(ep.content);
@@ -74,7 +77,7 @@ export default function EpisodeEditPage() {
       setAuthorNote(ep.authorNote || "");
       setImage(ep.image || null);
       
-      const text = ep.content.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+      const text = (ep.content || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
       setWordCount(text.length);
 
     } catch (err) {
