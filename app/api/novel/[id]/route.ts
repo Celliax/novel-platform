@@ -29,6 +29,7 @@ export async function GET(
       novel: {
         id: novel.id,
         title: novel.title,
+        authorId: novel.authorId,
         author: novel.author,
         genre: novel.genre,
         coverImage: novel.coverImage,
