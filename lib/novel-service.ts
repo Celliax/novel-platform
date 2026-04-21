@@ -83,6 +83,7 @@ export interface Comment {
   content: string;
   recommends: number;
   dislikes: number;
+  episodeNo?: number; // 회차 댓글인 경우 회차 번호 표시를 위해 추가
   createdAt: string;
 }
 
@@ -505,6 +506,13 @@ export async function getComments(novelId: number, episodeId?: number): Promise<
       }
       // episodeId가 없으면 해당 소설의 모든 댓글(회차 댓글 포함)을 반환
       return matchNovel;
+    })
+    .map(c => {
+      if (c.episodeId) {
+        const ep = database.episodes.find(e => e.id === c.episodeId);
+        return { ...c, episodeNo: ep?.chapterNo };
+      }
+      return c;
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }

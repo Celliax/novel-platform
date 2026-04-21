@@ -10,6 +10,7 @@ interface Comment {
   content: string;
   recommends: number;
   dislikes: number;
+  episodeNo?: number;
   createdAt: string;
 }
 
@@ -155,7 +156,12 @@ export default function CommentSection({
               <div className="flex-1">
                  <div className="flex items-center gap-2 mb-1.5">
                    <span className="font-extrabold text-[14px] text-gray-900">{comment.userName}</span>
-                   <span className="text-[11px] font-medium text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                   {comment.episodeNo && (
+                     <span className="px-1.5 py-0.5 bg-gray-100 text-gray-400 text-[10px] rounded font-bold">EP.{comment.episodeNo}</span>
+                   )}
+                   <span className="text-[11px] font-medium text-gray-400">
+                     {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : '방금 전'}
+                   </span>
                  </div>
                  <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
                    {comment.content}

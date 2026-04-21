@@ -374,7 +374,17 @@ export default function NovelDetailPage() {
                         <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
                       </div>
                     </div>
-                    <div className="text-[11px] text-gray-400 font-medium mt-1">{new Date(ep.createdAt).toLocaleDateString()}</div>
+                    <div className="text-[11px] text-gray-400 font-medium mt-1">
+                      {ep.createdAt ? new Date(ep.createdAt).toLocaleDateString('ko-KR', { 
+                        year: '2-digit', 
+                        month: '2-digit', 
+                        day: '2-digit' 
+                      }) : new Date().toLocaleDateString('ko-KR', { 
+                        year: '2-digit', 
+                        month: '2-digit', 
+                        day: '2-digit' 
+                      })}
+                    </div>
                   </Link>
                 </li>
               ))
