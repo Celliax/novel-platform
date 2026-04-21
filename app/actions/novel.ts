@@ -21,6 +21,18 @@ export async function createNovelAction(input: {
     throw new Error("로그인이 필요합니다.");
   }
 
+  // Ensure user exists in Prisma DB before creating novel
+  const prisma = (await import("@/lib/prisma")).getPrisma();
+  await prisma.user.upsert({
+    where: { id: user.id },
+    update: {},
+    create: {
+      id: user.id,
+      email: user.email || "",
+      nickname: user.user_metadata?.nickname || user.email?.split('@')[0] || "User",
+    }
+  });
+
   const title = input.title.trim();
   const genre = input.genre.trim();
   const synopsis = input.synopsis?.trim() || "";
