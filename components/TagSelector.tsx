@@ -103,17 +103,18 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
           <label className="block text-sm font-medium text-gray-700 mb-2">
             선택된 태그 ({selectedTags.length}/{maxTags})
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 p-3 bg-purple-50/50 rounded-lg border border-purple-100">
             {selectedTags.map((tag) => (
               <span
                 key={tag.id}
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white"
-                style={{ backgroundColor: tag.color }}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-purple-700 bg-white border border-purple-300 shadow-sm"
               >
                 {tag.name}
                 <button
+                  type="button"
                   onClick={() => removeTag(tag.id)}
-                  className="ml-2 text-white hover:text-gray-200"
+                  className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-purple-200 text-purple-700 hover:bg-purple-300 transition-colors"
+                  aria-label={`${tag.name} 태그 제거`}
                 >
                   ×
                 </button>

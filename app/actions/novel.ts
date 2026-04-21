@@ -41,15 +41,25 @@ export async function createNovelAction(input: {
     .map(tag => tag.name);
 
   // 소설 생성
-  const novel = await createNovel({
-    title,
-    authorId: user.id,
-    genre,
-    synopsis,
-    ageRating,
-    tags: selectedTags,
-    coverImage: input.coverImage,
-  });
+  let novel;
+  try {
+    novel = await createNovel({
+      title,
+      authorId: user.id,
+      genre,
+      synopsis,
+      ageRating,
+      tags: selectedTags,
+      coverImage: input.coverImage,
+    });
+  } catch (error: any) {
+    console.error("createNovelAction Error:", error);
+    throw new Error(error.message || "소설 생성 중 오류가 발생했습니다.");
+  }
+
+  if (!novel) {
+    throw new Error("소설 생성에 실패했습니다.");
+  }
 
   revalidatePath("/");
   redirect(`/novel/${novel.id}`);

@@ -117,7 +117,8 @@ function loadDatabase(): Database {
   try {
     if (fs.existsSync(DB_PATH)) {
       const data = fs.readFileSync(DB_PATH, 'utf-8');
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      return { ...defaultData, ...parsed };
     }
   } catch (error) {
     console.error('데이터베이스 로드 실패:', error);
@@ -171,19 +172,22 @@ export async function listNovelsForHome(): Promise<NovelWithAuthor[]> {
 }
 
 export async function getNovelWithEpisodes(id: number): Promise<Novel | null> {
-  // 최신 데이터 반영을 위해 데이터베이스 다시 로드
-  database = loadDatabase();
-  populateRelations();
-  
-  const novel = database.novels.find(n => n.id === id);
-  if (!novel) return null;
+  try {
+    database = loadDatabase();
+    populateRelations();
+    const novel = database.novels.find(n => n.id === id);
+    if (!novel) return null;
 
-  return {
-    ...novel,
-    episodes: database.episodes
-      .filter(e => e.novelId === id)
-      .sort((a, b) => a.chapterNo - b.chapterNo),
-  };
+    return {
+      ...novel,
+      episodes: database.episodes
+        .filter(e => e.novelId === id)
+        .sort((a, b) => a.chapterNo - b.chapterNo),
+    };
+  } catch (error) {
+    console.error("getNovelWithEpisodes error:", error);
+    return null;
+  }
 }
 
 export async function getEpisode(novelId: number, episodeId: number): Promise<Episode | null> {
@@ -208,6 +212,7 @@ export async function getTags(): Promise<Tag[]> {
 }
 
 export async function checkTitleAvailable(title: string): Promise<boolean> {
+  database = loadDatabase();
   const duplicate = database.novels.find(n => n.title === title);
   return !duplicate;
 }
@@ -290,6 +295,7 @@ export async function createNovel(data: {
       tag = {
         id: Math.max(...database.tags.map(t => t.id), 0) + 1,
         name: tagName,
+        color: "#6B7280", // 기본 색상 추가
         createdAt: new Date().toISOString(),
       };
       database.tags.push(tag);
