@@ -76,3 +76,44 @@ export async function createNovelAction(input: {
   revalidatePath("/");
   redirect(`/novel/${novel.id}`);
 }
+
+export async function updateNovelAction(id: number, input: {
+  title?: string;
+  genre?: string;
+  synopsis?: string;
+  ageRating?: string;
+  coverImage?: string;
+  tagIds?: number[];
+}) {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("로그인이 필요합니다.");
+
+  const { updateNovel, getTags, getNovelWithEpisodes } = await import("@/lib/novel-service");
+  
+  const novel = await getNovelWithEpisodes(id);
+  if (!novel || novel.authorId !== user.id) {
+    throw new Error("수정 권한이 없습니다.");
+  }
+
+  let selectedTags: string[] | undefined;
+  if (input.tagIds) {
+    const allTags = await getTags();
+    selectedTags = allTags
+      .filter(tag => input.tagIds!.includes(tag.id))
+      .map(tag => tag.name);
+  }
+
+  await updateNovel(id, {
+    title: input.title,
+    genre: input.genre,
+    synopsis: input.synopsis,
+    ageRating: input.ageRating,
+    coverImage: input.coverImage,
+    tags: selectedTags,
+  });
+
+  revalidatePath(`/novel/${id}`);
+  redirect(`/novel/${id}`);
+}

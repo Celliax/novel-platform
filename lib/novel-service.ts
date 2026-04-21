@@ -83,6 +83,9 @@ export async function getNovelWithEpisodes(id: number) {
       episodes: {
         orderBy: { chapterNo: 'asc' }
       },
+      notices: {
+        orderBy: { createdAt: 'desc' }
+      },
       tags: {
         include: { tag: true }
       }
@@ -129,6 +132,13 @@ export async function getNovelWithEpisodes(id: number) {
       recommends: ep.recommends,
       createdAt: ep.createdAt.toISOString(),
     })),
+    notices: novel.notices.map(n => ({
+      id: n.id,
+      title: n.title,
+      content: n.content,
+      views: n.views,
+      createdAt: n.createdAt.toISOString(),
+    })),
     tags: novel.tags.map(nt => ({
       id: nt.tag.id,
       name: nt.tag.name,
@@ -136,6 +146,77 @@ export async function getNovelWithEpisodes(id: number) {
     })),
     commentCount
   };
+}
+
+export async function updateNovel(id: number, data: {
+  title?: string;
+  genre?: string;
+  synopsis?: string;
+  ageRating?: string;
+  coverImage?: string;
+  tags?: string[];
+}): Promise<Novel> {
+  const novel = await prisma.novel.update({
+    where: { id },
+    data: {
+      title: data.title,
+      genre: data.genre,
+      synopsis: data.synopsis,
+      ageRating: data.ageRating,
+      coverImage: data.coverImage,
+      tags: data.tags ? {
+        deleteMany: {},
+        create: await Promise.all(data.tags.map(async (tagName) => {
+          let tag = await prisma.tag.findUnique({ where: { name: tagName } });
+          if (!tag) {
+            tag = await prisma.tag.create({ data: { name: tagName } });
+          }
+          return { tagId: tag.id };
+        }))
+      } : undefined
+    }
+  });
+
+  return {
+    id: novel.id,
+    title: novel.title,
+    authorId: novel.authorId,
+    genre: novel.genre,
+    coverImage: novel.coverImage,
+    views: novel.views,
+    rating: novel.rating,
+    synopsis: novel.synopsis,
+    ageRating: novel.ageRating,
+    createdAt: novel.createdAt.toISOString(),
+    updatedAt: novel.updatedAt.toISOString(),
+  };
+}
+
+export async function createNotice(data: {
+  novelId: number;
+  title: string;
+  content: string;
+}) {
+  return prisma.notice.create({
+    data: {
+      novelId: data.novelId,
+      title: data.title,
+      content: data.content,
+    }
+  });
+}
+
+export async function getNotice(novelId: number, noticeId: number) {
+  return prisma.notice.findFirst({
+    where: { id: noticeId, novelId }
+  });
+}
+
+export async function incrementNoticeViews(noticeId: number) {
+  await prisma.notice.update({
+    where: { id: noticeId },
+    data: { views: { increment: 1 } }
+  });
 }
 
 export async function incrementEpisodeViews(novelId: number, episodeId: number) {

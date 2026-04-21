@@ -54,6 +54,7 @@ model Novel {
 
   // Relations
   episodes   Episode[]
+  notices    Notice[]      // 작가 공지사항
   tags       NovelTag[]
   favoritedBy UserFavorite[] // 선호하는 유저들
   comments   Comment[]     // 댓글들
@@ -141,4 +142,16 @@ model Report {
   userId    String
   reason    String
   createdAt DateTime @default(now())
+}
+model Notice {
+  id        Int      @id @default(autoincrement())
+  novelId   Int
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([novelId])
 }

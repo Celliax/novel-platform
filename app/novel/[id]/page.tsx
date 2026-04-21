@@ -34,6 +34,13 @@ type Comment = {
   createdAt: string;
 };
 
+type Notice = {
+  id: number;
+  title: string;
+  views: number;
+  createdAt: string;
+};
+
 type Novel = {
   id: number;
   title: string;
@@ -47,6 +54,7 @@ type Novel = {
   ageRating: string;
   tags: Tag[];
   episodes: Episode[];
+  notices: Notice[];
   commentCount: number;
   favoriteCount: number;
 };
@@ -62,6 +70,7 @@ export default function NovelDetailPage() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [sortAsc, setSortAsc] = useState(true);
+  const [activeTab, setActiveTab] = useState<'episodes' | 'notices'>('episodes');
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'COMMENT' | 'NOVEL', id: number } | null>(null);
   const [reportReason, setReportReason] = useState("");
@@ -129,7 +138,7 @@ export default function NovelDetailPage() {
 
   const loadRecommendedNovels = async () => {
     try {
-      const res = await fetch('/api/novel/list'); // Need to ensure this exists or use home list
+      const res = await fetch('/api/novel/list'); 
       if (res.ok) {
         const data = await res.json();
         setRecommendedNovels(data.novels.filter((n: Novel) => n.id !== id).slice(0, 3));
@@ -316,18 +325,34 @@ export default function NovelDetailPage() {
               </Link>
             </div>
             {isAuthor && (
-              <div className="w-full lg:w-auto">
-                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg mb-2">
+              <div className="w-full lg:w-auto flex flex-col gap-3">
+                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
                   <span className="text-xs font-extrabold text-amber-700">✦ 작가 전용</span>
-                  <span className="text-xs text-amber-600">회차를 등록하고 독자들과 함께하세요.</span>
+                  <span className="text-xs text-amber-600">회차와 공지를 등록하고 작품을 관리하세요.</span>
                 </div>
-                <Link
-                  href={`/novel/${novel.id}/episode/create`}
-                  className="flex items-center justify-center gap-2 w-full lg:w-auto px-8 py-3.5 bg-gray-900 hover:bg-black text-white font-extrabold rounded text-center transition-colors shadow-sm text-sm"
-                >
-                  <Plus size={16} />
-                  회차 등록하기
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={`/novel/${novel.id}/episode/create`}
+                    className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 hover:bg-black text-white font-extrabold rounded transition-colors shadow-sm text-sm"
+                  >
+                    <Plus size={16} />
+                    회차 등록
+                  </Link>
+                  <Link
+                    href={`/novel/${novel.id}/notice/create`}
+                    className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-extrabold rounded transition-colors shadow-sm text-sm"
+                  >
+                    <AlertCircle size={16} className="text-purple-600" />
+                    작가 공지
+                  </Link>
+                  <Link
+                    href={`/novel/${novel.id}/settings`}
+                    className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-extrabold rounded transition-colors shadow-sm text-sm"
+                  >
+                    <Settings size={16} className="text-gray-500" />
+                    작품 설정
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -357,57 +382,105 @@ export default function NovelDetailPage() {
         
         {/* Left: Episodes & Comments */}
         <div>
-          {/* Episode List Header */}
-          <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-2">
-            <h2 className="text-[19px] font-extrabold text-gray-900">회차리스트</h2>
+          {/* Tabs */}
+          <div className="flex gap-8 border-b border-gray-100 mb-6">
             <button 
-              onClick={() => setSortAsc(!sortAsc)} 
-              className="text-xs font-bold text-gray-500 flex items-center gap-1 hover:text-gray-800 transition-colors"
+              onClick={() => setActiveTab('episodes')}
+              className={`pb-3 text-[17px] font-extrabold transition-all relative ${activeTab === 'episodes' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              {sortAsc ? '첫화부터' : '최신화부터'} <ArrowDownUp size={12}/>
+              회차정보
+              {activeTab === 'episodes' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />}
+            </button>
+            <button 
+              onClick={() => setActiveTab('notices')}
+              className={`pb-3 text-[17px] font-extrabold transition-all relative ${activeTab === 'notices' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              작가공지
+              <span className="ml-1.5 text-xs text-purple-600 font-bold bg-purple-50 px-1.5 py-0.5 rounded-full">{novel.notices.length}</span>
+              {activeTab === 'notices' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />}
             </button>
           </div>
-          
-          {/* Episode List */}
-          <ul className="divide-y divide-gray-100">
-            {displayedEpisodes.length > 0 ? (
-              displayedEpisodes.map(ep => (
-                <li key={ep.id} className="group py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
-                  <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="flex-1">
-                    <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
-                    <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
-                      <span>EP.{ep.chapterNo}</span>
-                      <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
-                      <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
-                    </div>
-                  </Link>
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    <div className="text-[11px] text-gray-400 font-medium mt-1">
-                      {ep.createdAt ? new Date(ep.createdAt).toLocaleDateString('ko-KR', { 
-                        year: '2-digit', 
-                        month: '2-digit', 
-                        day: '2-digit' 
-                      }) : new Date().toLocaleDateString('ko-KR', { 
-                        year: '2-digit', 
-                        month: '2-digit', 
-                        day: '2-digit' 
-                      })}
-                    </div>
-                    {isAuthor && (
-                      <Link 
-                        href={`/novel/${novel.id}/episode/${ep.id}/edit`}
-                        className="text-[11px] text-purple-600 font-bold hover:underline"
-                      >
-                        수정하기
+
+          {activeTab === 'episodes' ? (
+            <>
+              {/* Episode List Header */}
+              <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-2">
+                <h2 className="text-[19px] font-extrabold text-gray-900">회차리스트</h2>
+                <button 
+                  onClick={() => setSortAsc(!sortAsc)} 
+                  className="text-xs font-bold text-gray-500 flex items-center gap-1 hover:text-gray-800 transition-colors"
+                >
+                  {sortAsc ? '첫화부터' : '최신화부터'} <ArrowDownUp size={12}/>
+                </button>
+              </div>
+              
+              {/* Episode List */}
+              <ul className="divide-y divide-gray-100">
+                {displayedEpisodes.length > 0 ? (
+                  displayedEpisodes.map(ep => (
+                    <li key={ep.id} className="group py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
+                      <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="flex-1">
+                        <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
+                        <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
+                          <span>EP.{ep.chapterNo}</span>
+                          <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
+                          <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
+                        </div>
                       </Link>
-                    )}
-                  </div>
-                </li>
-              ))
-            ) : (
-              <li className="py-12 text-center text-gray-400 font-medium">등록된 회차가 없습니다.</li>
-            )}
-          </ul>
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <div className="text-[11px] text-gray-400 font-medium mt-1">
+                          {ep.createdAt ? new Date(ep.createdAt).toLocaleDateString('ko-KR', { 
+                            year: '2-digit', 
+                            month: '2-digit', 
+                            day: '2-digit' 
+                          }) : new Date().toLocaleDateString('ko-KR', { 
+                            year: '2-digit', 
+                            month: '2-digit', 
+                            day: '2-digit' 
+                          })}
+                        </div>
+                        {isAuthor && (
+                          <Link 
+                            href={`/novel/${novel.id}/episode/${ep.id}/edit`}
+                            className="text-[11px] text-purple-600 font-bold hover:underline"
+                          >
+                            수정하기
+                          </Link>
+                        )}
+                      </div>
+                    </li>
+                  ))
+                ) : (
+                  <li className="py-12 text-center text-gray-400 font-medium">등록된 회차가 없습니다.</li>
+                )}
+              </ul>
+            </>
+          ) : (
+            <div className="space-y-4">
+               {novel.notices.length > 0 ? (
+                 novel.notices.map(notice => (
+                   <Link 
+                     key={notice.id} 
+                     href={`/novel/${novel.id}/notice/${notice.id}`}
+                     className="block p-5 rounded-2xl border border-gray-100 bg-gray-50/30 hover:border-purple-200 hover:bg-purple-50/20 transition-all group"
+                   >
+                     <div className="flex justify-between items-start mb-2">
+                       <h3 className="font-extrabold text-gray-900 group-hover:text-purple-700 transition-colors">{notice.title}</h3>
+                       <span className="text-[11px] text-gray-400 font-bold">{new Date(notice.createdAt).toLocaleDateString()}</span>
+                     </div>
+                     <div className="text-xs text-gray-500 line-clamp-1 mb-3">{notice.content}</div>
+                     <div className="flex items-center gap-3 text-[10px] text-gray-400 font-bold">
+                       <span className="flex items-center gap-1"><Eye size={12}/> {notice.views.toLocaleString()}</span>
+                     </div>
+                   </Link>
+                 ))
+               ) : (
+                 <div className="py-20 text-center text-gray-400 font-medium border-2 border-dashed border-gray-100 rounded-3xl">
+                   등록된 공지사항이 없습니다.
+                 </div>
+               )}
+            </div>
+          )}
 
           <CommentSection 
             novelId={id} 
