@@ -24,14 +24,11 @@ export interface Novel {
   ageRating: string;
   createdAt: string;
   updatedAt: string;
-  episodes: Episode[];
-  tags: NovelTag[];
 }
 
 export interface Episode {
   id: number;
   novelId: number;
-  novel: Novel;
   chapterNo: number;
   title: string;
   content: string;
@@ -48,8 +45,6 @@ export interface Tag {
 export interface NovelTag {
   novelId: number;
   tagId: number;
-  novel: Novel;
-  tag: Tag;
 }
 
 export interface UserTagRead {
@@ -136,53 +131,39 @@ function saveDatabase(data: Database): void {
 
 let database = loadDatabase();
 
-function populateRelations() {
-  database.novels.forEach(novel => {
-    novel.author = database.users.find(u => u.id === novel.authorId)!;
-    novel.episodes = database.episodes.filter(e => e.novelId === novel.id);
-    novel.tags = database.novelTags.filter(nt => nt.novelId === novel.id);
-  });
-
-  database.episodes.forEach(episode => {
-    episode.novel = database.novels.find(n => n.id === episode.novelId)!;
-  });
-
-  database.novelTags.forEach(nt => {
-    nt.novel = database.novels.find(n => n.id === nt.novelId)!;
-    nt.tag = database.tags.find(t => t.id === nt.tagId)!;
-  });
-
-  database.userTagReads.forEach(utr => {
-    utr.user = database.users.find(u => u.id === utr.userId)!;
-    utr.tag = database.tags.find(t => t.id === utr.tagId)!;
-  });
-}
-
-populateRelations();
+// Relations are no longer populated in-place to avoid circular references and serialization errors.
 
 export type NovelWithAuthor = Novel & { author: User };
 
-export async function listNovelsForHome(): Promise<NovelWithAuthor[]> {
+export async function listNovelsForHome() {
   database = loadDatabase();
-  populateRelations();
-  return database.novels.map(novel => ({
-    ...novel,
-    author: novel.author,
-  }));
+  return database.novels.map(novel => {
+    const author = database.users.find(u => u.id === novel.authorId);
+    return {
+      ...novel,
+      author: author!,
+    };
+  });
 }
 
-export async function getNovelWithEpisodes(id: number): Promise<Novel | null> {
+export async function getNovelWithEpisodes(id: number) {
   try {
     database = loadDatabase();
-    populateRelations();
     const novel = database.novels.find(n => n.id === id);
     if (!novel) return null;
 
+    const author = database.users.find(u => u.id === novel.authorId);
+    const episodes = database.episodes
+      .filter(e => e.novelId === id)
+      .sort((a, b) => a.chapterNo - b.chapterNo);
+    const novelTags = database.novelTags.filter(nt => nt.novelId === id);
+    const tags = novelTags.map(nt => database.tags.find(t => t.id === nt.tagId)).filter(Boolean) as Tag[];
+
     return {
       ...novel,
-      episodes: database.episodes
-        .filter(e => e.novelId === id)
-        .sort((a, b) => a.chapterNo - b.chapterNo),
+      author: author!,
+      episodes,
+      tags
     };
   } catch (error) {
     console.error("getNovelWithEpisodes error:", error);
@@ -200,10 +181,13 @@ export async function getUserById(id: string): Promise<User | null> {
 
 export async function getUserTagStats(userId: string): Promise<{ tag: Tag; count: number }[]> {
   const userReads = database.userTagReads.filter(utr => utr.userId === userId);
-  return userReads.map(utr => ({
-    tag: utr.tag,
-    count: utr.readCount,
-  })).sort((a, b) => b.count - a.count);
+  return userReads.map(utr => {
+    const tag = database.tags.find(t => t.id === utr.tagId);
+    return {
+      tag: tag!,
+      count: utr.readCount,
+    };
+  }).filter(item => item.tag).sort((a, b) => b.count - a.count);
 }
 
 export async function getTags(): Promise<Tag[]> {
@@ -274,7 +258,6 @@ export async function createNovel(data: {
     id: Math.max(...database.novels.map(n => n.id), 0) + 1,
     title: data.title,
     authorId: data.authorId,
-    author,
     genre: data.genre,
     coverImage: data.coverImage || '/placeholder-cover.svg',
     views: 0,
@@ -283,8 +266,6 @@ export async function createNovel(data: {
     ageRating: data.ageRating,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    episodes: [],
-    tags: [],
   };
 
   database.novels.push(newNovel);
@@ -295,7 +276,7 @@ export async function createNovel(data: {
       tag = {
         id: Math.max(...database.tags.map(t => t.id), 0) + 1,
         name: tagName,
-        color: "#6B7280", // 기본 색상 추가
+        color: "#6B7280",
         createdAt: new Date().toISOString(),
       };
       database.tags.push(tag);
@@ -304,14 +285,10 @@ export async function createNovel(data: {
     database.novelTags.push({
       novelId: newNovel.id,
       tagId: tag.id,
-      novel: newNovel,
-      tag,
     });
   });
 
   saveDatabase(database);
-  populateRelations();
-
   return newNovel;
 }
 
@@ -329,7 +306,6 @@ export async function createEpisode(data: {
   const newEpisode: Episode = {
     id: Math.max(...database.episodes.map(e => e.id), 0) + 1,
     novelId: data.novelId,
-    novel,
     chapterNo: data.chapterNo,
     title: data.title,
     content: data.content,
@@ -338,7 +314,6 @@ export async function createEpisode(data: {
 
   database.episodes.push(newEpisode);
   saveDatabase(database);
-  populateRelations();
 
   return newEpisode;
 }
@@ -346,12 +321,7 @@ export async function createEpisode(data: {
 export async function getEpisodeNavigation(
   novelId: number,
   episodeId: number,
-): Promise<{
-  novel: Novel;
-  episode: Episode;
-  prev?: Episode;
-  next?: Episode;
-} | null> {
+) {
   const novel = database.novels.find(n => n.id === novelId);
   if (!novel) return null;
 
@@ -375,7 +345,6 @@ export async function getEpisodeNavigation(
 
 export async function getUserNovels(userId: string): Promise<Novel[]> {
   database = loadDatabase();
-  populateRelations();
   return database.novels.filter(novel => novel.authorId === userId);
 }
 
