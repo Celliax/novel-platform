@@ -90,9 +90,17 @@ export default function NovelDetailPage() {
           if (userRes.ok) {
             const userData = await userRes.json();
             if (novelData.novel.ageRating === "19세 이용가") {
-              if (!userData.user.age || userData.user.age < 19) {
-                alert("성인 인증이 필요한 작품입니다. 프로필에서 나이를 설정해주세요.");
-                window.location.href = "/profile/setup";
+              if (userData.user.age !== undefined && userData.user.age !== null && userData.user.age < 19) {
+                alert("이 작품은 19세 이상만 이용 가능합니다.");
+                window.location.href = "/";
+                return;
+              }
+              if (!userData.user.age) {
+                if (confirm("이 작품은 성인 인증이 필요합니다. 프로필 설정 페이지로 이동하시겠습니까?")) {
+                  window.location.href = "/profile/setup";
+                } else {
+                  window.location.href = "/";
+                }
                 return;
               }
             }
@@ -397,6 +405,7 @@ export default function NovelDetailPage() {
             novelId={id} 
             title="소설 전체 댓글"
             showInput={false}
+            authorId={novel.authorId}
           />
         </div>
 

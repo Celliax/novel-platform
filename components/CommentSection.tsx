@@ -6,6 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 
 interface Comment {
   id: number;
+  userId: string;
   userName: string;
   content: string;
   recommends: number;
@@ -17,6 +18,7 @@ interface Comment {
 interface CommentSectionProps {
   novelId: number;
   episodeId?: number;
+  authorId?: string;
   title?: string;
   showInput?: boolean;
 }
@@ -24,6 +26,7 @@ interface CommentSectionProps {
 export default function CommentSection({ 
   novelId, 
   episodeId, 
+  authorId,
   title = "댓글", 
   showInput = true 
 }: CommentSectionProps) {
@@ -156,6 +159,9 @@ export default function CommentSection({
               <div className="flex-1">
                  <div className="flex items-center gap-2 mb-1.5">
                    <span className="font-extrabold text-[14px] text-gray-900">{comment.userName}</span>
+                   {authorId && comment.userId === authorId && (
+                     <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[10px] rounded font-bold">작가</span>
+                   )}
                    {comment.episodeNo && (
                      <span className="px-1.5 py-0.5 bg-gray-100 text-gray-400 text-[10px] rounded font-bold">EP.{comment.episodeNo}</span>
                    )}

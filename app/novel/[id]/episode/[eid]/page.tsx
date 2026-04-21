@@ -82,6 +82,7 @@ export default async function EpisodePage({ params }: Props) {
         <CommentSection 
           novelId={novel.id} 
           episodeId={episode.id} 
+          authorId={novel.authorId}
           title="회차 댓글"
         />
       </div>
