@@ -70,6 +70,7 @@ interface Database {
 export interface Comment {
   id: number;
   novelId: number;
+  episodeId?: number; // 에피소드 댓글인 경우 추가
   userId: string;
   userName: string;
   content: string;
@@ -140,8 +141,14 @@ export async function listNovelsForHome() {
   database = loadDatabase();
   return database.novels.map(novel => {
     const author = database.users.find(u => u.id === novel.authorId);
+    const episodes = database.episodes.filter(e => e.novelId === novel.id);
+    const totalViews = episodes.reduce((sum, ep) => sum + (ep.views || 0), 0);
+    const totalRecommends = episodes.reduce((sum, ep) => sum + (ep.recommends || 0), 0);
+    
     return {
       ...novel,
+      views: totalViews,
+      rating: totalRecommends,
       author: author!,
     };
   });
@@ -183,7 +190,10 @@ export async function incrementEpisodeViews(novelId: number, episodeId: number) 
   const episode = database.episodes.find(e => e.novelId === novelId && e.id === episodeId);
   if (episode) {
     episode.views = (episode.views || 0) + 1;
+    console.log(`[ViewInc] Novel:${novelId} Ep:${episodeId} -> ${episode.views}`);
     saveDatabase(database);
+  } else {
+    console.warn(`[ViewInc] Episode not found: Novel:${novelId} Ep:${episodeId}`);
   }
 }
 
@@ -411,11 +421,21 @@ export async function getUserNovels(userId: string): Promise<Novel[]> {
   return database.novels.filter(novel => novel.authorId === userId);
 }
 
-export async function getComments(novelId: number): Promise<Comment[]> {
-  return (database.comments || []).filter(c => c.novelId === novelId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+export async function getComments(novelId: number, episodeId?: number): Promise<Comment[]> {
+  database = loadDatabase();
+  return (database.comments || [])
+    .filter(c => c.novelId === novelId && (episodeId ? c.episodeId === episodeId : !c.episodeId))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export async function createComment(data: { novelId: number, userId: string, userName: string, content: string }): Promise<Comment> {
+export async function createComment(data: { 
+  novelId: number, 
+  episodeId?: number, 
+  userId: string, 
+  userName: string, 
+  content: string 
+}): Promise<Comment> {
+  database = loadDatabase();
   if (!database.comments) database.comments = [];
   const newComment: Comment = {
     id: Math.max(...database.comments.map(c => c.id), 0) + 1,

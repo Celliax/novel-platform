@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight, List } from "lucide-react";
 import EpisodeReader from "@/components/EpisodeReader";
+import CommentSection from "@/components/CommentSection";
 import { getEpisodeNavigation } from "@/lib/novel-service";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +78,12 @@ export default async function EpisodePage({ params }: Props) {
             </Link>
           )}
         </nav>
+
+        <CommentSection 
+          novelId={novel.id} 
+          episodeId={episode.id} 
+          title="회차 댓글"
+        />
       </div>
     </div>
   );

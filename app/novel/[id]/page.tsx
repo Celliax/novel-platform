@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle } from "lucide-react";
+import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle, Loader2 } from "lucide-react";
+import CommentSection from "@/components/CommentSection";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -74,7 +75,7 @@ export default function NovelDetailPage() {
 
   const loadNovel = async () => {
     try {
-      const response = await fetch(`/api/novel/${id}`);
+      const response = await fetch(`/api/novel/${id}`, { cache: 'no-store' });
       if (response.ok) {
         const novelData = await response.json();
         setNovel(novelData.novel);
@@ -382,40 +383,10 @@ export default function NovelDetailPage() {
             )}
           </ul>
 
-          {/* Comments Section */}
-          <div className="mt-20">
-            <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-4">
-              <h2 className="text-[19px] font-extrabold text-gray-900">소설 전체 댓글</h2>
-            </div>
-            
-            <div className="space-y-0 divide-y divide-gray-100 pt-2">
-              {comments.length > 0 ? (
-                comments.map(comment => (
-                  <div key={comment.id} className="flex gap-4 py-6">
-                    <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">
-                      {comment.userName.charAt(0)}
-                    </div>
-                    <div className="flex-1">
-                       <div className="flex items-center gap-2 mb-1.5">
-                         <span className="font-extrabold text-[14px] text-gray-900">{comment.userName}</span>
-                         <span className="text-[11px] font-medium text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
-                       </div>
-                       <div className="text-[13px] text-gray-800 bg-gray-50/80 border border-gray-100 p-3.5 rounded-xl rounded-tl-none inline-block font-medium">
-                         {comment.content}
-                       </div>
-                       <div className="flex gap-3 mt-3 text-[11px] text-red-500 font-bold justify-end w-full">
-                         <button onClick={() => handleCommentAction(comment.id, 'recommend')} className="hover:text-red-600 transition-colors">추천 ({comment.recommends})</button>
-                         <button onClick={() => handleCommentAction(comment.id, 'dislike')} className="hover:text-red-600 transition-colors">비추 ({comment.dislikes})</button>
-                         <button onClick={() => openReportModal('COMMENT', comment.id)} className="hover:text-red-600 transition-colors">신고</button>
-                       </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="py-10 text-center text-gray-400 text-sm">아직 댓글이 없습니다.</p>
-              )}
-            </div>
-          </div>
+          <CommentSection 
+            novelId={id} 
+            title="소설 전체 댓글"
+          />
         </div>
 
         {/* Right: Sidebar */}
