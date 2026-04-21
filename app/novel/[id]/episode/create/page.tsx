@@ -49,6 +49,8 @@ export default function EpisodeCreatePage() {
   const [novelTitle, setNovelTitle] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     checkAuthAndPermission();
@@ -94,6 +96,27 @@ export default function EpisodeCreatePage() {
     setWordCount(text.length);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const TARGET_W = 800; // 에피소드 이미지는 좀 더 크게
+        const ratio = img.height / img.width;
+        canvas.width = TARGET_W;
+        canvas.height = TARGET_W * ratio;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setImage(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = ev.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -103,7 +126,13 @@ export default function EpisodeCreatePage() {
     }
     startTransition(async () => {
       try {
-        await createEpisodeAction({ novelId, chapterNo, title: epTitle.trim(), content });
+        await createEpisodeAction({ 
+          novelId, 
+          chapterNo, 
+          title: epTitle.trim(), 
+          content,
+          image: image || undefined 
+        });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "저장에 실패했습니다.");
@@ -157,6 +186,39 @@ export default function EpisodeCreatePage() {
               placeholder="에피소드 번호를 입력해주세요."
               className="w-full py-4 text-base text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none font-medium"
             />
+          </div>
+        </div>
+
+        {/* ─── Episode Image Upload ─── */}
+        <div className="border-b border-gray-100 bg-gray-50/30">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              className="hidden" 
+              accept="image/*" 
+            />
+            {!image ? (
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white"
+              >
+                <Settings size={16} /> 에피소드 삽화 추가하기 (선택)
+              </button>
+            ) : (
+              <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
+                <img src={image} alt="에피소드 삽화" className="w-full h-full object-cover" />
+                <button 
+                  type="button"
+                  onClick={() => setImage(null)}
+                  className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Settings size={12} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

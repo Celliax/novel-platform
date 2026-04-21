@@ -31,6 +31,7 @@ export interface Episode {
   chapterNo: number;
   title: string;
   content: string;
+  image?: string;
   createdAt: string;
 }
 
@@ -160,12 +161,29 @@ export async function getNovelWithEpisodes(id: number) {
       ...novel,
       author: author!,
       episodes,
-      tags
+      tags,
+      commentCount: (database.comments || []).filter(c => c.novelId === id).length
     };
   } catch (error) {
     console.error("getNovelWithEpisodes error:", error);
     return null;
   }
+}
+
+export async function incrementNovelViews(id: number) {
+  database = loadDatabase();
+  const novel = database.novels.find(n => n.id === id);
+  if (novel) {
+    novel.views = (novel.views || 0) + 1;
+    saveDatabase(database);
+  }
+}
+
+export async function getFavoriteCount(novelId: number): Promise<number> {
+  const prisma = getPrisma();
+  return prisma.userFavorite.count({
+    where: { novelId }
+  });
 }
 
 export async function getEpisode(novelId: number, episodeId: number): Promise<Episode | null> {
@@ -294,6 +312,7 @@ export async function createEpisode(data: {
   chapterNo: number;
   title: string;
   content: string;
+  image?: string;
 }): Promise<Episode> {
   const novel = database.novels.find(n => n.id === data.novelId);
   if (!novel) {
@@ -306,6 +325,7 @@ export async function createEpisode(data: {
     chapterNo: data.chapterNo,
     title: data.title,
     content: data.content,
+    image: data.image,
     createdAt: new Date().toISOString(),
   };
 

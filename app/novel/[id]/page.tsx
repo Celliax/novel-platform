@@ -43,6 +43,8 @@ type Novel = {
   ageRating: string;
   tags: Tag[];
   episodes: Episode[];
+  commentCount: number;
+  favoriteCount: number;
 };
 
 export default function NovelDetailPage() {
@@ -79,11 +81,28 @@ export default function NovelDetailPage() {
         setIsAuthor(user?.id === novelData.novel.authorId);
 
         if (user) {
+          // 성인 인증 체크
+          const userRes = await fetch(`/api/user/${user.id}`);
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            if (novelData.novel.ageRating === "19세 이용가") {
+              if (!userData.user.age || userData.user.age < 19) {
+                alert("성인 인증이 필요한 작품입니다. 프로필에서 나이를 설정해주세요.");
+                window.location.href = "/profile/setup";
+                return;
+              }
+            }
+          }
+
           const favRes = await fetch(`/api/novel/${id}/favorite`);
           if (favRes.ok) {
             const favData = await favRes.json();
             setIsFavorited(favData.isFavorited);
           }
+        } else if (novelData.novel.ageRating === "19세 이용가") {
+          alert("성인 인증이 필요한 작품입니다. 로그인이 필요합니다.");
+          window.location.href = "/login";
+          return;
         }
       } else {
         notFound();
@@ -257,7 +276,7 @@ export default function NovelDetailPage() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 font-medium mb-4">
             <span className="flex items-center gap-1.5 font-bold text-gray-800">조회 <span className="font-normal text-gray-600">{novel.views.toLocaleString()}</span></span>
             <span className="flex items-center gap-1.5 font-bold text-gray-800">추천 <span className="font-normal text-gray-600">{Math.floor(novel.views / 8).toLocaleString()}</span></span>
-            <span className="flex items-center gap-1.5 font-bold text-gray-800">인생픽 <span className="font-normal text-gray-600">공개전</span></span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">댓글 <span className="font-normal text-gray-600">{novel.commentCount.toLocaleString()}</span></span>
           </div>
           
           <div className="flex flex-wrap gap-2 mb-6">
@@ -269,7 +288,7 @@ export default function NovelDetailPage() {
 
           <div className="w-full bg-gray-50 rounded-xl p-5 mb-6 border border-gray-100/50">
             <div className="flex flex-wrap items-center gap-6 mb-4 text-sm font-bold text-gray-800">
-              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호 <span className="font-medium text-gray-600">{(novel.views / 20).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></span>
+              <span className="flex items-center gap-1.5"><Heart size={16} className="text-gray-400"/> 선호 <span className="font-medium text-gray-600">{novel.favoriteCount.toLocaleString()}</span></span>
               <span className="flex items-center gap-1.5"><BookOpen size={16} className="text-gray-400"/> 회차 <span className="font-medium text-gray-600">{novel.episodes.length}회차</span></span>
             </div>
             <div className="text-sm text-gray-600 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: novel.synopsis }} />

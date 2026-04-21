@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNovelWithEpisodes } from "@/lib/novel-service";
+import { getNovelWithEpisodes, incrementNovelViews, getFavoriteCount } from "@/lib/novel-service";
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +16,9 @@ export async function GET(
       );
     }
 
+    await incrementNovelViews(novelId);
     const novel = await getNovelWithEpisodes(novelId);
+    const favoriteCount = await getFavoriteCount(novelId);
 
     if (!novel) {
       return NextResponse.json(
@@ -43,6 +45,8 @@ export async function GET(
           title: episode.title,
         })),
         tags: novel.tags,
+        commentCount: novel.commentCount,
+        favoriteCount: favoriteCount,
       },
     });
   } catch (error) {
