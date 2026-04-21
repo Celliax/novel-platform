@@ -15,7 +15,6 @@ export interface Novel {
   id: number;
   title: string;
   authorId: string;
-  author: User;
   genre: string;
   coverImage: string;
   views: number;
@@ -51,8 +50,6 @@ export interface UserTagRead {
   userId: string;
   tagId: number;
   readCount: number;
-  user: User;
-  tag: Tag;
 }
 
 interface Database {

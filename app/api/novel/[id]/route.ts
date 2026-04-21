@@ -41,7 +41,7 @@ export async function GET(
           chapterNo: episode.chapterNo,
           title: episode.title,
         })),
-        tags: novel.tags.map(nt => nt.tag),
+        tags: novel.tags,
       },
     });
   } catch (error) {
