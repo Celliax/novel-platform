@@ -160,6 +160,28 @@ export async function getNovelWithEpisodes(id: number) {
     const novel = database.novels.find(n => n.id === id);
     if (!novel) return null;
 
+    // Prisma 동기화 확인 (선호작 등 기능 연동을 위해)
+    try {
+      const prisma = getPrisma();
+      const prismaNovel = await prisma.novel.findUnique({ where: { id } });
+      if (!prismaNovel) {
+        await prisma.novel.create({
+          data: {
+            id: novel.id,
+            title: novel.title,
+            authorId: novel.authorId,
+            genre: novel.genre,
+            coverImage: novel.coverImage,
+            views: novel.views,
+            rating: Number(novel.rating),
+            synopsis: novel.synopsis,
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Prisma JIT sync error:", e);
+    }
+
     const author = database.users.find(u => u.id === novel.authorId);
     const episodes = database.episodes
       .filter(e => e.novelId === id)
@@ -338,6 +360,26 @@ export async function createNovel(data: {
   };
 
   database.novels.push(newNovel);
+
+  // Prisma에도 소설 동기화 (선호작 기능을 위해 필요)
+  try {
+    const prisma = getPrisma();
+    await prisma.novel.create({
+      data: {
+        id: newNovel.id,
+        title: newNovel.title,
+        authorId: newNovel.authorId,
+        genre: newNovel.genre,
+        coverImage: newNovel.coverImage,
+        views: newNovel.views,
+        rating: Number(newNovel.rating),
+        synopsis: newNovel.synopsis,
+      }
+    });
+  } catch (error) {
+    console.error("Prisma novel creation error:", error);
+    // 이미 존재하는 경우는 무시하거나 업데이트할 수 있음
+  }
 
   data.tags.forEach(tagName => {
     let tag = database.tags.find(t => t.name === tagName);

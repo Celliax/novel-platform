@@ -17,9 +17,15 @@ interface CommentSectionProps {
   novelId: number;
   episodeId?: number;
   title?: string;
+  showInput?: boolean;
 }
 
-export default function CommentSection({ novelId, episodeId, title = "댓글" }: CommentSectionProps) {
+export default function CommentSection({ 
+  novelId, 
+  episodeId, 
+  title = "댓글", 
+  showInput = true 
+}: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
@@ -101,31 +107,33 @@ export default function CommentSection({ novelId, episodeId, title = "댓글" }:
       </div>
 
       {/* Comment Input */}
-      {user ? (
-        <form onSubmit={handleSubmit} className="mb-8">
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="따뜻한 댓글은 작가에게 큰 힘이 됩니다."
-              className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none h-20 placeholder:text-gray-400 font-medium"
-            />
-            <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200/50">
-              <span className="text-[11px] text-gray-400 font-medium">비속어 포함 시 제재될 수 있습니다.</span>
-              <button
-                type="submit"
-                disabled={submitting || !newComment.trim()}
-                className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
-              >
-                {submitting ? <Loader2 size={14} className="animate-spin" /> : "등록"}
-              </button>
+      {showInput && (
+        user ? (
+          <form onSubmit={handleSubmit} className="mb-8">
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="따뜻한 댓글은 작가에게 큰 힘이 됩니다."
+                className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none h-20 placeholder:text-gray-400 font-medium"
+              />
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200/50">
+                <span className="text-[11px] text-gray-400 font-medium">비속어 포함 시 제재될 수 있습니다.</span>
+                <button
+                  type="submit"
+                  disabled={submitting || !newComment.trim()}
+                  className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {submitting ? <Loader2 size={14} className="animate-spin" /> : "등록"}
+                </button>
+              </div>
             </div>
+          </form>
+        ) : (
+          <div className="bg-gray-50 rounded-xl p-8 border border-gray-200 text-center mb-8">
+            <p className="text-sm text-gray-500 font-medium">로그인 후 댓글을 작성할 수 있습니다.</p>
           </div>
-        </form>
-      ) : (
-        <div className="bg-gray-50 rounded-xl p-8 border border-gray-200 text-center mb-8">
-          <p className="text-sm text-gray-500 font-medium">로그인 후 댓글을 작성할 수 있습니다.</p>
-        </div>
+        )
       )}
 
       {/* Comment List */}

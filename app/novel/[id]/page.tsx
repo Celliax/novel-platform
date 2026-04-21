@@ -386,6 +386,7 @@ export default function NovelDetailPage() {
           <CommentSection 
             novelId={id} 
             title="소설 전체 댓글"
+            showInput={false}
           />
         </div>
 
@@ -404,7 +405,13 @@ export default function NovelDetailPage() {
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-[13px] text-gray-900 leading-tight mb-2 truncate group-hover:text-purple-700 transition-colors">{rec.title}</div>
                       <div className="flex gap-1.5 mb-2">
-                        <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] rounded font-bold">15</span>
+                        {rec.ageRating === "19세 이용가" ? (
+                          <span className="px-1.5 py-0.5 bg-red-600 text-white text-[9px] rounded font-bold">19</span>
+                        ) : rec.ageRating === "15세 이용가" ? (
+                          <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] rounded font-bold">15</span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 bg-green-600 text-white text-[9px] rounded font-bold">All</span>
+                        )}
                       </div>
                       <div className="text-[10px] text-gray-400 font-bold truncate">
                         {rec.tags?.slice(0, 3).map(t => `#${t.name}`).join(' ')}
