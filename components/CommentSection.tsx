@@ -152,10 +152,7 @@ export default function CommentSection({
           </div>
         ) : comments.length > 0 ? (
           comments.map(comment => (
-            <div key={comment.id} className="flex gap-4 py-6">
-              <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full shrink-0 flex items-center justify-center font-bold text-sm">
-                {comment.userName.charAt(0)}
-              </div>
+            <div key={comment.id} className="py-6">
               <div className="flex-1">
                  <div className="flex items-center gap-2 mb-1.5">
                    <span className="font-extrabold text-[14px] text-gray-900">{comment.userName}</span>
