@@ -36,10 +36,15 @@ export async function POST(
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
+    // 최신 닉네임 정보를 위해 getUserById 호출
+    const { getUserById } = await import("@/lib/novel-service");
+    const user = await getUserById(session.user.id);
+    const userName = user?.nickname || user?.name || session.user.user_metadata?.nickname || session.user.email?.split('@')[0] || "작자미상";
+
     const comment = await createComment({
       novelId,
       userId: session.user.id,
-      userName: session.user.user_metadata?.nickname || session.user.email?.split('@')[0] || "작자미상",
+      userName,
       content,
     });
 

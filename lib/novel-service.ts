@@ -6,6 +6,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  nickname?: string;
   avatar?: string;
   age?: number;
   createdAt: string;
@@ -215,7 +216,7 @@ export async function getNovelWithEpisodes(id: number) {
       console.error("Prisma JIT sync error:", e);
     }
 
-    const author = database.users.find(u => u.id === novel.authorId);
+    const author = await getUserById(novel.authorId);
     const episodes = database.episodes
       .filter(e => e.novelId === id)
       .sort((a, b) => a.chapterNo - b.chapterNo);
@@ -284,6 +285,7 @@ export async function getUserById(id: string): Promise<User | null> {
       id: prismaUser.id,
       email: prismaUser.email,
       name: prismaUser.nickname || "작자미상",
+      nickname: prismaUser.nickname || undefined,
       avatar: prismaUser.avatar || undefined,
       age: prismaUser.age || undefined,
       createdAt: prismaUser.createdAt.toISOString(),

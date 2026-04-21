@@ -50,11 +50,16 @@ export async function POST(
       return NextResponse.json({ error: "댓글 내용을 입력해주세요." }, { status: 400 });
     }
 
+    // 최신 닉네임 정보를 위해 getUserById 호출
+    const { getUserById } = await import("@/lib/novel-service");
+    const dbUser = await getUserById(user.id);
+    const userName = dbUser?.nickname || dbUser?.name || user.user_metadata?.nickname || user.email?.split('@')[0] || "작자미상";
+
     const comment = await createComment({
       novelId,
       episodeId,
       userId: user.id,
-      userName: user.user_metadata?.nickname || user.email || "익명",
+      userName,
       content,
     });
 
