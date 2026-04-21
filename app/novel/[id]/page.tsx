@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle, Loader2 } from "lucide-react";
+import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle, Loader2, Image as ImageIcon } from "lucide-react";
 import CommentSection from "@/components/CommentSection";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -266,6 +266,17 @@ export default function NovelDetailPage() {
               sizes="280px"
               priority
             />
+            {isAuthor && (
+              <Link 
+                href={`/novel/${novel.id}/settings`}
+                className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity backdrop-blur-[2px]"
+              >
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-2">
+                  <ImageIcon size={24} className="text-white" />
+                </div>
+                <span className="text-white text-xs font-bold">표지/정보 변경</span>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -424,7 +435,6 @@ export default function NovelDetailPage() {
                         <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
                           <span>EP.{ep.chapterNo}</span>
                           <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
-                          <span className="flex items-center gap-1"><Heart size={12}/> {ep.recommends?.toLocaleString() || 0}</span>
                         </div>
                       </Link>
                       <div className="flex flex-col items-end gap-2 shrink-0">

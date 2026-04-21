@@ -39,6 +39,10 @@ export default async function EpisodePage({ params }: Props) {
 
   const { novel, episode, prev, next } = data;
 
+  // 조회수 증가
+  const { incrementEpisodeViews } = await import("@/lib/novel-service");
+  await incrementEpisodeViews(novelId, episodeId);
+
   return (
     <div className="bg-surface min-h-full">
       <div className="border-b border-border bg-canvas/80 backdrop-blur-sm">
