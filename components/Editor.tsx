@@ -23,11 +23,21 @@ function Toolbar({ editor }: { editor: Editor | null }) {
 
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const base64 = ev.target?.result as string;
-      editor.chain().focus().setImage({ src: base64 }).run();
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const TARGET_W = 800; // 본문 삽화는 800px로 최적화
+        const ratio = img.height / img.width;
+        canvas.width = Math.min(img.width, TARGET_W);
+        canvas.height = canvas.width * ratio;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const base64 = canvas.toDataURL("image/jpeg", 0.8);
+        editor.chain().focus().setImage({ src: base64 }).run();
+      };
+      img.src = ev.target?.result as string;
     };
     reader.readAsDataURL(file);
-    // Reset input
     e.target.value = "";
   };
 
@@ -115,7 +125,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       >
         링크
       </button>
-      <div className="relative">
+      <div className="relative flex items-center gap-1">
         <button
           type="button"
           onClick={() => {
@@ -133,6 +143,31 @@ function Toolbar({ editor }: { editor: Editor | null }) {
           className="hidden"
           onChange={handleImageUpload}
         />
+        {editor.isActive("image") && (
+          <div className="flex items-center gap-1 ml-1 bg-border/40 p-0.5 rounded-lg">
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().updateAttributes("image", { width: "100%" }).run()}
+              className="px-1.5 py-0.5 text-[10px] bg-white rounded shadow-sm hover:bg-gray-50"
+            >
+              꽉차게
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().updateAttributes("image", { width: "50%" }).run()}
+              className="px-1.5 py-0.5 text-[10px] bg-white rounded shadow-sm hover:bg-gray-50"
+            >
+              중간
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().updateAttributes("image", { width: "25%" }).run()}
+              className="px-1.5 py-0.5 text-[10px] bg-white rounded shadow-sm hover:bg-gray-50"
+            >
+              작게
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -146,7 +181,19 @@ export default function RichTextEditor({ value, onChange }: EditorProps) {
       }),
       Underline,
       LinkExt.configure({ openOnClick: true, autolink: true, linkOnPaste: true }),
-      Image.configure({ inline: false, allowBase64: true }),
+      Image.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            width: {
+              default: "100%",
+              renderHTML: (attributes) => ({
+                style: `width: ${attributes.width}; height: auto; max-width: 100%; display: block; margin: 0 auto;`,
+              }),
+            },
+          };
+        },
+      }).configure({ inline: false, allowBase64: true }),
       Placeholder.configure({ placeholder: "여기에 소설을 써주세요..." }),
     ],
     content: value || "<p></p>",
