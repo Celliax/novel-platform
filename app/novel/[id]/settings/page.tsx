@@ -25,6 +25,12 @@ export default function NovelSettingsPage() {
   const [pending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  function isNextRedirectError(e: unknown): boolean {
+    if (typeof e !== "object" || e === null) return false;
+    const d = (e as { digest?: string }).digest;
+    return typeof d === "string" && d.startsWith("NEXT_REDIRECT");
+  }
+
   useEffect(() => {
     loadData();
   }, [id]);
@@ -128,6 +134,7 @@ export default function NovelSettingsPage() {
           tagIds
         });
       } catch (err) {
+        if (isNextRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "수정에 실패했습니다.");
       }
     });
