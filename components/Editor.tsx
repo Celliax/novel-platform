@@ -17,23 +17,38 @@ interface EditorProps {
 function Toolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null;
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 로딩 표시나 알림을 줄 수 있지만 일단 바로 진행
+    const img = new window.Image();
     const reader = new FileReader();
+    
     reader.onload = (ev) => {
-      const img = new window.Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement("canvas");
-        const TARGET_W = 800; // 본문 삽화는 800px로 최적화
+        const TARGET_W = 800;
         const ratio = img.height / img.width;
         canvas.width = Math.min(img.width, TARGET_W);
         canvas.height = canvas.width * ratio;
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const base64 = canvas.toDataURL("image/jpeg", 0.8);
-        editor.chain().focus().setImage({ src: base64 }).run();
+        
+        // Canvas를 Blob으로 변환 후 File 객체로 만들기
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+          
+          try {
+            const { uploadImage } = await import("@/lib/storage");
+            const url = await uploadImage(resizedFile);
+            editor.chain().focus().setImage({ src: url }).run();
+          } catch (err) {
+            console.error(err);
+            alert("이미지 업로드에 실패했습니다. (버킷 'images'가 공개 상태인지 확인해주세요)");
+          }
+        }, "image/jpeg", 0.85);
       };
       img.src = ev.target?.result as string;
     };

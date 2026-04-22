@@ -67,13 +67,17 @@ export default function NovelSettingsPage() {
     }
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    setIsUploading(true);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement("canvas");
         const TARGET_W = 400;
         const ratio = img.height / img.width;
@@ -81,7 +85,22 @@ export default function NovelSettingsPage() {
         canvas.height = TARGET_W * ratio;
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        setCoverImage(canvas.toDataURL("image/jpeg", 0.85));
+        
+        canvas.toBlob(async (blob) => {
+          if (!blob) { setIsUploading(false); return; }
+          const resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+          
+          try {
+            const { uploadImage } = await import("@/lib/storage");
+            const url = await uploadImage(resizedFile);
+            setCoverImage(url);
+          } catch (err) {
+            console.error(err);
+            alert("이미지 업로드 실패");
+          } finally {
+            setIsUploading(false);
+          }
+        }, "image/jpeg", 0.85);
       };
       img.src = ev.target?.result as string;
     };
@@ -137,9 +156,14 @@ export default function NovelSettingsPage() {
                   <ImageIcon size={32} className="text-gray-300" />
                 </div>
               )}
+              {isUploading && (
+                <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                  <Loader2 size={24} className="animate-spin text-purple-600" />
+                </div>
+              )}
               <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={() => !isUploading && fileInputRef.current?.click()}
+                className={`absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ${isUploading ? 'pointer-events-none' : ''}`}
               >
                 <span className="text-white text-xs font-bold">변경하기</span>
               </div>
