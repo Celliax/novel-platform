@@ -629,3 +629,15 @@ export async function isUserFavorited(novelId: number, userId: string): Promise<
   });
   return !!favorite;
 }
+export async function getSystemNotices() {
+  return prisma.systemNotice.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 5
+  });
+}
+
+export async function createSystemNotice(title: string, content: string, isImportant: boolean = false) {
+  return prisma.systemNotice.create({
+    data: { title, content, isImportant }
+  });
+}

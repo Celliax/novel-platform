@@ -167,3 +167,11 @@ model Notice {
 
   @@index([novelId])
 }
+
+model SystemNotice {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  isImportant Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
