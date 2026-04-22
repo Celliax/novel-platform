@@ -28,7 +28,7 @@ export interface Episode {
   novelId: number;
   chapterNo: number;
   title: string;
-  content: string;
+  content?: string;
   image?: string;
   authorNote?: string;
   views: number;

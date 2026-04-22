@@ -81,9 +81,25 @@ export async function getNovelWithEpisodes(id: number) {
     include: {
       author: true,
       episodes: {
+        select: {
+          id: true,
+          chapterNo: true,
+          title: true,
+          views: true,
+          recommends: true,
+          createdAt: true,
+          // content: true 는 제외하여 성능 최적화
+        },
         orderBy: { chapterNo: 'asc' }
       },
       notices: {
+        select: {
+          id: true,
+          title: true,
+          content: true, // 공지는 내용이 짧으므로 포함
+          views: true,
+          createdAt: true,
+        },
         orderBy: { createdAt: 'desc' }
       },
       tags: {
@@ -122,12 +138,9 @@ export async function getNovelWithEpisodes(id: number) {
     },
     episodes: novel.episodes.map(ep => ({
       id: ep.id,
-      novelId: ep.novelId,
+      novelId: id, // id is the novel id
       chapterNo: ep.chapterNo,
       title: ep.title,
-      content: ep.content,
-      image: ep.image || undefined,
-      authorNote: ep.authorNote || undefined,
       views: ep.views,
       recommends: ep.recommends,
       createdAt: ep.createdAt.toISOString(),

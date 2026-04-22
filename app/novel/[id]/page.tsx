@@ -15,24 +15,30 @@ export default async function NovelDetailPage({ params }: Props) {
 
   if (isNaN(id)) notFound();
 
-  // 1. Fetch novel data
-  const novel = await getNovelWithEpisodes(id);
-  if (!novel) notFound();
-
-  // 2. Fetch user session and related data
+  // 1. Fetch novel and user session in parallel
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [novel, { data: { user } }, allNovels] = await Promise.all([
+    getNovelWithEpisodes(id),
+    supabase.auth.getUser(),
+    listNovelsForHome()
+  ]);
+
+  if (!novel) notFound();
 
   let isAuthor = false;
   let isFavorited = false;
 
   if (user) {
     isAuthor = user.id === novel.authorId;
-    isFavorited = await isUserFavorited(id, user.id);
+    const [favorited, dbUser] = await Promise.all([
+      isUserFavorited(id, user.id),
+      getUserById(user.id)
+    ]);
+    
+    isFavorited = favorited;
 
-    // 3. Age certification check
+    // 2. Age certification check
     if (novel.ageRating === "19세 이용가") {
-      const dbUser = await getUserById(user.id);
       if (!dbUser || !dbUser.age) {
         // 인증 안된 경우 프로필 설정 유도
         return (
@@ -64,8 +70,7 @@ export default async function NovelDetailPage({ params }: Props) {
     redirect("/login");
   }
 
-  // 4. Recommended novels
-  const allNovels = await listNovelsForHome();
+  // 3. Recommended novels (already fetched in parallel above)
   const recommendedNovels = allNovels.filter(n => n.id !== id).slice(0, 3);
 
   // Note: Comments are handled by CommentSection which is a client component inside NovelDetailClient
