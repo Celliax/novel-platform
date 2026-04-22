@@ -10,9 +10,15 @@ cloudinary.config({
 
 /**
  * 서버 사이드에서 이미지를 Cloudinary에 업로드합니다.
- * @param base64 이미지의 Base64 데이터
  */
 export async function uploadToCloudinaryAction(base64: string) {
+  if (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    return { 
+      success: false, 
+      error: "서버 환경 변수(CLOUDINARY_API_KEY/SECRET)가 설정되지 않았습니다. Render 설정을 확인해 주세요." 
+    };
+  }
+
   try {
     const result = await cloudinary.uploader.upload(base64, {
       folder: "novel_platform",
