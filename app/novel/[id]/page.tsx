@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle, Loader2, Image as ImageIcon } from "lucide-react";
+import { BookOpen, ChevronRight, Eye, Star, Plus, Heart, Share2, MessageSquare, ArrowDownUp, AlertCircle, Loader2, Image as ImageIcon, Settings } from "lucide-react";
 import CommentSection from "@/components/CommentSection";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
