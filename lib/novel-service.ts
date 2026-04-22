@@ -263,6 +263,7 @@ export async function getEpisode(novelId: number, episodeId: number): Promise<Ep
     id: ep.id,
     novelId: ep.novelId,
     chapterNo: ep.chapterNo,
+    isSideStory: ep.isSideStory,
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
