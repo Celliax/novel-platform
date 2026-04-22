@@ -36,7 +36,7 @@ export async function listNovelsForHome() {
       author: {
         id: novel.author.id,
         email: novel.author.email,
-        name: novel.author.nickname || "작자미상",
+        name: novel.author.nickname || novel.author.email.split('@')[0] || "작자미상",
         nickname: novel.author.nickname || undefined,
         avatar: novel.author.avatar || undefined,
         age: novel.author.age || undefined,
@@ -113,7 +113,7 @@ export async function getNovelWithEpisodes(id: number) {
     author: {
       id: novel.author.id,
       email: novel.author.email,
-      name: novel.author.nickname || "작자미상",
+      name: novel.author.nickname || novel.author.email.split('@')[0] || "작자미상",
       nickname: novel.author.nickname || undefined,
       avatar: novel.author.avatar || undefined,
       age: novel.author.age || undefined,
@@ -265,7 +265,7 @@ export async function getUserById(id: string): Promise<User | null> {
   return {
     id: prismaUser.id,
     email: prismaUser.email,
-    name: prismaUser.nickname || "작자미상",
+    name: prismaUser.nickname || prismaUser.email.split('@')[0] || "작자미상",
     nickname: prismaUser.nickname || undefined,
     avatar: prismaUser.avatar || undefined,
     age: prismaUser.age || undefined,
