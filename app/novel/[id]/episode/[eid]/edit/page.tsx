@@ -99,6 +99,12 @@ export default function EpisodeEditPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.type === "image/gif") {
+      alert("GIF 이미지는 업로드할 수 없습니다.");
+      e.target.value = "";
+      return;
+    }
+
     setIsUploading(true);
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -110,11 +116,18 @@ export default function EpisodeEditPage() {
         canvas.width = TARGET_W;
         canvas.height = TARGET_W * ratio;
         const ctx = canvas.getContext("2d");
+
+        const outputType = file.type === "image/png" ? "image/png" : "image/webp";
+        if (outputType === "image/webp") {
+          ctx!.fillStyle = "white";
+          ctx!.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
         
         canvas.toBlob(async (blob) => {
           if (!blob) { setIsUploading(false); return; }
-          const resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + (outputType === "image/png" ? ".png" : ".webp"), { type: outputType });
           
           try {
             const { uploadImage } = await import("@/lib/storage");
@@ -126,7 +139,7 @@ export default function EpisodeEditPage() {
           } finally {
             setIsUploading(false);
           }
-        }, "image/jpeg", 0.85);
+        }, outputType, 0.85);
       };
       img.src = ev.target?.result as string;
     };

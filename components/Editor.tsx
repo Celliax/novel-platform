@@ -21,7 +21,16 @@ function Toolbar({ editor }: { editor: Editor | null }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 로딩 표시나 알림을 줄 수 있지만 일단 바로 진행
+    // GIF 파일 차단
+    if (file.type === "image/gif") {
+      alert("GIF 이미지는 업로드할 수 없습니다.");
+      e.target.value = "";
+      return;
+    }
+
+    // 파일 타입 결정 (WebP 선호, 아니면 원본 타입 유지)
+    const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+
     const img = new window.Image();
     const reader = new FileReader();
     
@@ -33,12 +42,18 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         canvas.width = Math.min(img.width, TARGET_W);
         canvas.height = canvas.width * ratio;
         const ctx = canvas.getContext("2d");
+        
+        // 투명도 유지를 위해 PNG인 경우 배경 처리를 다르게 함
+        if (outputType === "image/jpeg") {
+          ctx!.fillStyle = "#white";
+          ctx!.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        // Canvas를 Blob으로 변환 후 File 객체로 만들기
         canvas.toBlob(async (blob) => {
           if (!blob) return;
-          const resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + (outputType === "image/png" ? ".png" : ".jpg"), { type: outputType });
           
           try {
             const { uploadImage } = await import("@/lib/storage");
@@ -46,9 +61,9 @@ function Toolbar({ editor }: { editor: Editor | null }) {
             editor.chain().focus().setImage({ src: url }).run();
           } catch (err) {
             console.error(err);
-            alert("이미지 업로드에 실패했습니다. (버킷 'images'가 공개 상태인지 확인해주세요)");
+            alert("이미지 업로드 실패");
           }
-        }, "image/jpeg", 0.85);
+        }, outputType, 0.85);
       };
       img.src = ev.target?.result as string;
     };
