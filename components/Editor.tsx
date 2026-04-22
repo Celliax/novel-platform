@@ -28,7 +28,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       return;
     }
 
-    // 파일 타입 결정 (WebP 선호, 아니면 원본 타입 유지)
+    // 파일 타입 결정 (PNG는 투명도 유지, 그 외는 JPEG로 안전하게 처리)
     const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
 
     const img = new window.Image();
@@ -43,9 +43,9 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         canvas.height = canvas.width * ratio;
         const ctx = canvas.getContext("2d");
         
-        // 투명도 유지를 위해 PNG인 경우 배경 처리를 다르게 함
+        // JPEG 변환 시 투명 영역이 검게 나오는 것을 방지하기 위해 흰색 배경 추가
         if (outputType === "image/jpeg") {
-          ctx!.fillStyle = "#white";
+          ctx!.fillStyle = "white";
           ctx!.fillRect(0, 0, canvas.width, canvas.height);
         }
         
@@ -53,7 +53,8 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         
         canvas.toBlob(async (blob) => {
           if (!blob) return;
-          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + (outputType === "image/png" ? ".png" : ".jpg"), { type: outputType });
+          const extension = outputType === "image/png" ? ".png" : ".jpg";
+          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + extension, { type: outputType });
           
           try {
             const { uploadImage } = await import("@/lib/storage");
@@ -61,7 +62,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
             editor.chain().focus().setImage({ src: url }).run();
           } catch (err) {
             console.error(err);
-            alert("이미지 업로드 실패");
+            alert("이미지 업로드 실패: " + (err instanceof Error ? err.message : "알 수 없는 오류"));
           }
         }, outputType, 0.85);
       };

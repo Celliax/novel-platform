@@ -117,8 +117,8 @@ export default function EpisodeEditPage() {
         canvas.height = TARGET_W * ratio;
         const ctx = canvas.getContext("2d");
 
-        const outputType = file.type === "image/png" ? "image/png" : "image/webp";
-        if (outputType === "image/webp") {
+        const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+        if (outputType === "image/jpeg") {
           ctx!.fillStyle = "white";
           ctx!.fillRect(0, 0, canvas.width, canvas.height);
         }
@@ -127,7 +127,8 @@ export default function EpisodeEditPage() {
         
         canvas.toBlob(async (blob) => {
           if (!blob) { setIsUploading(false); return; }
-          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + (outputType === "image/png" ? ".png" : ".webp"), { type: outputType });
+          const extension = outputType === "image/png" ? ".png" : ".jpg";
+          const resizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + extension, { type: outputType });
           
           try {
             const { uploadImage } = await import("@/lib/storage");
@@ -135,7 +136,7 @@ export default function EpisodeEditPage() {
             setImage(url);
           } catch (err) {
             console.error(err);
-            alert("이미지 업로드 실패");
+            alert("이미지 업로드 실패: " + (err instanceof Error ? err.message : "알 수 없는 오류"));
           } finally {
             setIsUploading(false);
           }
