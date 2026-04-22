@@ -84,6 +84,7 @@ export async function getNovelWithEpisodes(id: number) {
         select: {
           id: true,
           chapterNo: true,
+          isSideStory: true,
           title: true,
           views: true,
           recommends: true,

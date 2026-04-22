@@ -11,7 +11,6 @@ export async function createEpisodeAction(input: {
   title: string;
   content: string;
   image?: string;
-  image?: string;
   authorNote?: string;
   isSideStory?: boolean;
 }) {
@@ -60,7 +59,6 @@ export async function updateEpisodeAction(input: {
   novelId: number;
   title: string;
   content: string;
-  image?: string;
   image?: string;
   authorNote?: string;
   isSideStory?: boolean;
