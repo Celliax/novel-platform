@@ -643,3 +643,9 @@ export async function createSystemNotice(title: string, content: string, isImpor
     data: { title, content, isImportant }
   });
 }
+
+export async function getSystemNotice(id: number) {
+  return prisma.systemNotice.findUnique({
+    where: { id }
+  });
+}

@@ -40,7 +40,9 @@ export default async function Home() {
               <Megaphone size={12} /> NOTICE
             </span>
             <div className="flex-1 text-xs sm:text-sm text-purple-900 font-bold truncate">
-              {systemNotices[0].title}
+              <Link href={`/notice/${systemNotices[0].id}`} className="hover:underline">
+                {systemNotices[0].title}
+              </Link>
             </div>
             {isAdmin && (
               <Link href="/admin/notice" className="text-[11px] font-extrabold text-purple-600 hover:underline flex items-center">
