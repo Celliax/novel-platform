@@ -93,13 +93,17 @@ export default function EpisodeEditPage() {
     setWordCount(text.length);
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setIsUploading(true);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement("canvas");
         const TARGET_W = 800;
         const ratio = img.height / img.width;
@@ -107,7 +111,22 @@ export default function EpisodeEditPage() {
         canvas.height = TARGET_W * ratio;
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        setImage(canvas.toDataURL("image/jpeg", 0.85));
+        
+        canvas.toBlob(async (blob) => {
+          if (!blob) { setIsUploading(false); return; }
+          const resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+          
+          try {
+            const { uploadImage } = await import("@/lib/storage");
+            const url = await uploadImage(resizedFile);
+            setImage(url);
+          } catch (err) {
+            console.error(err);
+            alert("이미지 업로드 실패");
+          } finally {
+            setIsUploading(false);
+          }
+        }, "image/jpeg", 0.85);
       };
       img.src = ev.target?.result as string;
     };
@@ -123,12 +142,19 @@ export default function EpisodeEditPage() {
     }
     startTransition(async () => {
       try {
+        let finalImage = image;
+        // 기존 Base64 이미지가 있다면 Cloudinary로 먼저 업로드
+        if (image && image.startsWith("data:image")) {
+          const { uploadBase64Image } = await import("@/lib/storage");
+          finalImage = await uploadBase64Image(image);
+        }
+
         await updateEpisodeAction({ 
           id: episodeId,
           novelId, 
           title: epTitle.trim(), 
           content,
-          image: image || undefined,
+          image: finalImage || undefined,
           authorNote: authorNote.trim() || undefined
         });
       } catch (err) {
@@ -197,18 +223,26 @@ export default function EpisodeEditPage() {
             {!image ? (
               <button 
                 type="button" 
+                disabled={isUploading}
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white"
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white disabled:opacity-50"
               >
-                <Settings size={16} /> 메인 삽화 설정 (선택)
+                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
+                {isUploading ? "업로드 중..." : "메인 삽화 설정 (선택)"}
               </button>
             ) : (
               <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
                 <img src={image} alt="메인 삽화" className="w-full h-full object-cover" />
+                {isUploading && (
+                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                    <Loader2 size={20} className="animate-spin text-purple-600" />
+                  </div>
+                )}
                 <button 
                   type="button"
+                  disabled={isUploading}
                   onClick={() => setImage(null)}
-                  className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:hidden"
                 >
                   <Settings size={12} />
                 </button>

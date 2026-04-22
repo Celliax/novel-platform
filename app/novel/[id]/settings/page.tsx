@@ -112,12 +112,19 @@ export default function NovelSettingsPage() {
     setError(null);
     startTransition(async () => {
       try {
+        let finalCover = coverImage;
+        // 기존 Base64 이미지가 있다면 Cloudinary로 먼저 업로드
+        if (coverImage && coverImage.startsWith("data:image")) {
+          const { uploadBase64Image } = await import("@/lib/storage");
+          finalCover = await uploadBase64Image(coverImage);
+        }
+
         await updateNovelAction(id, {
           title,
           genre,
           synopsis,
           ageRating,
-          coverImage: coverImage || undefined,
+          coverImage: finalCover || undefined,
           tagIds
         });
       } catch (err) {

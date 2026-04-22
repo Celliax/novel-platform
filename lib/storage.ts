@@ -34,3 +34,31 @@ export async function uploadImage(file: File): Promise<string> {
     throw error;
   }
 }
+/**
+ * Base64 데이터를 Cloudinary에 업로드합니다.
+ */
+export async function uploadBase64Image(base64: string): Promise<string> {
+  const CLOUD_NAME = "dgkarqfds";
+  const UPLOAD_PRESET = "qvhyc3hj";
+
+  try {
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file: base64,
+          upload_preset: UPLOAD_PRESET,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error?.message || "업로드 실패");
+    return result.secure_url;
+  } catch (error) {
+    console.error("Base64 Upload Error:", error);
+    throw error;
+  }
+}
