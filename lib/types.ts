@@ -64,4 +64,14 @@ export interface Report {
   createdAt: string;
 }
 
+export interface Notice {
+  id: number;
+  novelId: number;
+  title: string;
+  content: string;
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type NovelWithAuthor = Novel & { author: User };

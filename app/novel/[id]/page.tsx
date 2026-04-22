@@ -37,6 +37,7 @@ type Comment = {
 type Notice = {
   id: number;
   title: string;
+  content: string;
   views: number;
   createdAt: string;
 };
