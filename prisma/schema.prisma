@@ -58,6 +58,10 @@ model Novel {
   tags       NovelTag[]
   favoritedBy UserFavorite[] // 선호하는 유저들
   comments   Comment[]     // 댓글들
+
+  @@index([authorId])
+  @@index([genre])
+  @@index([updatedAt(sort: Desc)])
 }
 
 model Episode {
@@ -122,6 +126,10 @@ model Comment {
 
   novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
   votes     CommentVote[]
+
+  @@index([novelId])
+  @@index([episodeId])
+  @@index([userId])
 }
 
 model CommentVote {
@@ -142,6 +150,9 @@ model Report {
   userId    String
   reason    String
   createdAt DateTime @default(now())
+
+  @@index([targetId])
+  @@index([userId])
 }
 model Notice {
   id        Int      @id @default(autoincrement())
