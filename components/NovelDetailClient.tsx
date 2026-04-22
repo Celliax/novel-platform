@@ -7,7 +7,7 @@ import { BookOpen, Eye, Plus, Heart, Share2, ArrowDownUp, AlertCircle, Settings,
 import CommentSection from "./CommentSection";
 
 type Tag = { id: number; name: string };
-type Episode = { id: number; chapterNo: number; title: string; views: number; recommends: number; createdAt: string };
+type Episode = { id: number; chapterNo: number; isSideStory: boolean; title: string; views: number; recommends: number; createdAt: string };
 type Notice = { id: number; title: string; content: string; views: number; createdAt: string };
 type Novel = {
   id: number;
@@ -158,7 +158,7 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
           <div className="flex flex-col gap-3 w-full lg:w-auto">
             <div className="flex gap-3">
               <Link href={firstEpisode ? `/novel/${novel.id}/episode/${firstEpisode.id}` : '#'} className="flex-1 lg:flex-none px-12 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded text-center transition-colors shadow-sm">
-                {firstEpisode ? `EP.${firstEpisode.chapterNo}. 이어보기` : '첫화보기'}
+                {firstEpisode ? (firstEpisode.isSideStory ? '첫 외전보기' : `EP.${firstEpisode.chapterNo}. 이어보기`) : '첫화보기'}
               </Link>
             </div>
             {isAuthor && (
@@ -208,8 +208,14 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
                 {displayedEpisodes.map(ep => (
                   <li key={ep.id} className="group py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
                     <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="flex-1">
-                      <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">{ep.title}</div>
-                      <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5"><span>EP.{ep.chapterNo}</span><span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span></div>
+                      <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">
+                        {ep.isSideStory && <span className="text-purple-600 mr-1.5">[외전]</span>}
+                        {ep.title}
+                      </div>
+                      <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
+                        <span>{ep.isSideStory ? '외전' : `EP.${ep.chapterNo}`}</span>
+                        <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
+                      </div>
                     </Link>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <div className="text-[11px] text-gray-400 font-medium mt-1">{new Date(ep.createdAt).toLocaleDateString('ko-KR')}</div>

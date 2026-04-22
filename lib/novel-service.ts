@@ -140,6 +140,7 @@ export async function getNovelWithEpisodes(id: number) {
       id: ep.id,
       novelId: id, // id is the novel id
       chapterNo: ep.chapterNo,
+      isSideStory: ep.isSideStory,
       title: ep.title,
       views: ep.views,
       recommends: ep.recommends,
@@ -385,16 +386,19 @@ export async function createNovel(data: {
 
 export async function createEpisode(data: {
   novelId: number;
-  chapterNo: number;
+  chapterNo?: number;
   title: string;
   content: string;
   image?: string;
   authorNote?: string;
+  isSideStory?: boolean;
 }): Promise<Episode> {
+  const chapterNo = data.chapterNo || (await prisma.episode.count({ where: { novelId: data.novelId } })) + 1;
   const ep = await prisma.episode.create({
     data: {
       novelId: data.novelId,
-      chapterNo: data.chapterNo,
+      chapterNo,
+      isSideStory: data.isSideStory || false,
       title: data.title,
       content: data.content,
       image: data.image,
@@ -406,6 +410,7 @@ export async function createEpisode(data: {
     id: ep.id,
     novelId: ep.novelId,
     chapterNo: ep.chapterNo,
+    isSideStory: ep.isSideStory,
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
@@ -422,6 +427,7 @@ export async function updateEpisode(id: number, data: {
   image?: string;
   authorNote?: string;
   chapterNo?: number;
+  isSideStory?: boolean;
 }): Promise<Episode> {
   const ep = await prisma.episode.update({
     where: { id },
@@ -431,6 +437,7 @@ export async function updateEpisode(id: number, data: {
       image: data.image,
       authorNote: data.authorNote,
       chapterNo: data.chapterNo,
+      isSideStory: data.isSideStory,
     }
   });
 
@@ -438,6 +445,7 @@ export async function updateEpisode(id: number, data: {
     id: ep.id,
     novelId: ep.novelId,
     chapterNo: ep.chapterNo,
+    isSideStory: ep.isSideStory,
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,

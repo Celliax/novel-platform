@@ -11,7 +11,9 @@ export async function createEpisodeAction(input: {
   title: string;
   content: string;
   image?: string;
+  image?: string;
   authorNote?: string;
+  isSideStory?: boolean;
 }) {
   // Supabase에서 사용자 정보 가져오기
   const supabase = await getSupabaseServerClient();
@@ -46,6 +48,7 @@ export async function createEpisodeAction(input: {
     content: input.content,
     image: input.image,
     authorNote: input.authorNote,
+    isSideStory: input.isSideStory,
   });
 
   revalidatePath(`/novel/${input.novelId}`);
@@ -58,7 +61,9 @@ export async function updateEpisodeAction(input: {
   title: string;
   content: string;
   image?: string;
+  image?: string;
   authorNote?: string;
+  isSideStory?: boolean;
 }) {
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -78,6 +83,7 @@ export async function updateEpisodeAction(input: {
     content: input.content,
     image: input.image,
     authorNote: input.authorNote,
+    isSideStory: input.isSideStory,
   });
 
   revalidatePath(`/novel/${input.novelId}`);

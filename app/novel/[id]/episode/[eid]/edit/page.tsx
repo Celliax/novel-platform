@@ -31,6 +31,7 @@ export default function EpisodeEditPage() {
   const [content, setContent] = useState("<p></p>");
   const [chapterNo, setChapterNo] = useState(1);
   const [authorNote, setAuthorNote] = useState("");
+  const [isSideStory, setIsSideStory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState(true);
@@ -75,6 +76,7 @@ export default function EpisodeEditPage() {
       setContent(ep.content);
       setChapterNo(ep.chapterNo);
       setAuthorNote(ep.authorNote || "");
+      setIsSideStory(ep.isSideStory || false);
       setImage(ep.image || null);
       
       const text = (ep.content || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
@@ -169,7 +171,8 @@ export default function EpisodeEditPage() {
           title: epTitle.trim(), 
           content,
           image: finalImage || undefined,
-          authorNote: authorNote.trim() || undefined
+          authorNote: authorNote.trim() || undefined,
+          isSideStory: isSideStory
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -226,42 +229,56 @@ export default function EpisodeEditPage() {
         </div>
 
         <div className="border-b border-gray-100 bg-gray-50/30">
-          <div className="max-w-4xl mx-auto px-4 py-4">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleImageChange} 
-              className="hidden" 
-              accept="image/*" 
-            />
-            {!image ? (
-              <button 
-                type="button" 
-                disabled={isUploading}
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white disabled:opacity-50"
-              >
-                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
-                {isUploading ? "업로드 중..." : "메인 삽화 설정 (선택)"}
-              </button>
-            ) : (
-              <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
-                <img src={image} alt="메인 삽화" className="w-full h-full object-cover" />
-                {isUploading && (
-                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                    <Loader2 size={20} className="animate-spin text-purple-600" />
-                  </div>
-                )}
+          <div className="max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleImageChange} 
+                className="hidden" 
+                accept="image/*" 
+              />
+              {!image ? (
                 <button 
-                  type="button"
+                  type="button" 
                   disabled={isUploading}
-                  onClick={() => setImage(null)}
-                  className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:hidden"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white disabled:opacity-50"
                 >
-                  <Settings size={12} />
+                  {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
+                  {isUploading ? "업로드 중..." : "메인 삽화 설정 (선택)"}
                 </button>
-              </div>
-            )}
+              ) : (
+                <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
+                  <img src={image} alt="메인 삽화" className="w-full h-full object-cover" />
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                      <Loader2 size={20} className="animate-spin text-purple-600" />
+                    </div>
+                  )}
+                  <button 
+                    type="button"
+                    disabled={isUploading}
+                    onClick={() => setImage(null)}
+                    className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:hidden"
+                  >
+                    <Settings size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1.5 text-xs text-purple-600 font-bold cursor-pointer bg-purple-50 px-2 py-1 rounded-md border border-purple-100">
+                <input 
+                  type="checkbox" 
+                  checked={isSideStory}
+                  onChange={(e) => setIsSideStory(e.target.checked)}
+                  className="rounded accent-purple-600" 
+                />
+                외전으로 등록
+              </label>
+            </div>
           </div>
         </div>
 

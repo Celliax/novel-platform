@@ -42,6 +42,7 @@ export default function EpisodeCreatePage() {
   const [content, setContent] = useState("<p></p>");
   const [chapterNo, setChapterNo] = useState(1);
   const [authorNote, setAuthorNote] = useState("");
+  const [isSideStory, setIsSideStory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState(true);
@@ -151,7 +152,8 @@ export default function EpisodeCreatePage() {
           title: epTitle.trim(), 
           content,
           image: image || undefined,
-          authorNote: authorNote.trim() || undefined
+          authorNote: authorNote.trim() || undefined,
+          isSideStory: isSideStory
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -260,6 +262,15 @@ export default function EpisodeCreatePage() {
               <option>전체 열람가능</option>
               <option>구독자 전용</option>
             </select>
+            <label className="flex items-center gap-1.5 text-xs text-purple-600 font-bold cursor-pointer bg-purple-50 px-2 py-1 rounded-md border border-purple-100">
+              <input 
+                type="checkbox" 
+                checked={isSideStory}
+                onChange={(e) => setIsSideStory(e.target.checked)}
+                className="rounded accent-purple-600" 
+              />
+              외전으로 등록
+            </label>
             <label className="flex items-center gap-1.5 text-xs text-gray-600 font-medium cursor-pointer">
               <input type="checkbox" className="rounded" />
               연재예약

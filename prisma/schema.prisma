@@ -69,6 +69,7 @@ model Episode {
   novelId   Int
   novel     Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
   chapterNo Int
+  isSideStory Boolean @default(false)
   title     String
   content   String
   image     String?

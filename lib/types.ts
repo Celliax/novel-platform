@@ -27,6 +27,7 @@ export interface Episode {
   id: number;
   novelId: number;
   chapterNo: number;
+  isSideStory: boolean;
   title: string;
   content?: string;
   image?: string;
