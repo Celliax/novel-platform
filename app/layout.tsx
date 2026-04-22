@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "FPT 소설 플랫폼",
@@ -14,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="min-h-screen flex flex-col bg-canvas text-foreground antialiased font-sans">
+      <body className={`${inter.className} min-h-screen flex flex-col bg-canvas text-foreground antialiased`}>
         <Navbar />
         <main className="flex-1 w-full">{children}</main>
         <footer className="bg-ink text-canvas/90 py-8 text-center text-sm">

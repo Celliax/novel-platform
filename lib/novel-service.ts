@@ -596,3 +596,15 @@ export async function createReport(data: { type: 'COMMENT' | 'NOVEL', targetId: 
     createdAt: report.createdAt.toISOString(),
   };
 }
+
+export async function isUserFavorited(novelId: number, userId: string): Promise<boolean> {
+  const favorite = await prisma.userFavorite.findUnique({
+    where: {
+      userId_novelId: {
+        userId,
+        novelId,
+      }
+    }
+  });
+  return !!favorite;
+}

@@ -12,16 +12,7 @@ interface EpisodeReaderProps {
 }
 
 export default function EpisodeReader({ title, contentHtml, image, authorNote, novelId, episodeId }: EpisodeReaderProps) {
-  const viewed = useRef(false);
-
-  useEffect(() => {
-    if (!viewed.current) {
-      viewed.current = true;
-      fetch(`/api/novel/${novelId}/episode/${episodeId}/view`, { method: "POST" })
-        .catch(err => console.error("View increment failed:", err));
-    }
-  }, [novelId, episodeId]);
-
+  // 조회수 증가는 이제 서버 컴포넌트에서 직접 처리하므로 클라이언트 측 코드는 제거합니다.
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-10 pb-8 border-b border-border">
