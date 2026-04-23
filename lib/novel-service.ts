@@ -214,6 +214,7 @@ export async function updateNovel(id: number, data: {
     coverImage: novel.coverImage,
     views: novel.views,
     rating: novel.rating,
+    recommendCount: novel.recommendCount,
     synopsis: novel.synopsis,
     ageRating: novel.ageRating,
     createdAt: novel.createdAt.toISOString(),
@@ -404,6 +405,7 @@ export async function createNovel(data: {
     coverImage: novel.coverImage,
     views: novel.views,
     rating: novel.rating,
+    recommendCount: novel.recommendCount,
     synopsis: novel.synopsis,
     ageRating: novel.ageRating,
     createdAt: novel.createdAt.toISOString(),
@@ -519,6 +521,7 @@ export async function getEpisodeNavigation(
       coverImage: novel.coverImage,
       views: novel.views,
       rating: novel.rating,
+      recommendCount: novel.recommendCount,
       synopsis: novel.synopsis,
       ageRating: novel.ageRating,
       createdAt: novel.createdAt.toISOString(),
@@ -569,6 +572,7 @@ export async function getUserNovels(userId: string): Promise<Novel[]> {
     coverImage: n.coverImage,
     views: n.views,
     rating: n.rating,
+    recommendCount: n.recommendCount,
     synopsis: n.synopsis,
     ageRating: n.ageRating,
     createdAt: n.createdAt.toISOString(),
@@ -746,6 +750,7 @@ export async function getUserWithNovels(userId: string) {
       coverImage: n.coverImage,
       views: n.views,
       rating: n.rating,
+      recommendCount: n.recommendCount,
       createdAt: n.createdAt.toISOString(),
     })),
     favorites: user.favorites.map(f => ({
@@ -756,6 +761,7 @@ export async function getUserWithNovels(userId: string) {
         title: f.novel.title,
         views: f.novel.views,
         rating: f.novel.rating,
+        recommendCount: f.novel.recommendCount,
         tags: f.novel.tags.map(nt => ({
           tag: { name: nt.tag.name }
         }))
