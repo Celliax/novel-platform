@@ -111,6 +111,7 @@ export default async function Home() {
                 coverImage={novel.coverImage}
                 views={novel.views}
                 rating={novel.rating}
+                recommendCount={novel.recommendCount}
               />
             ))}
           </div>

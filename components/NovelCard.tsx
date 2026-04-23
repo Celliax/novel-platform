@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, Star } from "lucide-react";
+import { Eye, Star, ThumbsUp } from "lucide-react";
 
 interface NovelCardProps {
   id: number;
@@ -11,6 +11,7 @@ interface NovelCardProps {
   coverImage: string;
   views: number;
   rating: number;
+  recommendCount?: number;
 }
 
 export default function NovelCard({
@@ -22,6 +23,7 @@ export default function NovelCard({
   coverImage,
   views,
   rating,
+  recommendCount = 0,
 }: NovelCardProps) {
   const src = coverImage || "/placeholder-cover.svg";
 
@@ -39,7 +41,7 @@ export default function NovelCard({
         </div>
         <div className="p-4">
           <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-xs bg-brand-50 text-brand-700 px-2 py-1 rounded-md font-medium">
+            <span className="text-[10px] bg-brand-50 text-brand-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
               {genre}
             </span>
             {ageRating === "15세 이용가" && (
@@ -49,15 +51,19 @@ export default function NovelCard({
               <span className="px-1.5 py-0.5 bg-red-600 text-white text-[9px] rounded font-bold">19</span>
             )}
           </div>
-          <h3 className="font-bold text-lg line-clamp-1 text-foreground">{title}</h3>
-          <p className="text-sm text-muted">{author}</p>
-          <div className="flex items-center gap-4 mt-2 text-sm text-muted">
+          <h3 className="font-bold text-base line-clamp-1 text-foreground mb-1">{title}</h3>
+          <p className="text-xs text-muted font-medium mb-3">{author}</p>
+          <div className="flex items-center gap-3 text-[11px] text-muted font-bold">
             <span className="flex items-center gap-1">
-              <Eye size={14} aria-hidden /> {views.toLocaleString()}
+              <Eye size={12} aria-hidden className="text-gray-400" /> {views.toLocaleString()}
             </span>
             <span className="flex items-center gap-1">
-              <Star size={14} className="text-amber-400 fill-amber-400" aria-hidden />
+              <Star size={12} className="text-amber-400 fill-amber-400" aria-hidden />
               {rating.toFixed(1)}
+            </span>
+            <span className="flex items-center gap-1">
+              <ThumbsUp size={12} className="text-purple-500 fill-purple-500/20" aria-hidden />
+              {recommendCount.toLocaleString()}
             </span>
           </div>
         </div>
