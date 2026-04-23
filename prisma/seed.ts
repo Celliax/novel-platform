@@ -40,6 +40,10 @@ const DEFAULT_TAGS = [
 async function main() {
   console.log("Seed 시작...");
 
+  // 기존 태그 삭제 (초기화)
+  console.log("기존 태그 삭제 중...");
+  await prisma.tag.deleteMany();
+
   // 기본 태그 생성 (이미 있으면 건너뜀)
   console.log("기본 태그 생성 중...");
   for (const tag of DEFAULT_TAGS) {
