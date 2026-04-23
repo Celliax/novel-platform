@@ -712,6 +712,18 @@ export async function getUserWithNovels(userId: string) {
     include: {
       novels: {
         orderBy: { updatedAt: 'desc' }
+      },
+      favorites: {
+        include: {
+          novel: {
+            include: {
+              tags: {
+                include: { tag: true }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
       }
     }
   });
@@ -733,6 +745,19 @@ export async function getUserWithNovels(userId: string) {
       views: n.views,
       rating: n.rating,
       createdAt: n.createdAt.toISOString(),
+    })),
+    favorites: user.favorites.map(f => ({
+      novelId: f.novelId,
+      createdAt: f.createdAt,
+      novel: {
+        id: f.novel.id,
+        title: f.novel.title,
+        views: f.novel.views,
+        rating: f.novel.rating,
+        tags: f.novel.tags.map(nt => ({
+          tag: { name: nt.tag.name }
+        }))
+      }
     }))
   };
 }
