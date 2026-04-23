@@ -1,9 +1,49 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getNovelWithEpisodes, isUserFavorited, listNovelsForHome, getUserById } from "@/lib/novel-service";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import NovelDetailClient from "@/components/NovelDetailClient";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fptnovel.vercel.app";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id: idStr } = await params;
+  const id = parseInt(idStr);
+
+  if (isNaN(id)) return {};
+
+  const novel = await getNovelWithEpisodes(id);
+  if (!novel) return {};
+
+  const title = `${novel.title} | FPT 소설 플랫폼`;
+  const description = novel.synopsis
+    ? novel.synopsis.slice(0, 150)
+    : `${novel.title} - FPT 소설 플랫폼에서 읽어보세요.`;
+  const coverImage = novel.coverImage && !novel.coverImage.startsWith('/placeholder')
+    ? novel.coverImage
+    : undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/novel/${id}`,
+      siteName: "FPT 소설 플랫폼",
+      type: "website",
+      ...(coverImage ? { images: [{ url: coverImage, width: 400, alt: novel.title }] } : {}),
+    },
+    twitter: {
+      card: coverImage ? "summary_large_image" : "summary",
+      title,
+      description,
+      ...(coverImage ? { images: [coverImage] } : {}),
+    },
+  };
+}
 
 interface Props {
   params: Promise<{ id: string }>;
