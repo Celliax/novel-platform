@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Loader2, Save, Image as ImageIcon } from "lucide-react";
-import { updateNovelAction } from "@/app/actions/novel";
+import { ChevronLeft, Loader2, Save, Image as ImageIcon, Trash2, AlertTriangle } from "lucide-react";
+import { updateNovelAction, deleteNovelAction } from "@/app/actions/novel";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import TagSelector from "@/components/TagSelector";
 import { Tag } from "@/lib/types";
@@ -28,6 +28,12 @@ export default function NovelSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function isNextRedirectError(e: unknown): boolean {
     if (typeof e !== "object" || e === null) return false;
@@ -149,6 +155,19 @@ export default function NovelSettingsPage() {
         setError(err instanceof Error ? err.message : "수정에 실패했습니다.");
       }
     });
+  };
+
+  const handleDelete = async () => {
+    if (deleteConfirmText !== title) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteNovelAction(id);
+    } catch (err: any) {
+      if (isNextRedirectError(err)) throw err;
+      setDeleteError(err.message || "삭제 중 오류가 발생했습니다.");
+      setIsDeleting(false);
+    }
   };
 
   if (loading) {
@@ -289,6 +308,87 @@ export default function NovelSettingsPage() {
           </div>
         )}
       </form>
+
+      {/* Danger Zone */}
+      <div className="mt-10 bg-white border border-red-100 rounded-2xl p-8 shadow-sm">
+        <h2 className="text-base font-extrabold text-red-600 mb-1 flex items-center gap-2">
+          <AlertTriangle size={18} />
+          위험 구역
+        </h2>
+        <p className="text-sm text-gray-400 mb-5">
+          아래 작업은 되돌릴 수 없습니다. 신중하게 진행해주세요.
+        </p>
+        <button
+          type="button"
+          onClick={() => { setShowDeleteModal(true); setDeleteConfirmText(""); setDeleteError(null); }}
+          className="flex items-center gap-2 px-5 py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl text-sm transition-colors border border-red-200"
+        >
+          <Trash2 size={16} />
+          이 작품 삭제하기
+        </button>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-red-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <Trash2 size={20} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-gray-900">작품 삭제</h3>
+                <p className="text-xs text-gray-400">이 작업은 되돌릴 수 없습니다</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-1">
+              삭제 시 <strong>모든 회차, 댓글, 선호작, 별점, 공지</strong> 등 관련 데이터가 함께 삭제됩니다.
+            </p>
+            <p className="text-sm text-gray-600 mb-5">
+              계속하려면 아래에 작품 제목 <strong className="text-red-600 break-all">'{title}'</strong>을 입력하세요.
+            </p>
+
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="작품 제목 입력"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all"
+              disabled={isDeleting}
+            />
+
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteConfirmText !== title || isDeleting}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-extrabold rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+              >
+                {isDeleting ? (
+                  <><Loader2 size={16} className="animate-spin" /> 삭제 중…</>
+                ) : (
+                  <><Trash2 size={16} /> 완전히 삭제</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

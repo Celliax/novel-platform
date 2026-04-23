@@ -119,3 +119,22 @@ export async function updateNovelAction(id: number, input: {
   revalidatePath(`/novel/${id}`);
   redirect(`/novel/${id}`);
 }
+
+export async function deleteNovelAction(id: number) {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("로그인이 필요합니다.");
+
+  const { getNovelWithEpisodes, deleteNovel } = await import("@/lib/novel-service");
+
+  const novel = await getNovelWithEpisodes(id);
+  if (!novel || novel.authorId !== user.id) {
+    throw new Error("삭제 권한이 없습니다.");
+  }
+
+  await deleteNovel(id);
+
+  revalidatePath("/");
+  redirect("/");
+}

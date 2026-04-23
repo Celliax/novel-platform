@@ -730,6 +730,13 @@ export async function getSystemNotice(id: number) {
   });
 }
 
+export async function deleteNovel(id: number): Promise<void> {
+  // onDelete: Cascade가 설정되어 있어 연관된 데이터(회차, 댓글, 태그, 선호작, 별점, 공지 등)가 자동 삭제됨
+  await prisma.novel.delete({
+    where: { id }
+  });
+}
+
 export async function getUserWithNovels(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
