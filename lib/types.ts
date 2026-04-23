@@ -17,6 +17,7 @@ export interface Novel {
   coverImage: string;
   views: number;
   rating: number;
+  recommendCount: number;
   synopsis: string;
   ageRating: string;
   createdAt: string;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, Eye, Plus, Heart, Share2, ArrowDownUp, AlertCircle, Settings, Image as ImageIcon } from "lucide-react";
+import { BookOpen, Eye, Plus, Heart, Share2, ArrowDownUp, AlertCircle, Settings, Image as ImageIcon, Star, ThumbsUp, X, Loader2 } from "lucide-react";
 import CommentSection from "./CommentSection";
 
 type Tag = { id: number; name: string };
@@ -18,6 +18,7 @@ type Novel = {
   coverImage: string;
   views: number;
   rating: number;
+  recommendCount: number;
   synopsis: string;
   ageRating: string;
   tags: Tag[];
@@ -42,6 +43,35 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reporting, setReporting] = useState(false);
+
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [displayRating, setDisplayRating] = useState(novel.rating);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [ratingLoading, setRatingLoading] = useState(false);
+
+  const handleRate = async (score: number) => {
+    setRatingLoading(true);
+    try {
+      const res = await fetch(`/api/novel/${novel.id}/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDisplayRating(data.avgRating);
+        alert("별점이 등록되었습니다!");
+        setShowRateModal(false);
+      } else {
+        alert("별점 등록에 실패했습니다. 로그인이 필요할 수 있습니다.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("오류가 발생했습니다.");
+    } finally {
+      setRatingLoading(false);
+    }
+  };
 
   const toggleFavorite = async () => {
     setFavoriteLoading(true);
@@ -122,6 +152,9 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
 
         <div className="flex-1 w-full flex flex-col items-start">
           <div className="flex lg:hidden w-full justify-end gap-3 mb-4">
+             <button onClick={() => setShowRateModal(true)} className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
+               <Star size={18} className="text-amber-400 fill-amber-400" />
+             </button>
              <button onClick={toggleFavorite} className={`flex items-center justify-center w-10 h-10 rounded-full border ${isFavorited ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}>
                <Heart size={18} className={isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-700'} />
              </button>
@@ -137,10 +170,21 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
             {novel.ageRating === "19세 이용가" && <span className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] rounded font-bold">19</span>}
           </div>
           
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 font-medium mb-4">
-            <span className="flex items-center gap-1.5 font-bold text-gray-800">조회 <span className="font-normal text-gray-600">{novel.views.toLocaleString()}</span></span>
-            <span className="flex items-center gap-1.5 font-bold text-gray-800">추천 <span className="font-normal text-gray-600">{novel.rating.toLocaleString()}</span></span>
-            <span className="flex items-center gap-1.5 font-bold text-gray-800">댓글 <span className="font-normal text-gray-600">{novel.commentCount.toLocaleString()}</span></span>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 font-medium mb-4">
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">
+              <Star size={16} className="text-amber-400 fill-amber-400" /> 
+              별점 <span className="font-normal text-gray-600">{displayRating.toFixed(1)}</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">
+              <ThumbsUp size={16} className="text-purple-600" />
+              추천 <span className="font-normal text-gray-600">{novel.recommendCount.toLocaleString()}</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">
+              조회 <span className="font-normal text-gray-600">{novel.views.toLocaleString()}</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-bold text-gray-800">
+              댓글 <span className="font-normal text-gray-600">{novel.commentCount.toLocaleString()}</span>
+            </span>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">
@@ -179,8 +223,16 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
 
         <div className="hidden lg:flex flex-col gap-6 items-center lg:ml-auto shrink-0 pr-4">
           <div className="flex gap-5 text-center">
+            <button onClick={() => setShowRateModal(true)} className="flex flex-col items-center gap-2 group">
+              <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-amber-50 transition shadow-sm">
+                <Star size={22} className="text-amber-400 fill-amber-400" />
+              </div>
+              <span className="text-xs font-bold text-gray-500">별점</span>
+            </button>
             <button onClick={handleShare} className="flex flex-col items-center gap-2 group">
-              <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-gray-50 transition shadow-sm"><Share2 size={22} className="text-gray-600" /></div>
+              <div className="w-[52px] h-[52px] rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-gray-50 transition shadow-sm">
+                <Share2 size={22} className="text-gray-600" />
+              </div>
               <span className="text-xs font-bold text-gray-500">공유</span>
             </button>
             <button onClick={toggleFavorite} disabled={favoriteLoading} className="flex flex-col items-center gap-2 group">
@@ -265,6 +317,77 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
             <div className="flex items-center gap-2 text-red-600 mb-4"><AlertCircle size={24} /><h3 className="text-lg font-bold">신고하기</h3></div>
             <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 min-h-[100px] resize-none mb-6" placeholder="신고 사유를 입력하세요..." />
             <div className="flex gap-3"><button onClick={() => setShowReportModal(false)} className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors">취소</button><button onClick={handleReport} disabled={reporting} className="flex-1 py-3 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-50">{reporting ? "처리 중..." : "확인"}</button></div>
+          </div>
+        </div>
+      )}
+      {/* Rating Modal */}
+      {showRateModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="p-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-400 mb-6 border border-amber-100">
+                <Star size={32} className="fill-amber-400" />
+              </div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">작품을 평가해 주세요</h3>
+              <p className="text-sm text-gray-400 font-bold mb-8">독자님의 평가는 작가님께 큰 힘이 됩니다!</p>
+              
+              <div className="flex gap-2 mb-10">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <button
+                    key={num}
+                    onMouseEnter={() => setHoverRating(num)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => handleRate(num)}
+                    disabled={ratingLoading}
+                    className="group relative transition-transform active:scale-90"
+                  >
+                    <Star
+                      size={40}
+                      className={`transition-colors duration-200 ${
+                        (hoverRating || 0) >= num || (!hoverRating && false)
+                          ? "text-amber-400 fill-amber-400"
+                          : "text-gray-200 fill-gray-100"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setShowRateModal(false)}
+                className="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-500 font-black rounded-2xl transition-all flex items-center justify-center gap-2"
+              >
+                나중에 하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-black text-gray-900">작품 신고하기</h3>
+                <button onClick={() => setShowReportModal(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+              </div>
+              <p className="text-sm text-gray-500 font-bold mb-4 leading-relaxed italic border-l-4 border-red-500 pl-3 bg-red-50 py-3 rounded-r-lg">부적절한 내용이나 저작권 침해 등의 사유가 있을 경우 신고해 주세요. 운영진이 검토 후 조치하겠습니다.</p>
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="신고 사유를 구체적으로 작성해 주세요..."
+                className="w-full h-32 p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-medium text-sm mb-6"
+              />
+              <button
+                onClick={handleReport}
+                disabled={reporting}
+                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {reporting ? <Loader2 className="animate-spin" size={18} /> : "신고 접수하기"}
+              </button>
+            </div>
           </div>
         </div>
       )}

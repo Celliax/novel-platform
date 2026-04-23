@@ -28,6 +28,7 @@ model User {
   favorites UserFavorite[] // 선호작
   comments  Comment[]      // 작성한 댓글
   commentVotes CommentVote[] // 댓글 투표 기록
+  ratings      Rating[]      // 별점 기록
 }
 
 model Tag {
@@ -48,7 +49,8 @@ model Novel {
   genre      String
   coverImage String    @default("/placeholder-cover.svg")
   views      Int       @default(0)
-  rating     Float     @default(0)
+  rating     Float     @default(0)    // 평균 별점 (0.0 ~ 5.0)
+  recommendCount Int   @default(0)    // 전체 추천수 합계
   synopsis   String
   ageRating  String    @default("전체 이용가")
   createdAt  DateTime  @default(now())
@@ -60,6 +62,7 @@ model Novel {
   tags       NovelTag[]
   favoritedBy UserFavorite[] // 선호하는 유저들
   comments   Comment[]     // 댓글들
+  ratings    Rating[]      // 별점들
 
   @@index([authorId])
   @@index([genre])
@@ -162,6 +165,18 @@ model Report {
 
   @@index([targetId])
   @@index([userId])
+}
+
+model Rating {
+  userId    String
+  novelId   Int
+  score     Int      // 1 ~ 5
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
 }
 model Notice {
   id        Int      @id @default(autoincrement())
