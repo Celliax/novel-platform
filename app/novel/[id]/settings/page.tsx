@@ -3,9 +3,14 @@
 import { useState, useEffect, useTransition, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Loader2, Save, Image as ImageIcon, Settings } from "lucide-react";
+import { ChevronLeft, Loader2, Save, Image as ImageIcon } from "lucide-react";
 import { updateNovelAction } from "@/app/actions/novel";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import TagSelector from "@/components/TagSelector";
+import { Tag } from "@/lib/types";
+
+const GENRE_OPTIONS = ["자유판타지", "현대판타지", "무협", "로맨스", "로맨스판타지", "BL", "GL", "일상", "공포/스릴러", "SF", "역사", "스포츠", "기타"];
+const AGE_OPTIONS = ["전체 이용가", "15세 이용가", "19세 이용가"];
 
 export default function NovelSettingsPage() {
   const router = useRouter();
@@ -17,8 +22,7 @@ export default function NovelSettingsPage() {
   const [synopsis, setSynopsis] = useState("");
   const [ageRating, setAgeRating] = useState("전체 이용가");
   const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [tagIds, setTagIds] = useState<number[]>([]);
-  const [allTags, setAllTags] = useState<{id: number, name: string}[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,14 +45,7 @@ export default function NovelSettingsPage() {
     if (!user) { router.push("/login"); return; }
 
     try {
-      // 1. Tags
-      const tagsRes = await fetch("/api/tags");
-      if (tagsRes.ok) {
-        const tagsData = await tagsRes.json();
-        setAllTags(tagsData.tags);
-      }
-
-      // 2. Novel
+      // Novel (Tags are included in novel data)
       const novelRes = await fetch(`/api/novel/${id}`);
       if (!novelRes.ok) throw new Error("작품을 찾을 수 없습니다.");
       const novelData = await novelRes.json();
@@ -64,7 +61,7 @@ export default function NovelSettingsPage() {
       setSynopsis(novel.synopsis);
       setAgeRating(novel.ageRating);
       setCoverImage(novel.coverImage);
-      setTagIds(novel.tags.map((t: any) => t.id));
+      setSelectedTags(novel.tags || []);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "데이터 로드 실패");
@@ -145,7 +142,7 @@ export default function NovelSettingsPage() {
           synopsis,
           ageRating,
           coverImage: finalCover || undefined,
-          tagIds
+          tagIds: selectedTags.map(t => t.id)
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -233,14 +230,29 @@ export default function NovelSettingsPage() {
               onChange={(e) => setGenre(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none bg-white transition-all"
             >
-              <option value="판타지">판타지</option>
-              <option value="로맨스">로맨스</option>
-              <option value="무협">무협</option>
-              <option value="현대판타지">현대판타지</option>
-              <option value="SF">SF</option>
-              <option value="미스터리">미스터리</option>
+              {GENRE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-extrabold text-gray-700 mb-2">연령 등급</label>
+          <select
+            value={ageRating}
+            onChange={(e) => setAgeRating(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none bg-white transition-all"
+          >
+            {AGE_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-extrabold text-gray-700 mb-2">태그</label>
+          <TagSelector
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
+            maxTags={10}
+          />
         </div>
 
         <div>
