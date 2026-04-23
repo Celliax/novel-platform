@@ -49,7 +49,9 @@ export interface Comment {
   episodeId?: number;
   userId: string;
   userName: string;
+  userAvatar?: string;
   content: string;
+  parentId?: number;
   recommends: number;
   dislikes: number;
   episodeNo?: number;

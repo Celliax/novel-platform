@@ -44,7 +44,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { content } = body;
+    const { content, parentId } = body;
 
     if (!content) {
       return NextResponse.json({ error: "댓글 내용을 입력해주세요." }, { status: 400 });
@@ -61,6 +61,7 @@ export async function POST(
       userId: user.id,
       userName,
       content,
+      parentId: parentId ? Number(parentId) : undefined,
     });
 
     return NextResponse.json({ comment });

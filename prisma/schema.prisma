@@ -26,6 +26,8 @@ model User {
   novels    Novel[]  // 작가로서의 소설들
   readTags  UserTagRead[] // 읽은 태그 통계
   favorites UserFavorite[] // 선호작
+  comments  Comment[]      // 작성한 댓글
+  commentVotes CommentVote[] // 댓글 투표 기록
 }
 
 model Tag {
@@ -121,16 +123,21 @@ model Comment {
   userId    String
   userName  String
   content   String
+  parentId  Int?
   recommends Int     @default(0)
   dislikes  Int      @default(0)
   createdAt DateTime @default(now())
 
   novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
   votes     CommentVote[]
 
   @@index([novelId])
   @@index([episodeId])
   @@index([userId])
+  @@index([parentId])
 }
 
 model CommentVote {
@@ -140,6 +147,7 @@ model CommentVote {
   createdAt DateTime @default(now())
 
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, commentId])
 }

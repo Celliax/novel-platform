@@ -31,7 +31,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content } = await request.json();
+    const { content, parentId } = await request.json();
     if (!content) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
@@ -46,6 +46,7 @@ export async function POST(
       userId: session.user.id,
       userName,
       content,
+      parentId: parentId ? Number(parentId) : undefined,
     });
 
     return NextResponse.json({ comment });

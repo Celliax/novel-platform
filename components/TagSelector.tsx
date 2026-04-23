@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tag } from "@/lib/types";
+import { Search, Plus, X, Loader2, Hash } from "lucide-react";
 
 interface TagSelectorProps {
   selectedTags: Tag[];
@@ -11,10 +12,9 @@ interface TagSelectorProps {
 
 export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }: TagSelectorProps) {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState("#6B7280");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     loadTags();
@@ -32,57 +32,53 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
     }
   };
 
-  const addTag = async () => {
-    if (!newTagName.trim()) return;
+  const filteredTags = useMemo(() => {
+    if (!searchTerm.trim()) return availableTags.slice(0, 20); // 검색어 없으면 상위 20개만
+    return availableTags.filter(tag => 
+      tag.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [availableTags, searchTerm]);
 
-    setLoading(true);
+  const isExactMatch = useMemo(() => {
+    return availableTags.some(tag => tag.name.toLowerCase() === searchTerm.trim().toLowerCase());
+  }, [availableTags, searchTerm]);
+
+  const handleCreateTag = async () => {
+    const tagName = searchTerm.trim();
+    if (!tagName || isExactMatch || isCreating) return;
+
+    setIsCreating(true);
     try {
       const response = await fetch("/api/tags", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newTagName.trim(),
-          color: newTagColor,
+          name: tagName,
+          color: "#6B7280", // 기본 색상
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // 새 태그를 선택된 태그에 추가
         onTagsChange([...selectedTags, data.tag]);
-        setNewTagName("");
-        setNewTagColor("#6B7280");
-        setShowAddForm(false);
-        // 태그 목록 새로고침
-        loadTags();
-      } else if (response.status === 409) {
-        // 이미 존재하는 태그인 경우 기존 태그 선택
-        if (!selectedTags.find(tag => tag.id === data.tag.id)) {
-          onTagsChange([...selectedTags, data.tag]);
-        }
-        setNewTagName("");
-        setShowAddForm(false);
+        setSearchTerm("");
+        loadTags(); // 전체 목록 갱신
       } else {
         alert(data.error || "태그 추가에 실패했습니다.");
       }
     } catch (error) {
       console.error("태그 추가 실패:", error);
-      alert("태그 추가에 실패했습니다.");
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   };
 
   const toggleTag = (tag: Tag) => {
-    const isSelected = selectedTags.find(t => t.id === tag.id);
+    const isSelected = selectedTags.some(t => t.id === tag.id);
     if (isSelected) {
-      // 태그 제거
       onTagsChange(selectedTags.filter(t => t.id !== tag.id));
     } else {
-      // 태그 추가 (최대 개수 체크)
       if (selectedTags.length >= maxTags) {
         alert(`최대 ${maxTags}개까지 선택할 수 있습니다.`);
         return;
@@ -91,129 +87,99 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
     }
   };
 
-  const removeTag = (tagId: number) => {
-    onTagsChange(selectedTags.filter(tag => tag.id !== tagId));
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!isExactMatch && searchTerm.trim()) {
+        handleCreateTag();
+      }
+    }
   };
 
   return (
     <div className="space-y-4">
-      {/* 선택된 태그들 */}
+      {/* Search and Input */}
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <Search size={16} />
+        </div>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="태그 검색 또는 직접 입력 후 엔터"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 transition-all outline-none"
+        />
+        {searchTerm && !isExactMatch && (
+          <button
+            type="button"
+            onClick={handleCreateTag}
+            disabled={isCreating}
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 transition-all disabled:opacity-50"
+          >
+            {isCreating ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+            추가
+          </button>
+        )}
+      </div>
+
+      {/* Selected Tags */}
       {selectedTags.length > 0 && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            선택된 태그 ({selectedTags.length}/{maxTags})
-          </label>
-          <div className="flex flex-wrap gap-2 p-3 bg-purple-50/50 rounded-lg border border-purple-100">
-            {selectedTags.map((tag) => (
-              <span
-                key={tag.id}
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-purple-700 bg-white border border-purple-300 shadow-sm"
+        <div className="flex flex-wrap gap-2 p-1">
+          {selectedTags.map((tag) => (
+            <div
+              key={tag.id}
+              className="group flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-xs font-black border border-purple-200 shadow-sm transition-all hover:bg-purple-200"
+            >
+              <Hash size={12} className="text-purple-400" />
+              {tag.name}
+              <button
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className="ml-1 text-purple-400 hover:text-purple-700 transition-colors"
               >
-                {tag.name}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag.id)}
-                  className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-purple-200 text-purple-700 hover:bg-purple-300 transition-colors"
-                  aria-label={`${tag.name} 태그 제거`}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
+                <X size={14} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* 사용 가능한 태그들 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          태그 선택
-        </label>
-        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto border rounded-lg p-3">
-          {availableTags.map((tag) => {
-            const isSelected = selectedTags.find(t => t.id === tag.id);
-            return (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
-                  isSelected
-                    ? "text-purple-700 border-2 border-purple-500 bg-purple-50 shadow-sm"
-                    : "text-gray-700 border-2 border-gray-200 hover:border-purple-300 hover:bg-gray-50"
-                }`}
-                disabled={!isSelected && selectedTags.length >= maxTags}
-              >
-                {tag.name}
-              </button>
-            );
-          })}
+      {/* Suggestions / Available Tags */}
+      <div className="pt-2">
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-wider mb-2 ml-1">추천 태그</p>
+        <div className="flex flex-wrap gap-2">
+          {filteredTags.length > 0 ? (
+            filteredTags.map((tag) => {
+              const isSelected = selectedTags.some(t => t.id === tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border
+                    ${isSelected 
+                      ? "bg-purple-600 border-purple-600 text-white shadow-md scale-95" 
+                      : "bg-white border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50"
+                    }
+                  `}
+                >
+                  {tag.name}
+                </button>
+              );
+            })
+          ) : (
+            searchTerm && !isCreating && (
+              <p className="text-xs text-gray-400 ml-1 py-2 font-medium">검색 결과가 없습니다. 우측의 [+ 추가] 버튼을 눌러 새 태그를 만드세요.</p>
+            )
+          )}
         </div>
       </div>
-
-      {/* 새 태그 추가 */}
-      <div>
-        {!showAddForm ? (
-          <button
-            type="button"
-            onClick={() => setShowAddForm(true)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            disabled={selectedTags.length >= maxTags}
-          >
-            + 태그 추가
-          </button>
-        ) : (
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  태그 이름
-                </label>
-                <input
-                  type="text"
-                  value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="새 태그 이름"
-                  maxLength={20}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  색상
-                </label>
-                <input
-                  type="color"
-                  value={newTagColor}
-                  onChange={(e) => setNewTagColor(e.target.value)}
-                  className="w-full h-10 border border-gray-300 rounded-md cursor-pointer"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2 mt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAddForm(false);
-                  setNewTagName("");
-                  setNewTagColor("#6B7280");
-                }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={addTag}
-                disabled={loading || !newTagName.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "추가 중..." : "추가"}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      
+      <p className="text-[10px] text-gray-400 ml-1">
+        ※ 이미 있는 태그는 목록에서 선택하고, 없는 태그는 입력 후 엔터를 치면 새로 만들어집니다.
+      </p>
     </div>
   );
 }

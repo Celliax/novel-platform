@@ -551,13 +551,30 @@ export async function getComments(novelId: number, episodeId?: number): Promise<
       novelId,
       episodeId: episodeId || undefined,
     },
+    include: {
+      user: {
+        select: {
+          avatar: true
+        }
+      },
+      novel: {
+        include: {
+          episodes: {
+            select: {
+              id: true,
+              chapterNo: true
+            }
+          }
+        }
+      }
+    },
     orderBy: { createdAt: 'desc' }
   });
 
-  return Promise.all(comments.map(async (c) => {
+  return comments.map((c) => {
     let episodeNo: number | undefined;
     if (c.episodeId) {
-      const ep = await prisma.episode.findUnique({ where: { id: c.episodeId } });
+      const ep = c.novel.episodes.find(e => e.id === c.episodeId);
       episodeNo = ep?.chapterNo;
     }
     return {
@@ -566,13 +583,15 @@ export async function getComments(novelId: number, episodeId?: number): Promise<
       episodeId: c.episodeId || undefined,
       userId: c.userId,
       userName: c.userName,
+      userAvatar: c.user.avatar || undefined,
       content: c.content,
+      parentId: c.parentId || undefined,
       recommends: c.recommends,
       dislikes: c.dislikes,
       episodeNo,
       createdAt: c.createdAt.toISOString(),
     };
-  }));
+  });
 }
 
 export async function createComment(data: { 
@@ -580,7 +599,8 @@ export async function createComment(data: {
   episodeId?: number, 
   userId: string, 
   userName: string, 
-  content: string 
+  content: string,
+  parentId?: number
 }): Promise<Comment> {
   const comment = await prisma.comment.create({
     data: {
@@ -589,6 +609,7 @@ export async function createComment(data: {
       userId: data.userId,
       userName: data.userName,
       content: data.content,
+      parentId: data.parentId,
     }
   });
 
@@ -599,6 +620,7 @@ export async function createComment(data: {
     userId: comment.userId,
     userName: comment.userName,
     content: comment.content,
+    parentId: comment.parentId || undefined,
     recommends: comment.recommends,
     dislikes: comment.dislikes,
     createdAt: comment.createdAt.toISOString(),
