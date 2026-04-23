@@ -8,7 +8,7 @@ const DEFAULT_TAGS = [
   { name: "무협", color: "#EF4444" },
   { name: "현대", color: "#10B981" },
   { name: "로맨스", color: "#EC4899" },
-  { name: "로판", color: "#8B5CF6" },
+  { name: "하렘", color: "#FF69B4" },
   { name: "아카데미", color: "#F59E0B" },
   { name: "회귀", color: "#6366F1" },
   { name: "빙의", color: "#14B8A6" },
@@ -24,6 +24,17 @@ const DEFAULT_TAGS = [
   { name: "인터넷방송", color: "#DC2626" },
   { name: "게임", color: "#DB2777" },
   { name: "SF", color: "#059669" },
+  { name: "피폐", color: "#000000" },
+  { name: "후회", color: "#FF6666" },
+  { name: "집착", color: "#FFB7C5" },
+  { name: "역키잡", color: "#10B981" },
+  { name: "성좌", color: "#FFA500" },
+  { name: "탑", color: "#CC6699" },
+  { name: "암컷타락", color: "#000000" },
+  { name: "얀데레", color: "#FF0000" },
+  { name: "멘헤라", color: "#FF0000" },
+  { name: "용사", color: "#2563EB" },
+  { name: "중세", color: "#A52A2A" }
 ];
 
 async function main() {
