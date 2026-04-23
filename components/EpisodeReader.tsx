@@ -10,9 +10,10 @@ interface EpisodeReaderProps {
   authorNote?: string;
   novelId: number;
   episodeId: number;
+  isAdultOnly?: boolean;
 }
 
-export default function EpisodeReader({ title, contentHtml, image, authorNote, novelId, episodeId }: EpisodeReaderProps) {
+export default function EpisodeReader({ title, contentHtml, image, authorNote, novelId, episodeId, isAdultOnly }: EpisodeReaderProps) {
   const [recommended, setRecommended] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +38,12 @@ export default function EpisodeReader({ title, contentHtml, image, authorNote, n
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-10 pb-8 border-b border-gray-200">
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">{title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+          {title}
+          {isAdultOnly && (
+            <span className="shrink-0 px-2 py-1 bg-red-600 text-white text-xs font-black rounded">19</span>
+          )}
+        </h1>
       </header>
       
       {image && (

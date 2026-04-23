@@ -75,6 +75,7 @@ model Episode {
   novel     Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
   chapterNo Int
   isSideStory Boolean @default(false)
+  isAdultOnly Boolean @default(false) // 특정 회차만 19세 이용가 설정
   title     String
   content   String
   image     String?

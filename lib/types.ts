@@ -30,6 +30,7 @@ export interface Episode {
   chapterNo: number;
   displayNo?: number; // 정식 회차 번호 (외전 제외)
   isSideStory: boolean;
+  isAdultOnly: boolean;
   title: string;
   content?: string;
   image?: string;

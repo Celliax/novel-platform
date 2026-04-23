@@ -32,6 +32,7 @@ export default function EpisodeEditPage() {
   const [chapterNo, setChapterNo] = useState(1);
   const [authorNote, setAuthorNote] = useState("");
   const [isSideStory, setIsSideStory] = useState(false);
+  const [isAdultOnly, setIsAdultOnly] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState(true);
@@ -77,6 +78,7 @@ export default function EpisodeEditPage() {
       setChapterNo(ep.chapterNo);
       setAuthorNote(ep.authorNote || "");
       setIsSideStory(ep.isSideStory || false);
+      setIsAdultOnly(ep.isAdultOnly || false);
       setImage(ep.image || null);
       
       const text = (ep.content || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
@@ -172,7 +174,8 @@ export default function EpisodeEditPage() {
           content,
           image: finalImage || undefined,
           authorNote: authorNote.trim() || undefined,
-          isSideStory: isSideStory
+          isSideStory: isSideStory,
+          isAdultOnly: isAdultOnly
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -277,6 +280,15 @@ export default function EpisodeEditPage() {
                   className="rounded accent-purple-600" 
                 />
                 외전으로 등록
+              </label>
+              <label className="flex items-center gap-1.5 text-xs text-red-600 font-bold cursor-pointer bg-red-50 px-2 py-1 rounded-md border border-red-100">
+                <input 
+                  type="checkbox" 
+                  checked={isAdultOnly}
+                  onChange={(e) => setIsAdultOnly(e.target.checked)}
+                  className="rounded accent-red-600" 
+                />
+                19세 이용가(성인)
               </label>
             </div>
           </div>

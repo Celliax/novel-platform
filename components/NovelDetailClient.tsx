@@ -7,7 +7,7 @@ import { BookOpen, Eye, Plus, Heart, Share2, ArrowDownUp, AlertCircle, Settings,
 import CommentSection from "./CommentSection";
 
 type Tag = { id: number; name: string };
-type Episode = { id: number; chapterNo: number; displayNo?: number; isSideStory: boolean; title: string; views: number; recommends: number; createdAt: string };
+type Episode = { id: number; chapterNo: number; displayNo?: number; isSideStory: boolean; isAdultOnly: boolean; title: string; views: number; recommends: number; createdAt: string };
 type Notice = { id: number; title: string; content: string; views: number; createdAt: string };
 type Novel = {
   id: number;
@@ -260,9 +260,12 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
                 {displayedEpisodes.map(ep => (
                   <li key={ep.id} className="group py-4 flex items-start gap-3 hover:bg-gray-50 transition-colors px-2 rounded-lg">
                     <Link href={`/novel/${novel.id}/episode/${ep.id}`} className="flex-1">
-                      <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors">
-                        {ep.isSideStory && <span className="text-purple-600 mr-1.5">[외전]</span>}
-                        {ep.title}
+                      <div className="font-bold text-[15px] text-gray-800 group-hover:text-purple-700 transition-colors flex items-center gap-1.5 flex-wrap">
+                        {ep.isSideStory && <span className="text-purple-600">[외전]</span>}
+                        <span>{ep.title}</span>
+                        {ep.isAdultOnly && (
+                          <span className="shrink-0 px-1 py-0.5 bg-red-600 text-white text-[9px] font-black rounded leading-none">19</span>
+                        )}
                       </div>
                       <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
                         <span>{ep.isSideStory ? '외전' : `EP.${ep.displayNo}`}</span>

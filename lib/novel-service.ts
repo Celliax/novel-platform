@@ -91,6 +91,7 @@ export async function getNovelWithEpisodes(id: number) {
           id: true,
           chapterNo: true,
           isSideStory: true,
+          isAdultOnly: true,
           title: true,
           views: true,
           recommends: true,
@@ -155,6 +156,7 @@ export async function getNovelWithEpisodes(id: number) {
         chapterNo: ep.chapterNo,
         displayNo,
         isSideStory: ep.isSideStory,
+    isAdultOnly: ep.isAdultOnly,
         title: ep.title,
         views: ep.views,
         recommends: ep.recommends,
@@ -290,6 +292,7 @@ export async function getEpisode(novelId: number, episodeId: number): Promise<Ep
     chapterNo: ep.chapterNo,
     displayNo,
     isSideStory: ep.isSideStory,
+    isAdultOnly: ep.isAdultOnly,
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
@@ -421,6 +424,7 @@ export async function createEpisode(data: {
   image?: string;
   authorNote?: string;
   isSideStory?: boolean;
+  isAdultOnly?: boolean;
 }): Promise<Episode> {
   const chapterNo = data.chapterNo || (await prisma.episode.count({ where: { novelId: data.novelId } })) + 1;
   const ep = await prisma.episode.create({
@@ -432,6 +436,7 @@ export async function createEpisode(data: {
       content: data.content,
       image: data.image,
       authorNote: data.authorNote,
+      isAdultOnly: data.isAdultOnly || false,
     }
   });
 
@@ -440,6 +445,7 @@ export async function createEpisode(data: {
     novelId: ep.novelId,
     chapterNo: ep.chapterNo,
     isSideStory: ep.isSideStory,
+    isAdultOnly: ep.isAdultOnly,
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
@@ -457,6 +463,7 @@ export async function updateEpisode(id: number, data: {
   authorNote?: string;
   chapterNo?: number;
   isSideStory?: boolean;
+  isAdultOnly?: boolean;
 }): Promise<Episode> {
   const ep = await prisma.episode.update({
     where: { id },
@@ -467,6 +474,7 @@ export async function updateEpisode(id: number, data: {
       authorNote: data.authorNote,
       chapterNo: data.chapterNo,
       isSideStory: data.isSideStory,
+      isAdultOnly: data.isAdultOnly,
     }
   });
 
@@ -475,6 +483,7 @@ export async function updateEpisode(id: number, data: {
     novelId: ep.novelId,
     chapterNo: ep.chapterNo,
     isSideStory: ep.isSideStory,
+    isAdultOnly: ep.isAdultOnly,
     title: ep.title,
     content: ep.content,
     image: ep.image || undefined,
@@ -533,6 +542,7 @@ export async function getEpisodeNavigation(
       chapterNo: episode.chapterNo,
       displayNo: getDisplayNo(episode),
       isSideStory: episode.isSideStory,
+      isAdultOnly: episode.isAdultOnly,
       title: episode.title,
       content: episode.content,
       image: episode.image || undefined,

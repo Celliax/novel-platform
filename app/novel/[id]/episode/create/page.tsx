@@ -43,6 +43,7 @@ export default function EpisodeCreatePage() {
   const [chapterNo, setChapterNo] = useState(1);
   const [authorNote, setAuthorNote] = useState("");
   const [isSideStory, setIsSideStory] = useState(false);
+  const [isAdultOnly, setIsAdultOnly] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState(true);
@@ -153,7 +154,8 @@ export default function EpisodeCreatePage() {
           content,
           image: image || undefined,
           authorNote: authorNote.trim() || undefined,
-          isSideStory: isSideStory
+          isSideStory: isSideStory,
+          isAdultOnly: isAdultOnly
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -270,6 +272,15 @@ export default function EpisodeCreatePage() {
                 className="rounded accent-purple-600" 
               />
               외전으로 등록
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-red-600 font-bold cursor-pointer bg-red-50 px-2 py-1 rounded-md border border-red-100">
+              <input 
+                type="checkbox" 
+                checked={isAdultOnly}
+                onChange={(e) => setIsAdultOnly(e.target.checked)}
+                className="rounded accent-red-600" 
+              />
+              19세 이용가(성인)
             </label>
             <label className="flex items-center gap-1.5 text-xs text-gray-600 font-medium cursor-pointer">
               <input type="checkbox" className="rounded" />

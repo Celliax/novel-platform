@@ -68,6 +68,7 @@ export default async function EpisodePage({ params }: Props) {
           authorNote={episode.authorNote || undefined}
           novelId={novel.id}
           episodeId={episode.id}
+          isAdultOnly={episode.isAdultOnly}
         />
 
         <nav
