@@ -27,6 +27,7 @@ export interface Episode {
   id: number;
   novelId: number;
   chapterNo: number;
+  displayNo?: number; // 정식 회차 번호 (외전 제외)
   isSideStory: boolean;
   title: string;
   content?: string;

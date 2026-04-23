@@ -55,7 +55,7 @@ export default async function EpisodePage({ params }: Props) {
             {novel.title} — 목차
           </Link>
           <p className="text-sm text-muted">
-            {episode.chapterNo}화 · {episode.title}
+            {episode.isSideStory ? '외전' : `EP.${episode.displayNo}`} · {episode.title}
           </p>
         </div>
       </div>

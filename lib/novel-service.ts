@@ -142,16 +142,23 @@ export async function getNovelWithEpisodes(id: number) {
       createdAt: novel.author.createdAt.toISOString(),
       updatedAt: novel.author.updatedAt.toISOString(),
     },
-    episodes: novel.episodes.map(ep => ({
-      id: ep.id,
-      novelId: id, // id is the novel id
-      chapterNo: ep.chapterNo,
-      isSideStory: ep.isSideStory,
-      title: ep.title,
-      views: ep.views,
-      recommends: ep.recommends,
-      createdAt: ep.createdAt.toISOString(),
-    })),
+    episodes: novel.episodes.map((ep) => {
+      const displayNo = ep.isSideStory 
+        ? undefined 
+        : novel.episodes.filter(e => !e.isSideStory && e.chapterNo <= ep.chapterNo).length;
+      
+      return {
+        id: ep.id,
+        novelId: id,
+        chapterNo: ep.chapterNo,
+        displayNo,
+        isSideStory: ep.isSideStory,
+        title: ep.title,
+        views: ep.views,
+        recommends: ep.recommends,
+        createdAt: ep.createdAt.toISOString(),
+      };
+    }),
     notices: novel.notices.map(n => ({
       id: n.id,
       title: n.title,
@@ -264,10 +271,21 @@ export async function getEpisode(novelId: number, episodeId: number): Promise<Ep
     where: { id: episodeId, novelId }
   });
   if (!ep) return null;
+
+  const allEps = await prisma.episode.findMany({
+    where: { novelId: ep.novelId },
+    orderBy: { chapterNo: 'asc' }
+  });
+  
+  const displayNo = ep.isSideStory 
+    ? undefined 
+    : allEps.filter(e => !e.isSideStory && e.chapterNo <= ep.chapterNo).length;
+
   return {
     id: ep.id,
     novelId: ep.novelId,
     chapterNo: ep.chapterNo,
+    displayNo,
     isSideStory: ep.isSideStory,
     title: ep.title,
     content: ep.content,
@@ -483,6 +501,13 @@ export async function getEpisodeNavigation(
     orderBy: { chapterNo: 'asc' }
   });
 
+  const allEps = await prisma.episode.findMany({
+    where: { novelId },
+    orderBy: { chapterNo: 'asc' }
+  });
+
+  const getDisplayNo = (ep: any) => ep.isSideStory ? undefined : allEps.filter(e => !e.isSideStory && e.chapterNo <= ep.chapterNo).length;
+
   return {
     novel: {
       id: novel.id,
@@ -501,6 +526,8 @@ export async function getEpisodeNavigation(
       id: episode.id,
       novelId: episode.novelId,
       chapterNo: episode.chapterNo,
+      displayNo: getDisplayNo(episode),
+      isSideStory: episode.isSideStory,
       title: episode.title,
       content: episode.content,
       image: episode.image || undefined,
@@ -512,12 +539,14 @@ export async function getEpisodeNavigation(
     prev: prev ? {
       id: prev.id,
       chapterNo: prev.chapterNo,
+      displayNo: getDisplayNo(prev),
       title: prev.title,
       createdAt: prev.createdAt.toISOString(),
     } : undefined,
     next: next ? {
       id: next.id,
       chapterNo: next.chapterNo,
+      displayNo: getDisplayNo(next),
       title: next.title,
       createdAt: next.createdAt.toISOString(),
     } : undefined,
@@ -675,4 +704,35 @@ export async function getSystemNotice(id: number) {
   return prisma.systemNotice.findUnique({
     where: { id }
   });
+}
+
+export async function getUserWithNovels(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      novels: {
+        orderBy: { updatedAt: 'desc' }
+      }
+    }
+  });
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    nickname: user.nickname || "작자미상",
+    avatar: user.avatar || undefined,
+    bio: user.bio || undefined,
+    isPrivate: user.isPrivate,
+    createdAt: user.createdAt.toISOString(),
+    novels: user.novels.map(n => ({
+      id: n.id,
+      title: n.title,
+      genre: n.genre,
+      coverImage: n.coverImage,
+      views: n.views,
+      rating: n.rating,
+      createdAt: n.createdAt.toISOString(),
+    }))
+  };
 }

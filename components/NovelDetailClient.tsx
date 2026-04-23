@@ -132,7 +132,7 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
 
           <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900">{novel.title}</h1>
           <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
-            <span className="font-bold text-gray-800 mr-1">{authorName}</span>
+            <Link href={`/profile/${novel.authorId}`} className="font-bold text-gray-800 mr-1 hover:text-purple-600 hover:underline transition-colors">{authorName}</Link>
             {novel.ageRating === "15세 이용가" && <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] rounded font-bold">15</span>}
             {novel.ageRating === "19세 이용가" && <span className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] rounded font-bold">19</span>}
           </div>
@@ -158,7 +158,7 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
           <div className="flex flex-col gap-3 w-full lg:w-auto">
             <div className="flex gap-3">
               <Link href={firstEpisode ? `/novel/${novel.id}/episode/${firstEpisode.id}` : '#'} className="flex-1 lg:flex-none px-12 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded text-center transition-colors shadow-sm">
-                {firstEpisode ? (firstEpisode.isSideStory ? '첫 외전보기' : `EP.${firstEpisode.chapterNo}. 이어보기`) : '첫화보기'}
+                {firstEpisode ? (firstEpisode.isSideStory ? '첫 외전보기' : `EP.${firstEpisode.displayNo}. 이어보기`) : '첫화보기'}
               </Link>
             </div>
             {isAuthor && (
@@ -213,7 +213,7 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
                         {ep.title}
                       </div>
                       <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
-                        <span>{ep.isSideStory ? '외전' : `EP.${ep.chapterNo}`}</span>
+                        <span>{ep.isSideStory ? '외전' : `EP.${ep.displayNo}`}</span>
                         <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
                       </div>
                     </Link>

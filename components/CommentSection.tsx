@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { MessageSquare, ThumbsUp, ThumbsDown, AlertCircle, Loader2, User as UserIcon, CornerDownRight } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
@@ -192,7 +193,7 @@ export default function CommentSection({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="font-black text-[15px] text-gray-900 tracking-tight">{comment.userName}</span>
+                    <Link href={`/profile/${comment.userId}`} className="font-black text-[15px] text-gray-900 tracking-tight hover:text-purple-600 hover:underline transition-colors">{comment.userName}</Link>
                     {authorId && comment.userId === authorId && (
                       <span className="px-2 py-0.5 bg-purple-600 text-white text-[9px] rounded-md font-black uppercase tracking-tighter shadow-sm">Author</span>
                     )}
@@ -282,7 +283,7 @@ export default function CommentSection({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-black text-[13px] text-gray-900 tracking-tight">{reply.userName}</span>
+                            <Link href={`/profile/${reply.userId}`} className="font-black text-[13px] text-gray-900 tracking-tight hover:text-purple-600 hover:underline transition-colors">{reply.userName}</Link>
                             {authorId && reply.userId === authorId && (
                               <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[8px] rounded font-black uppercase tracking-tighter">Author</span>
                             )}
