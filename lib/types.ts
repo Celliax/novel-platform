@@ -20,6 +20,7 @@ export interface Novel {
   recommendCount: number;
   synopsis: string;
   ageRating: string;
+  isEvent: boolean;
   createdAt: string;
   updatedAt: string;
 }

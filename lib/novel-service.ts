@@ -37,6 +37,7 @@ export async function listNovelsForHome() {
       recommendCount: totalRecommends,
       synopsis: novel.synopsis,
       ageRating: novel.ageRating,
+      isEvent: novel.isEvent,
       createdAt: novel.createdAt.toISOString(),
       updatedAt: novel.updatedAt.toISOString(),
       author: {
@@ -133,6 +134,7 @@ export async function getNovelWithEpisodes(id: number) {
     recommendCount: totalRecommends,
     synopsis: novel.synopsis,
     ageRating: novel.ageRating,
+    isEvent: novel.isEvent,
     createdAt: novel.createdAt.toISOString(),
     updatedAt: novel.updatedAt.toISOString(),
     author: {
@@ -219,6 +221,7 @@ export async function updateNovel(id: number, data: {
     recommendCount: novel.recommendCount,
     synopsis: novel.synopsis,
     ageRating: novel.ageRating,
+    isEvent: novel.isEvent,
     createdAt: novel.createdAt.toISOString(),
     updatedAt: novel.updatedAt.toISOString(),
   };
@@ -377,6 +380,7 @@ export async function createNovel(data: {
   genre: string;
   synopsis: string;
   ageRating: string;
+  isEvent?: boolean;
   tags: string[];
   coverImage?: string;
 }): Promise<Novel> {
@@ -387,6 +391,7 @@ export async function createNovel(data: {
       genre: data.genre,
       synopsis: data.synopsis,
       ageRating: data.ageRating,
+      isEvent: data.isEvent || false,
       coverImage: data.coverImage || '/placeholder-cover.svg',
       tags: {
         create: await Promise.all(data.tags.map(async (tagName) => {
@@ -411,6 +416,7 @@ export async function createNovel(data: {
     recommendCount: novel.recommendCount,
     synopsis: novel.synopsis,
     ageRating: novel.ageRating,
+    isEvent: novel.isEvent,
     createdAt: novel.createdAt.toISOString(),
     updatedAt: novel.updatedAt.toISOString(),
   };
@@ -533,6 +539,7 @@ export async function getEpisodeNavigation(
       recommendCount: novel.recommendCount,
       synopsis: novel.synopsis,
       ageRating: novel.ageRating,
+      isEvent: novel.isEvent,
       createdAt: novel.createdAt.toISOString(),
       updatedAt: novel.updatedAt.toISOString(),
     },
@@ -585,6 +592,7 @@ export async function getUserNovels(userId: string): Promise<Novel[]> {
     recommendCount: n.recommendCount,
     synopsis: n.synopsis,
     ageRating: n.ageRating,
+    isEvent: n.isEvent,
     createdAt: n.createdAt.toISOString(),
     updatedAt: n.updatedAt.toISOString(),
   }));

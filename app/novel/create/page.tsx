@@ -38,6 +38,7 @@ export default function NovelCreatePage() {
   const [synopsis, setSynopsis] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [isEvent, setIsEvent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [loading, setLoading] = useState(true);
@@ -113,6 +114,7 @@ export default function NovelCreatePage() {
           ageRating: age,
           tagIds: selectedTags.map(t => t.id),
           coverImage: coverImage || undefined,
+          isEvent,
         });
       } catch (err) {
         if (isNextRedirectError(err)) throw err;
@@ -297,6 +299,63 @@ export default function NovelCreatePage() {
                     placeholder="작품에 대한 소개를 입력해주세요. 독자들이 첫눈에 흥미를 느낄 수 있도록 매력적으로 작성해주세요."
                     className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400 resize-none"
                   />
+                </div>
+
+                {/* ─── 등록 유형 선택 ─── */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-800 mb-3">
+                    등록 유형 <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* 일반 등록 */}
+                    <button
+                      type="button"
+                      onClick={() => setIsEvent(false)}
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-left
+                        ${!isEvent
+                          ? "border-purple-500 bg-purple-50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                        }`}
+                    >
+                      <span className="text-2xl">📖</span>
+                      <div className="text-center">
+                        <p className={`text-sm font-extrabold ${!isEvent ? "text-purple-700" : "text-gray-700"}`}>일반 등록</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">일반 소설로 연재합니다</p>
+                      </div>
+                      {!isEvent && (
+                        <span className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-[9px] font-black">✓</span>
+                        </span>
+                      )}
+                    </button>
+
+                    {/* 이벤트 등록 */}
+                    <button
+                      type="button"
+                      onClick={() => setIsEvent(true)}
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-left
+                        ${isEvent
+                          ? "border-amber-400 bg-amber-50 shadow-sm"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                        }`}
+                    >
+                      <span className="text-2xl">🏆</span>
+                      <div className="text-center">
+                        <p className={`text-sm font-extrabold ${isEvent ? "text-amber-700" : "text-gray-700"}`}>이벤트 등록</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">5월 23일까지 이벤트 참여</p>
+                      </div>
+                      {isEvent && (
+                        <span className="absolute top-2 right-2 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
+                          <span className="text-white text-[9px] font-black">✓</span>
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                  {isEvent && (
+                    <p className="mt-2 text-xs text-amber-600 font-medium bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
+                      🎉 이벤트 참여작은 메인 페이지 하단 &apos;5월 특별 이벤트&apos; 섹션에 노출됩니다.
+                    </p>
+                  )}
                 </div>
 
                 {/* Buttons */}

@@ -12,6 +12,7 @@ export async function createNovelAction(input: {
   ageRating: string;
   tagIds: number[];
   coverImage?: string;
+  isEvent?: boolean;
 }) {
   // Supabase에서 사용자 정보 가져오기
   const supabase = await getSupabaseServerClient();
@@ -61,6 +62,7 @@ export async function createNovelAction(input: {
       genre,
       synopsis,
       ageRating,
+      isEvent: input.isEvent || false,
       tags: selectedTags,
       coverImage: input.coverImage,
     });

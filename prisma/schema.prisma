@@ -53,6 +53,7 @@ model Novel {
   recommendCount Int   @default(0)    // 전체 추천수 합계
   synopsis   String
   ageRating  String    @default("전체 이용가")
+  isEvent    Boolean   @default(false)  // 이벤트 참여작 여부
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
