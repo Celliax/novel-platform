@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description: "FPT 소설 플랫폼은 소설을 작성하고 관리하는 플랫폼입니다.",
 };
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,6 +26,8 @@ export default function RootLayout({
         <footer className="bg-ink text-canvas/90 py-8 text-center text-sm">
           <p>© 2026 FPT 소설 플랫폼</p>
         </footer>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
