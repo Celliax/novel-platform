@@ -12,7 +12,12 @@ export async function listNovelsForHome() {
   const novels = await prisma.novel.findMany({
     include: {
       author: true,
-      episodes: true,
+      episodes: {
+        select: {
+          views: true,
+          recommends: true
+        }
+      },
     },
     orderBy: { createdAt: 'desc' }
   });

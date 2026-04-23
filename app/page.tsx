@@ -7,6 +7,7 @@ import { ADMIN_ID } from "@/lib/constants";
 import { Megaphone, PlusCircle, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 60; // 1분마다 캐시 갱신
 
 export default async function Home() {
   const hasDbConfig = Boolean(process.env.DATABASE_URL);
