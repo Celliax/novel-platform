@@ -15,6 +15,7 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     loadTags();
@@ -33,11 +34,13 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
   };
 
   const filteredTags = useMemo(() => {
-    if (!searchTerm.trim()) return availableTags.slice(0, 20); // 검색어 없으면 상위 20개만
+    if (!searchTerm.trim()) {
+      return isExpanded ? availableTags : availableTags.slice(0, 20);
+    }
     return availableTags.filter(tag => 
       tag.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [availableTags, searchTerm]);
+  }, [availableTags, searchTerm, isExpanded]);
 
   const isExactMatch = useMemo(() => {
     return availableTags.some(tag => tag.name.toLowerCase() === searchTerm.trim().toLowerCase());
@@ -148,7 +151,18 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
 
       {/* Suggestions / Available Tags */}
       <div className="pt-2">
-        <p className="text-[11px] font-black text-gray-400 uppercase tracking-wider mb-2 ml-1">추천 태그</p>
+        <div className="flex justify-between items-center mb-2 ml-1">
+          <p className="text-[11px] font-black text-gray-400 uppercase tracking-wider">추천 태그</p>
+          {!searchTerm && availableTags.length > 20 && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-[10px] font-bold text-purple-600 hover:text-purple-800 transition-colors"
+            >
+              {isExpanded ? "접기 ▲" : `더보기 (${availableTags.length - 20}개+) ▼`}
+            </button>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2">
           {filteredTags.length > 0 ? (
             filteredTags.map((tag) => {
