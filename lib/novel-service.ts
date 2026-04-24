@@ -97,7 +97,7 @@ export async function getNovelWithEpisodes(id: number) {
           views: true,
           recommends: true,
           createdAt: true,
-          // content: true 는 제외하여 성능 최적화
+          content: true, // 글자수 계산을 위해 포함
         },
         orderBy: { chapterNo: 'asc' }
       },
@@ -158,10 +158,11 @@ export async function getNovelWithEpisodes(id: number) {
         chapterNo: ep.chapterNo,
         displayNo,
         isSideStory: ep.isSideStory,
-    isAdultOnly: ep.isAdultOnly,
+        isAdultOnly: ep.isAdultOnly,
         title: ep.title,
         views: ep.views,
         recommends: ep.recommends,
+        wordCount: ep.content ? ep.content.length : 0,
         createdAt: ep.createdAt.toISOString(),
       };
     }),

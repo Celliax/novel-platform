@@ -7,7 +7,7 @@ import { BookOpen, Eye, Plus, Heart, Share2, ArrowDownUp, AlertCircle, Settings,
 import CommentSection from "./CommentSection";
 
 type Tag = { id: number; name: string };
-type Episode = { id: number; chapterNo: number; displayNo?: number; isSideStory: boolean; isAdultOnly: boolean; title: string; views: number; recommends: number; createdAt: string };
+type Episode = { id: number; chapterNo: number; displayNo?: number; isSideStory: boolean; isAdultOnly: boolean; title: string; views: number; recommends: number; wordCount?: number; createdAt: string };
 type Notice = { id: number; title: string; content: string; views: number; createdAt: string };
 type Novel = {
   id: number;
@@ -270,6 +270,7 @@ export default function NovelDetailClient({ novel, isAuthor, initialIsFavorited,
                       <div className="flex gap-3 text-[11px] text-gray-400 font-medium mt-1.5">
                         <span>{ep.isSideStory ? '외전' : `EP.${ep.displayNo}`}</span>
                         <span className="flex items-center gap-1"><Eye size={12}/> {ep.views?.toLocaleString() || 0}</span>
+                        {ep.wordCount !== undefined && <span className="flex items-center gap-1">{ep.wordCount.toLocaleString()}자</span>}
                       </div>
                     </Link>
                     <div className="flex flex-col items-end gap-2 shrink-0">
