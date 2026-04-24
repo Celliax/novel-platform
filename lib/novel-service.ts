@@ -162,7 +162,7 @@ export async function getNovelWithEpisodes(id: number) {
         title: ep.title,
         views: ep.views,
         recommends: ep.recommends,
-        wordCount: ep.content ? ep.content.length : 0,
+        wordCount: ep.content ? ep.content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').replace(/[\s*\u200B]/g, '').length : 0,
         createdAt: ep.createdAt.toISOString(),
       };
     }),
