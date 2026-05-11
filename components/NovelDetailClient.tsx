@@ -8,7 +8,7 @@ import CommentSection from "./CommentSection";
 
 type Tag = { id: number; name: string };
 type Episode = { id: number; chapterNo: number; displayNo?: number; isSideStory: boolean; isAdultOnly: boolean; title: string; views: number; recommends: number; wordCount?: number; createdAt: string };
-type Notice = { id: number; title: string; content: string; views: number; createdAt: string };
+type Notice = { id: number; title: string; content: string; image?: string; views: number; createdAt: string };
 type Novel = {
   id: number;
   title: string;

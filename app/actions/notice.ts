@@ -9,6 +9,7 @@ export async function createNoticeAction(input: {
   novelId: number;
   title: string;
   content: string;
+  image?: string;
 }) {
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -24,6 +25,7 @@ export async function createNoticeAction(input: {
     novelId: input.novelId,
     title: input.title,
     content: input.content,
+    image: input.image,
   });
 
   revalidatePath(`/novel/${input.novelId}`);

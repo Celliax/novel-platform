@@ -106,6 +106,7 @@ export async function getNovelWithEpisodes(id: number) {
           id: true,
           title: true,
           content: true, // 공지는 내용이 짧으므로 포함
+          image: true,
           views: true,
           createdAt: true,
         },
@@ -170,6 +171,7 @@ export async function getNovelWithEpisodes(id: number) {
       id: n.id,
       title: n.title,
       content: n.content,
+      image: n.image || undefined,
       views: n.views,
       createdAt: n.createdAt.toISOString(),
     })),
@@ -232,12 +234,14 @@ export async function createNotice(data: {
   novelId: number;
   title: string;
   content: string;
+  image?: string;
 }) {
   return prisma.notice.create({
     data: {
       novelId: data.novelId,
       title: data.title,
       content: data.content,
+      image: data.image,
     }
   });
 }

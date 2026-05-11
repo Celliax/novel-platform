@@ -70,6 +70,16 @@ export default function NoticeDetailPage() {
             <span className="flex items-center gap-1.5"><Eye size={14}/> {notice.views.toLocaleString()}</span>
           </div>
         </header>
+        {/* 첨부 이미지 */}
+        {notice.image && (
+          <div className="border-b border-gray-50 bg-gray-50/20 flex justify-center p-4">
+            <img
+              src={notice.image}
+              alt="공지 첨부 이미지"
+              className="max-w-full max-h-[480px] object-contain rounded-xl"
+            />
+          </div>
+        )}
         <div className="p-8 text-gray-800 leading-relaxed whitespace-pre-wrap text-[15px]">
           {notice.content}
         </div>
