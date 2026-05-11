@@ -80,9 +80,10 @@ export default function NoticeDetailPage() {
             />
           </div>
         )}
-        <div className="p-8 text-gray-800 leading-relaxed whitespace-pre-wrap text-[15px]">
-          {notice.content}
-        </div>
+        <div 
+          className="p-8 text-gray-800 leading-relaxed text-[15px] prose prose-purple max-w-none tiptap"
+          dangerouslySetInnerHTML={{ __html: notice.content }}
+        />
       </article>
 
       <div className="mt-8 flex justify-center">

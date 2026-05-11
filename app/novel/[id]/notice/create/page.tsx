@@ -3,9 +3,17 @@
 import { useState, useTransition, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ChevronLeft, Loader2, Send, ImagePlus, X } from "lucide-react";
 import { createNoticeAction } from "@/app/actions/notice";
 import { uploadToCloudinaryAction } from "@/app/actions/storage";
+
+const Editor = dynamic(() => import("@/components/Editor"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[40vh] bg-gray-50 animate-pulse rounded-xl" aria-hidden />
+  ),
+});
 
 export default function NoticeCreatePage() {
   const router = useRouter();
@@ -104,15 +112,9 @@ export default function NoticeCreatePage() {
           />
         </div>
 
-        <div>
+        <div className="editor-container">
           <label className="block text-sm font-extrabold text-gray-700 mb-2">공지 내용</label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={10}
-            placeholder="공지할 내용을 작성하세요."
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none resize-none transition-all"
-          />
+          <Editor value={content} onChange={setContent} />
         </div>
 
         {/* 이미지 첨부 섹션 */}
