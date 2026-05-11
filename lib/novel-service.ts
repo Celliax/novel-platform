@@ -246,9 +246,25 @@ export async function createNotice(data: {
   });
 }
 
+export async function updateNotice(id: number, data: {
+  title?: string;
+  content?: string;
+  image?: string;
+}) {
+  return prisma.notice.update({
+    where: { id },
+    data: {
+      title: data.title,
+      content: data.content,
+      image: data.image,
+    }
+  });
+}
+
 export async function getNotice(novelId: number, noticeId: number) {
   return prisma.notice.findFirst({
-    where: { id: noticeId, novelId }
+    where: { id: noticeId, novelId },
+    include: { novel: { select: { authorId: true } } }
   });
 }
 

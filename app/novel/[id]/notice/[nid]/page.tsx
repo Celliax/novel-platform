@@ -14,8 +14,16 @@ export default function NoticeDetailPage() {
   const [notice, setNotice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchUser = async () => {
+      const { getSupabaseClient } = await import("@/lib/supabase/client");
+      const supabase = getSupabaseClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    fetchUser();
     loadNotice();
   }, [novelId, noticeId]);
 
@@ -59,7 +67,15 @@ export default function NoticeDetailPage() {
         <Link href={`/novel/${novelId}`} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="text-2xl font-extrabold text-gray-900">작가 공지사항</h1>
+        <h1 className="text-2xl font-extrabold text-gray-900 flex-1">작가 공지사항</h1>
+        {currentUserId && notice.novel?.authorId === currentUserId && (
+          <Link
+            href={`/novel/${novelId}/notice/${noticeId}/edit`}
+            className="px-4 py-2 text-sm font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+          >
+            수정
+          </Link>
+        )}
       </div>
 
       <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

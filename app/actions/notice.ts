@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createNotice, getNovelWithEpisodes } from "@/lib/novel-service";
+import { createNotice, updateNotice, getNovelWithEpisodes } from "@/lib/novel-service";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function createNoticeAction(input: {
@@ -30,4 +30,31 @@ export async function createNoticeAction(input: {
 
   revalidatePath(`/novel/${input.novelId}`);
   redirect(`/novel/${input.novelId}`);
+}
+
+export async function updateNoticeAction(input: {
+  noticeId: number;
+  novelId: number;
+  title: string;
+  content: string;
+  image?: string;
+}) {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("로그인이 필요합니다.");
+
+  const novel = await getNovelWithEpisodes(input.novelId);
+  if (!novel || novel.authorId !== user.id) {
+    throw new Error("공지 수정 권한이 없습니다.");
+  }
+
+  await updateNotice(input.noticeId, {
+    title: input.title,
+    content: input.content,
+    image: input.image,
+  });
+
+  revalidatePath(`/novel/${input.novelId}/notice/${input.noticeId}`);
+  redirect(`/novel/${input.novelId}/notice/${input.noticeId}`);
 }
