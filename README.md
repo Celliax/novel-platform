@@ -1,6 +1,6 @@
-# FPT 소설 플랫폼 (FPT Novel Platform)
+# 소설 플랫폼 (Novel Platform)
 
-![FPT Novel Platform Banner](./public/header.png)
+![Novel Platform Banner](./public/header.png)
 
 모던하고 세련된 사용자 경험을 제공하는 차세대 웹 소설 플랫폼입니다. 작가와 독자가 더 가깝게 소통하고, 몰입감 넘치는 독서 환경을 제공하는 것을 목표로 합니다.
 
