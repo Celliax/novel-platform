@@ -5,9 +5,33 @@ import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fptnovel.vercel.app";
+const DESCRIPTION = "누구나 자유롭게 상상의 나래를 펼치고, 소중한 작품을 세상에 선보일 수 있습니다.";
+
 export const metadata: Metadata = {
   title: "FPT 소설 플랫폼",
-  description: "FPT 소설 플랫폼은 소설을 작성하고 관리하는 플랫폼입니다.",
+  description: DESCRIPTION,
+  openGraph: {
+    title: "FPT 소설 플랫폼",
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "FPT 소설 플랫폼",
+    type: "website",
+    images: [
+      {
+        url: "/header.png",
+        width: 1200,
+        height: 630,
+        alt: "FPT 소설 플랫폼",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FPT 소설 플랫폼",
+    description: DESCRIPTION,
+    images: ["/header.png"],
+  },
 };
 
 import { SpeedInsights } from "@vercel/speed-insights/next";

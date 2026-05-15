@@ -8,6 +8,10 @@ export const dynamic = "force-dynamic";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fptnovel.vercel.app";
 
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>?/gm, '');
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id: idStr } = await params;
   const id = parseInt(idStr);
@@ -18,8 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!novel) return {};
 
   const title = `${novel.title} | FPT 소설 플랫폼`;
-  const description = novel.synopsis
-    ? novel.synopsis.slice(0, 150)
+  const cleanSynopsis = stripHtml(novel.synopsis || "");
+  const description = cleanSynopsis
+    ? cleanSynopsis.slice(0, 150)
     : `${novel.title} - FPT 소설 플랫폼에서 읽어보세요.`;
   const coverImage = novel.coverImage && !novel.coverImage.startsWith('/placeholder')
     ? novel.coverImage
