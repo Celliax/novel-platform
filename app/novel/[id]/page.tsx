@@ -87,13 +87,13 @@ export default async function NovelDetailPage({ params }: Props) {
       if (!dbUser || !dbUser.age) {
         // 인증 안된 경우 프로필 설정 유도
         return (
-          <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-sm text-center">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">성인 인증이 필요합니다</h2>
-              <p className="text-gray-500 text-sm mb-6">이 작품은 성인 전용 콘텐츠입니다. 성인 인증을 위해 프로필을 설정해주세요.</p>
+          <div className="flex items-center justify-center min-h-screen bg-canvas p-4">
+            <div className="bg-surface p-8 rounded-2xl shadow-card border border-border max-w-sm text-center">
+              <h2 className="text-xl font-bold mb-4 text-foreground">성인 인증이 필요합니다</h2>
+              <p className="text-muted text-sm mb-6">이 작품은 성인 전용 콘텐츠입니다. 성인 인증을 위해 프로필을 설정해주세요.</p>
               <div className="flex gap-3">
-                <a href="/" className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">홈으로</a>
-                <a href="/profile/setup" className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg font-bold text-sm">인증하러 가기</a>
+                <a href="/" className="flex-1 px-4 py-2 bg-gray-100 text-muted rounded-lg font-bold text-sm">홈으로</a>
+                <a href="/profile/setup" className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg font-bold text-sm">인증하러 가기</a>
               </div>
             </div>
           </div>
@@ -101,11 +101,11 @@ export default async function NovelDetailPage({ params }: Props) {
       }
       if (dbUser.age < 19) {
         return (
-          <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-sm text-center">
+          <div className="flex items-center justify-center min-h-screen bg-canvas p-4">
+            <div className="bg-surface p-8 rounded-2xl shadow-card border border-border max-w-sm text-center">
               <h2 className="text-xl font-bold mb-4 text-red-600">접근 제한</h2>
-              <p className="text-gray-500 text-sm mb-6">만 19세 미만은 이용할 수 없는 작품입니다.</p>
-              <a href="/" className="inline-block px-6 py-2 bg-purple-600 text-white rounded-lg font-bold text-sm">홈으로 돌아가기</a>
+              <p className="text-muted text-sm mb-6">만 19세 미만은 이용할 수 없는 작품입니다.</p>
+              <a href="/" className="inline-block px-6 py-2 bg-brand-600 text-white rounded-lg font-bold text-sm">홈으로 돌아가기</a>
             </div>
           </div>
         );

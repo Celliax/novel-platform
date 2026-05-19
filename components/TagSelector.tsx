@@ -103,7 +103,7 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
     <div className="space-y-4">
       {/* Search and Input */}
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/80">
           <Search size={16} />
         </div>
         <input
@@ -112,14 +112,14 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="태그 검색 또는 직접 입력 후 엔터"
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 transition-all outline-none"
+          className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border/80 rounded-xl text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-600 transition-all outline-none"
         />
         {searchTerm && !isExactMatch && (
           <button
             type="button"
             onClick={handleCreateTag}
             disabled={isCreating}
-            className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 transition-all disabled:opacity-50"
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-3 py-1 bg-brand-600 text-white text-xs font-bold rounded-lg hover:bg-brand-700 transition-all disabled:opacity-50"
           >
             {isCreating ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
             추가
@@ -133,14 +133,14 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
           {selectedTags.map((tag) => (
             <div
               key={tag.id}
-              className="group flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-xs font-black border border-purple-200 shadow-sm transition-all hover:bg-purple-200"
+              className="group flex items-center gap-1.5 px-3 py-1.5 bg-brand-100 text-brand-700 rounded-lg text-xs font-black border border-brand-200 shadow-card transition-all hover:bg-purple-200"
             >
               <Hash size={12} className="text-purple-400" />
               {tag.name}
               <button
                 type="button"
                 onClick={() => toggleTag(tag)}
-                className="ml-1 text-purple-400 hover:text-purple-700 transition-colors"
+                className="ml-1 text-purple-400 hover:text-brand-700 transition-colors"
               >
                 <X size={14} />
               </button>
@@ -152,12 +152,12 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
       {/* Suggestions / Available Tags */}
       <div className="pt-2">
         <div className="flex justify-between items-center mb-2 ml-1">
-          <p className="text-[11px] font-black text-gray-400 uppercase tracking-wider">추천 태그</p>
+          <p className="text-[11px] font-black text-muted/80 uppercase tracking-wider">추천 태그</p>
           {!searchTerm && availableTags.length > 20 && (
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-[10px] font-bold text-purple-600 hover:text-purple-800 transition-colors"
+              className="text-[10px] font-bold text-brand-600 hover:text-purple-800 transition-colors"
             >
               {isExpanded ? "접기 ▲" : `더보기 (${availableTags.length - 20}개+) ▼`}
             </button>
@@ -174,8 +174,8 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
                   onClick={() => toggleTag(tag)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border
                     ${isSelected 
-                      ? "bg-purple-600 border-purple-600 text-white shadow-md scale-95" 
-                      : "bg-white border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50"
+                      ? "bg-brand-600 border-purple-600 text-white shadow-card scale-95" 
+                      : "bg-surface border-border text-muted hover:border-purple-300 hover:text-brand-600 hover:bg-brand-50"
                     }
                   `}
                 >
@@ -185,13 +185,13 @@ export default function TagSelector({ selectedTags, onTagsChange, maxTags = 10 }
             })
           ) : (
             searchTerm && !isCreating && (
-              <p className="text-xs text-gray-400 ml-1 py-2 font-medium">검색 결과가 없습니다. 우측의 [+ 추가] 버튼을 눌러 새 태그를 만드세요.</p>
+              <p className="text-xs text-muted/80 ml-1 py-2 font-medium">검색 결과가 없습니다. 우측의 [+ 추가] 버튼을 눌러 새 태그를 만드세요.</p>
             )
           )}
         </div>
       </div>
       
-      <p className="text-[10px] text-gray-400 ml-1">
+      <p className="text-[10px] text-muted/80 ml-1">
         ※ 이미 있는 태그는 목록에서 선택하고, 없는 태그는 입력 후 엔터를 치면 새로 만들어집니다.
       </p>
     </div>

@@ -13,7 +13,7 @@ import { CheckCircle, XCircle, Loader2, Camera, ImagePlus } from "lucide-react";
 const Editor = dynamic(() => import("@/components/Editor"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[140px] rounded-lg border border-gray-200 bg-gray-50 animate-pulse" aria-hidden />
+    <div className="min-h-[140px] rounded-lg border border-border bg-canvas animate-pulse" aria-hidden />
   ),
 });
 
@@ -126,40 +126,40 @@ export default function NovelCreatePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={32} className="animate-spin text-purple-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-16">
+    <div className="bg-canvas min-h-screen pb-16">
       {/* Breadcrumb */}
-      <div className="border-b border-gray-200 bg-white px-4 py-3">
-        <div className="max-w-5xl mx-auto flex items-center gap-2 text-sm text-gray-500">
-          <Link href="/" className="hover:text-purple-600 font-medium">홈</Link>
+      <div className="border-b border-border bg-surface px-4 py-3">
+        <div className="max-w-5xl mx-auto flex items-center gap-2 text-sm text-muted">
+          <Link href="/" className="hover:text-brand-600 font-medium">홈</Link>
           <span>›</span>
-          <span className="text-gray-900 font-bold">작품추가</span>
-          <span className="text-gray-400 ml-2">✦ 독자이시라면 이는 작품명 및 상세 정보를 입력해주세요.</span>
+          <span className="text-foreground font-bold">작품추가</span>
+          <span className="text-muted/80 ml-2">✦ 독자이시라면 이는 작품명 및 상세 정보를 입력해주세요.</span>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-surface rounded-xl border border-border shadow-card overflow-hidden">
             {/* Form Header */}
-            <div className="px-8 py-5 border-b border-gray-100">
-              <h1 className="text-xl font-extrabold text-gray-900">작품설정</h1>
-              <p className="text-sm text-gray-500 mt-1">등록하실 작품에 대한 정보를 입력해 주세요.</p>
+            <div className="px-8 py-5 border-b border-border">
+              <h1 className="text-xl font-extrabold text-foreground">작품설정</h1>
+              <p className="text-sm text-muted mt-1">등록하실 작품에 대한 정보를 입력해 주세요.</p>
             </div>
 
             <div className="flex flex-col lg:flex-row">
               {/* LEFT: Cover Preview */}
-              <div className="lg:w-72 shrink-0 flex flex-col items-center px-8 py-8 border-b lg:border-b-0 lg:border-r border-gray-100 bg-gray-50/50">
-                <p className="text-sm font-bold text-gray-700 mb-4 self-start">관련된 북커버 표지 <span className="text-red-500">*</span></p>
+              <div className="lg:w-72 shrink-0 flex flex-col items-center px-8 py-8 border-b lg:border-b-0 lg:border-r border-border bg-canvas/50">
+                <p className="text-sm font-bold text-foreground/80 mb-4 self-start">관련된 북커버 표지 <span className="text-red-500">*</span></p>
 
                 {/* Cover Preview Box */}
                 <div
-                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border-2 border-dashed border-gray-300 bg-gray-100 flex flex-col items-center justify-center cursor-pointer group hover:border-purple-400 transition-colors"
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border-2 border-dashed border-border/80 bg-gray-100 flex flex-col items-center justify-center cursor-pointer group hover:border-brand-600 transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {coverImage ? (
@@ -174,8 +174,8 @@ export default function NovelCreatePage() {
                     </>
                   ) : (
                     <div className="text-center px-4">
-                      <div className="text-gray-400 font-extrabold text-2xl leading-tight mb-2">북커버<br/>준비중</div>
-                      <p className="text-xs text-gray-400 mt-3">클릭하여 업로드</p>
+                      <div className="text-muted/80 font-extrabold text-2xl leading-tight mb-2">북커버<br/>준비중</div>
+                      <p className="text-xs text-muted/80 mt-3">클릭하여 업로드</p>
                     </div>
                   )}
                   <input
@@ -190,7 +190,7 @@ export default function NovelCreatePage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 text-sm font-bold text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-border/80 text-sm font-bold text-muted rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <ImagePlus size={16} />
                   파일 선택
@@ -204,7 +204,7 @@ export default function NovelCreatePage() {
                     커버 제거
                   </button>
                 )}
-                <p className="text-[10px] text-gray-400 mt-3 text-center leading-relaxed">
+                <p className="text-[10px] text-muted/80 mt-3 text-center leading-relaxed">
                   권장: 400×600 사이즈<br/>이미지 파일 (JPEG/PNG)
                 </p>
               </div>
@@ -220,7 +220,7 @@ export default function NovelCreatePage() {
 
                 {/* 작품명 */}
                 <div>
-                  <label htmlFor="title" className="block text-sm font-bold text-gray-800 mb-2">
+                  <label htmlFor="title" className="block text-sm font-bold text-foreground/90 mb-2">
                     작품명 <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -229,15 +229,15 @@ export default function NovelCreatePage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       required
-                      className={`w-full rounded-lg border px-3 py-2.5 pr-9 text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-colors
+                      className={`w-full rounded-lg border px-3 py-2.5 pr-9 text-sm text-foreground bg-surface placeholder:text-muted/80 focus:outline-none focus:ring-2 transition-colors
                         ${titleStatus === "taken" ? "border-red-400 focus:ring-red-100" : ""}
                         ${titleStatus === "available" ? "border-green-400 focus:ring-green-100" : ""}
-                        ${titleStatus !== "taken" && titleStatus !== "available" ? "border-gray-300 focus:ring-purple-100 focus:border-purple-400" : ""}
+                        ${titleStatus !== "taken" && titleStatus !== "available" ? "border-border/80 focus:ring-brand-100 focus:border-brand-600" : ""}
                       `}
                       placeholder="작품명을 입력해주세요."
                     />
                     <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                      {titleStatus === "checking" && <Loader2 size={16} className="text-gray-400 animate-spin" />}
+                      {titleStatus === "checking" && <Loader2 size={16} className="text-muted/80 animate-spin" />}
                       {titleStatus === "available" && <CheckCircle size={16} className="text-green-500" />}
                       {titleStatus === "taken" && <XCircle size={16} className="text-red-500" />}
                     </div>
@@ -249,27 +249,27 @@ export default function NovelCreatePage() {
                 {/* 분류 & 연령 */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="genre" className="block text-sm font-bold text-gray-800 mb-2">
+                    <label htmlFor="genre" className="block text-sm font-bold text-foreground/90 mb-2">
                       분류 <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="genre"
                       value={genre}
                       onChange={(e) => setGenre(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400"
+                      className="w-full rounded-lg border border-border/80 px-3 py-2.5 text-sm text-foreground bg-surface focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-600"
                     >
                       {GENRE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="age" className="block text-sm font-bold text-gray-800 mb-2">
+                    <label htmlFor="age" className="block text-sm font-bold text-foreground/90 mb-2">
                       연령 <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="age"
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400"
+                      className="w-full rounded-lg border border-border/80 px-3 py-2.5 text-sm text-foreground bg-surface focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-600"
                     >
                       {AGE_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
@@ -278,9 +278,9 @@ export default function NovelCreatePage() {
 
                 {/* 태그 */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-2">
+                  <label className="block text-sm font-bold text-foreground/90 mb-2">
                     태그 <span className="text-red-500">*</span>
-                    <span className="ml-1 text-gray-400 font-normal">(최소 1개, 최대 10개 선택)</span>
+                    <span className="ml-1 text-muted/80 font-normal">(최소 1개, 최대 10개 선택)</span>
                   </label>
                   <TagSelector
                     selectedTags={selectedTags}
@@ -291,19 +291,19 @@ export default function NovelCreatePage() {
 
                 {/* 작품 소개 */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-2">작품소개</label>
+                  <label className="block text-sm font-bold text-foreground/90 mb-2">작품소개</label>
                   <textarea
                     value={synopsis}
                     onChange={(e) => setSynopsis(e.target.value)}
                     rows={5}
                     placeholder="작품에 대한 소개를 입력해주세요. 독자들이 첫눈에 흥미를 느낄 수 있도록 매력적으로 작성해주세요."
-                    className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400 resize-none"
+                    className="w-full rounded-lg border border-border/80 px-3 py-3 text-sm text-foreground bg-surface placeholder:text-muted/80 focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-600 resize-none"
                   />
                 </div>
 
                 {/* ─── 등록 유형 선택 ─── */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-3">
+                  <label className="block text-sm font-bold text-foreground/90 mb-3">
                     등록 유형 <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -313,17 +313,17 @@ export default function NovelCreatePage() {
                       onClick={() => setIsEvent(false)}
                       className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-left
                         ${!isEvent
-                          ? "border-purple-500 bg-purple-50 shadow-sm"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          ? "border-purple-500 bg-brand-50 shadow-card"
+                          : "border-border bg-surface hover:border-border/80"
                         }`}
                     >
                       <span className="text-2xl">📖</span>
                       <div className="text-center">
-                        <p className={`text-sm font-extrabold ${!isEvent ? "text-purple-700" : "text-gray-700"}`}>일반 등록</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">일반 소설로 연재합니다</p>
+                        <p className={`text-sm font-extrabold ${!isEvent ? "text-brand-700" : "text-foreground/80"}`}>일반 등록</p>
+                        <p className="text-[11px] text-muted/80 mt-0.5">일반 소설로 연재합니다</p>
                       </div>
                       {!isEvent && (
-                        <span className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="absolute top-2 right-2 w-4 h-4 bg-brand-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-[9px] font-black">✓</span>
                         </span>
                       )}
@@ -335,14 +335,14 @@ export default function NovelCreatePage() {
                       onClick={() => setIsEvent(true)}
                       className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-left
                         ${isEvent
-                          ? "border-amber-400 bg-amber-50 shadow-sm"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          ? "border-amber-400 bg-amber-50 shadow-card"
+                          : "border-border bg-surface hover:border-border/80"
                         }`}
                     >
                       <span className="text-2xl">🏆</span>
                       <div className="text-center">
-                        <p className={`text-sm font-extrabold ${isEvent ? "text-amber-700" : "text-gray-700"}`}>이벤트 등록</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">5월 23일까지 이벤트 참여</p>
+                        <p className={`text-sm font-extrabold ${isEvent ? "text-amber-700" : "text-foreground/80"}`}>이벤트 등록</p>
+                        <p className="text-[11px] text-muted/80 mt-0.5">5월 23일까지 이벤트 참여</p>
                       </div>
                       {isEvent && (
                         <span className="absolute top-2 right-2 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
@@ -362,14 +362,14 @@ export default function NovelCreatePage() {
                 <div className="flex justify-end gap-3 pt-2">
                   <Link
                     href="/"
-                    className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="px-6 py-2.5 border border-border/80 rounded-lg text-sm font-bold text-muted hover:bg-canvas transition-colors"
                   >
                     취소
                   </Link>
                   <button
                     type="submit"
                     disabled={pending || titleStatus === "taken" || titleStatus === "checking"}
-                    className="flex items-center gap-2 px-8 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-sm rounded-lg transition-colors shadow-card disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {pending ? <><Loader2 size={15} className="animate-spin" />저장 중…</> : "작품등록"}
                   </button>

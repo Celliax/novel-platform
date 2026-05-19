@@ -173,7 +173,7 @@ export default function NovelSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={32} className="animate-spin text-purple-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
@@ -184,25 +184,25 @@ export default function NovelSettingsPage() {
         <Link href={`/novel/${id}`} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="text-2xl font-extrabold text-gray-900">작품 설정</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">작품 설정</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-8 bg-surface p-8 rounded-2xl border border-border shadow-card">
         {/* Cover Image Section */}
         <div>
-          <label className="block text-sm font-extrabold text-gray-700 mb-4">작품 표지</label>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-4">작품 표지</label>
           <div className="flex items-start gap-6">
-            <div className="relative w-40 aspect-[3/4] rounded-xl overflow-hidden border border-gray-200 shadow-sm group">
+            <div className="relative w-40 aspect-[3/4] rounded-xl overflow-hidden border border-border shadow-card group">
               {coverImage ? (
                 <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                <div className="w-full h-full bg-canvas flex items-center justify-center">
                   <ImageIcon size={32} className="text-gray-300" />
                 </div>
               )}
               {isUploading && (
-                <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                  <Loader2 size={24} className="animate-spin text-purple-600" />
+                <div className="absolute inset-0 bg-surface/60 flex items-center justify-center">
+                  <Loader2 size={24} className="animate-spin text-brand-600" />
                 </div>
               )}
               <div 
@@ -213,12 +213,12 @@ export default function NovelSettingsPage() {
               </div>
             </div>
             <div className="flex-1 space-y-2">
-              <p className="text-sm text-gray-500 font-medium">표지는 작품의 첫인상입니다.</p>
-              <p className="text-xs text-gray-400">추천 사이즈: 600x800 (3:4 비율)</p>
+              <p className="text-sm text-muted font-medium">표지는 작품의 첫인상입니다.</p>
+              <p className="text-xs text-muted/80">추천 사이즈: 600x800 (3:4 비율)</p>
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-2 text-sm text-purple-600 font-bold hover:underline"
+                className="mt-2 text-sm text-brand-600 font-bold hover:underline"
               >
                 파일 선택하기
               </button>
@@ -235,19 +235,19 @@ export default function NovelSettingsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-extrabold text-gray-700 mb-2">작품 제목</label>
+            <label className="block text-sm font-extrabold text-foreground/80 mb-2">작품 제목</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none transition-all"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-600 outline-none transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-extrabold text-gray-700 mb-2">장르</label>
+            <label className="block text-sm font-extrabold text-foreground/80 mb-2">장르</label>
             <select
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none bg-white transition-all"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-600 outline-none bg-surface transition-all"
             >
               {GENRE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
@@ -255,18 +255,18 @@ export default function NovelSettingsPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-extrabold text-gray-700 mb-2">연령 등급</label>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-2">연령 등급</label>
           <select
             value={ageRating}
             onChange={(e) => setAgeRating(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none bg-white transition-all"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-600 outline-none bg-surface transition-all"
           >
             {AGE_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-extrabold text-gray-700 mb-2">태그</label>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-2">태그</label>
           <TagSelector
             selectedTags={selectedTags}
             onTagsChange={setSelectedTags}
@@ -275,12 +275,12 @@ export default function NovelSettingsPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-extrabold text-gray-700 mb-2">줄거리</label>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-2">줄거리</label>
           <textarea
             value={synopsis}
             onChange={(e) => setSynopsis(e.target.value)}
             rows={5}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none resize-none transition-all"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-600 outline-none resize-none transition-all"
           />
         </div>
 
@@ -288,14 +288,14 @@ export default function NovelSettingsPage() {
           <button
             type="button"
             onClick={() => router.push(`/novel/${id}`)}
-            className="flex-1 py-4 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+            className="flex-1 py-4 border border-border rounded-xl text-sm font-bold text-muted hover:bg-canvas transition-colors"
           >
             취소
           </button>
           <button
             type="submit"
             disabled={pending}
-            className="flex-1 py-4 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 py-4 bg-brand-600 hover:bg-brand-700 text-white font-extrabold rounded-xl text-sm transition-colors shadow-card flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {pending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             {pending ? "저장 중…" : "수정 완료"}
@@ -310,12 +310,12 @@ export default function NovelSettingsPage() {
       </form>
 
       {/* Danger Zone */}
-      <div className="mt-10 bg-white border border-red-100 rounded-2xl p-8 shadow-sm">
+      <div className="mt-10 bg-surface border border-red-100 rounded-2xl p-8 shadow-card">
         <h2 className="text-base font-extrabold text-red-600 mb-1 flex items-center gap-2">
           <AlertTriangle size={18} />
           위험 구역
         </h2>
-        <p className="text-sm text-gray-400 mb-5">
+        <p className="text-sm text-muted/80 mb-5">
           아래 작업은 되돌릴 수 없습니다. 신중하게 진행해주세요.
         </p>
         <button
@@ -331,21 +331,21 @@ export default function NovelSettingsPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-red-100">
+          <div className="bg-surface rounded-2xl shadow-2xl max-w-md w-full p-8 border border-red-100">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                 <Trash2 size={20} className="text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-extrabold text-gray-900">작품 삭제</h3>
-                <p className="text-xs text-gray-400">이 작업은 되돌릴 수 없습니다</p>
+                <h3 className="text-lg font-extrabold text-foreground">작품 삭제</h3>
+                <p className="text-xs text-muted/80">이 작업은 되돌릴 수 없습니다</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-sm text-muted mb-1">
               삭제 시 <strong>모든 회차, 댓글, 선호작, 별점, 공지</strong> 등 관련 데이터가 함께 삭제됩니다.
             </p>
-            <p className="text-sm text-gray-600 mb-5">
+            <p className="text-sm text-muted mb-5">
               계속하려면 아래에 작품 제목 <strong className="text-red-600 break-all">'{title}'</strong>을 입력하세요.
             </p>
 
@@ -354,7 +354,7 @@ export default function NovelSettingsPage() {
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder="작품 제목 입력"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all"
+              className="w-full border border-border rounded-xl px-4 py-3 text-sm mb-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all"
               disabled={isDeleting}
             />
 
@@ -369,7 +369,7 @@ export default function NovelSettingsPage() {
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-3 border border-border rounded-xl text-sm font-bold text-muted hover:bg-canvas transition-colors disabled:opacity-50"
               >
                 취소
               </button>
@@ -377,7 +377,7 @@ export default function NovelSettingsPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteConfirmText !== title || isDeleting}
-                className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-extrabold rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-extrabold rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-card"
               >
                 {isDeleting ? (
                   <><Loader2 size={16} className="animate-spin" /> 삭제 중…</>

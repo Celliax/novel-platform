@@ -55,14 +55,14 @@ export default function NovelCard({
           <p className="text-xs text-muted font-medium mb-3">{author}</p>
           <div className="flex items-center gap-3 text-[11px] text-muted font-bold">
             <span className="flex items-center gap-1">
-              <Eye size={12} aria-hidden className="text-gray-400" /> {views.toLocaleString()}
+              <Eye size={12} aria-hidden className="text-muted/80" /> {views.toLocaleString()}
             </span>
             <span className="flex items-center gap-1">
               <Star size={12} className="text-amber-400 fill-amber-400" aria-hidden />
               {rating.toFixed(1)}
             </span>
             <span className="flex items-center gap-1">
-              <ThumbsUp size={12} className="text-purple-500 fill-purple-500/20" aria-hidden />
+              <ThumbsUp size={12} className="text-brand-500 fill-purple-500/20" aria-hidden />
               {recommendCount.toLocaleString()}
             </span>
           </div>

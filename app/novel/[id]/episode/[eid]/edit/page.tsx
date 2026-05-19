@@ -11,7 +11,7 @@ import { ChevronLeft, Loader2, Save, BookOpen, Settings } from "lucide-react";
 const Editor = dynamic(() => import("@/components/Editor"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[60vh] bg-white animate-pulse" aria-hidden />
+    <div className="min-h-[60vh] bg-surface animate-pulse" aria-hidden />
   ),
 });
 
@@ -187,19 +187,19 @@ export default function EpisodeEditPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={32} className="animate-spin text-purple-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
 
   if (error && !isAuthor) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center bg-white p-12 rounded-2xl border border-gray-200 shadow-sm max-w-sm">
+      <div className="flex items-center justify-center min-h-screen bg-canvas">
+        <div className="text-center bg-surface p-12 rounded-2xl border border-border shadow-card max-w-sm">
           <BookOpen size={32} className="text-red-400 mx-auto mb-4" />
-          <p className="text-gray-900 text-xl font-extrabold">에러 발생</p>
-          <p className="text-gray-500 mt-2 text-sm">{error}</p>
-          <Link href={`/novel/${novelId}`} className="mt-6 inline-block px-6 py-2.5 bg-purple-600 text-white font-bold rounded-xl text-sm hover:bg-purple-700 transition-colors">
+          <p className="text-foreground text-xl font-extrabold">에러 발생</p>
+          <p className="text-muted mt-2 text-sm">{error}</p>
+          <Link href={`/novel/${novelId}`} className="mt-6 inline-block px-6 py-2.5 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition-colors">
             작품으로 돌아가기
           </Link>
         </div>
@@ -208,30 +208,30 @@ export default function EpisodeEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-surface">
       <form id="episode-form" onSubmit={handleSubmit}>
-        <div className="border-b border-gray-200 px-4 py-3 bg-white">
-          <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-gray-500 font-medium">
-            <Link href={`/novel/${novelId}`} className="hover:text-purple-600 flex items-center gap-1">
+        <div className="border-b border-border px-4 py-3 bg-surface">
+          <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-muted font-medium">
+            <Link href={`/novel/${novelId}`} className="hover:text-brand-600 flex items-center gap-1">
               <ChevronLeft size={15} /> {novelTitle || "소설"}
             </Link>
             <span>∷</span>
-            <span className="text-gray-900 font-extrabold">회차 수정하기</span>
+            <span className="text-foreground font-extrabold">회차 수정하기</span>
           </div>
         </div>
 
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <div className="max-w-4xl mx-auto px-4">
             <input
               value={epTitle}
               onChange={(e) => setEpTitle(e.target.value)}
               placeholder="회차 제목을 입력해주세요."
-              className="w-full py-4 text-base text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none font-medium"
+              className="w-full py-4 text-base text-foreground/90 placeholder:text-muted/80 bg-transparent focus:outline-none font-medium"
             />
           </div>
         </div>
 
-        <div className="border-b border-gray-100 bg-gray-50/30">
+        <div className="border-b border-border bg-canvas/30">
           <div className="max-w-4xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <input 
@@ -246,17 +246,17 @@ export default function EpisodeEditPage() {
                   type="button" 
                   disabled={isUploading}
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white disabled:opacity-50"
+                  className="flex items-center gap-2 text-sm text-muted hover:text-brand-600 transition-colors font-medium border border-dashed border-border/80 rounded-lg px-4 py-2 bg-surface disabled:opacity-50"
                 >
                   {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
                   {isUploading ? "업로드 중..." : "메인 삽화 설정 (선택)"}
                 </button>
               ) : (
-                <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
+                <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-border group">
                   <img src={image} alt="메인 삽화" className="w-full h-full object-cover" />
                   {isUploading && (
-                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                      <Loader2 size={20} className="animate-spin text-purple-600" />
+                    <div className="absolute inset-0 bg-surface/60 flex items-center justify-center">
+                      <Loader2 size={20} className="animate-spin text-brand-600" />
                     </div>
                   )}
                   <button 
@@ -272,7 +272,7 @@ export default function EpisodeEditPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1.5 text-xs text-purple-600 font-bold cursor-pointer bg-purple-50 px-2 py-1 rounded-md border border-purple-100">
+              <label className="flex items-center gap-1.5 text-xs text-brand-600 font-bold cursor-pointer bg-brand-50 px-2 py-1 rounded-md border border-brand-100">
                 <input 
                   type="checkbox" 
                   checked={isSideStory}
@@ -304,29 +304,29 @@ export default function EpisodeEditPage() {
           <Editor value={content} onChange={handleContentChange} />
         </div>
 
-        <div className="border-t border-gray-200">
+        <div className="border-t border-border">
           <div className="max-w-4xl mx-auto px-4 py-4">
-            <label className="block text-xs font-extrabold text-gray-600 mb-2">
-              작가글 <span className="font-normal text-gray-400">[작가만]</span>
+            <label className="block text-xs font-extrabold text-muted mb-2">
+              작가글 <span className="font-normal text-muted/80">[작가만]</span>
             </label>
             <textarea
               value={authorNote}
               onChange={(e) => setAuthorNote(e.target.value)}
               rows={3}
               placeholder="독자분들에게 남기고 싶은 말을 작성해주세요. (선택)"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400 resize-none"
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-foreground/90 bg-surface placeholder:text-muted/80 focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-600 resize-none"
             />
             <div className="flex items-center justify-end gap-2 mt-4">
               <Link
                 href={`/novel/${novelId}`}
-                className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 border border-border/80 rounded-lg text-sm font-bold text-muted hover:bg-canvas transition-colors"
               >
                 취소
               </Link>
               <button
                 type="submit"
                 disabled={pending}
-                className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm rounded-lg transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-sm rounded-lg transition-colors shadow-card disabled:opacity-50"
               >
                 {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                 {pending ? "수정 중…" : "수정완료"}

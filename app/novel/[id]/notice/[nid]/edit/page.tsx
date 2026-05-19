@@ -11,7 +11,7 @@ import { uploadToCloudinaryAction } from "@/app/actions/storage";
 const Editor = dynamic(() => import("@/components/Editor"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[40vh] bg-gray-50 animate-pulse rounded-xl" aria-hidden />
+    <div className="min-h-[40vh] bg-canvas animate-pulse rounded-xl" aria-hidden />
   ),
 });
 
@@ -120,7 +120,7 @@ export default function NoticeEditPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={32} className="animate-spin text-purple-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
@@ -131,33 +131,33 @@ export default function NoticeEditPage() {
         <Link href={`/novel/${novelId}/notice/${noticeId}`} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="text-2xl font-extrabold text-gray-900">작가 공지 수정</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">작가 공지 수정</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-surface p-8 rounded-2xl border border-border shadow-card">
         <div>
-          <label className="block text-sm font-extrabold text-gray-700 mb-2">공지 제목</label>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-2">공지 제목</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="공지사항 제목을 입력하세요."
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-100 focus:border-purple-400 outline-none transition-all"
+            className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-600 outline-none transition-all"
           />
         </div>
 
         <div className="editor-container">
-          <label className="block text-sm font-extrabold text-gray-700 mb-2">공지 내용</label>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-2">공지 내용</label>
           <Editor value={content} onChange={setContent} />
         </div>
 
         {/* 이미지 첨부 섹션 */}
         <div>
-          <label className="block text-sm font-extrabold text-gray-700 mb-2">
-            이미지 첨부 <span className="font-normal text-gray-400">(선택)</span>
+          <label className="block text-sm font-extrabold text-foreground/80 mb-2">
+            이미지 첨부 <span className="font-normal text-muted/80">(선택)</span>
           </label>
 
           {imagePreview ? (
-            <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+            <div className="relative rounded-xl overflow-hidden border border-border bg-canvas">
               {/* 미리보기 이미지 */}
               <img
                 src={imagePreview}
@@ -166,9 +166,9 @@ export default function NoticeEditPage() {
               />
               {/* 업로드 중 오버레이 */}
               {imageUploading && (
-                <div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center gap-2">
-                  <Loader2 size={28} className="animate-spin text-purple-600" />
-                  <span className="text-sm font-bold text-purple-600">업로드 중…</span>
+                <div className="absolute inset-0 bg-surface/70 flex flex-col items-center justify-center gap-2">
+                  <Loader2 size={28} className="animate-spin text-brand-600" />
+                  <span className="text-sm font-bold text-brand-600">업로드 중…</span>
                 </div>
               )}
               {/* 삭제 버튼 */}
@@ -193,10 +193,10 @@ export default function NoticeEditPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-36 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-purple-300 hover:bg-purple-50/30 transition-all group"
+              className="w-full h-36 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-purple-300 hover:bg-brand-50/30 transition-all group"
             >
               <ImagePlus size={28} className="text-gray-300 group-hover:text-purple-400 transition-colors" />
-              <span className="text-sm font-bold text-gray-400 group-hover:text-purple-500 transition-colors">
+              <span className="text-sm font-bold text-muted/80 group-hover:text-brand-500 transition-colors">
                 클릭하여 이미지 첨부
               </span>
               <span className="text-xs text-gray-300">JPG, PNG, GIF, WebP 지원</span>
@@ -216,14 +216,14 @@ export default function NoticeEditPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 py-4 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+            className="flex-1 py-4 border border-border rounded-xl text-sm font-bold text-muted hover:bg-canvas transition-colors"
           >
             취소
           </button>
           <button
             type="submit"
             disabled={pending || imageUploading}
-            className="flex-1 py-4 bg-gray-900 hover:bg-black text-white font-extrabold rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 py-4 bg-gray-900 hover:bg-black text-white font-extrabold rounded-xl text-sm transition-colors shadow-card flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {pending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             {pending ? "수정 중…" : "수정 완료"}

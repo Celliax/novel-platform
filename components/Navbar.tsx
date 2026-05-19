@@ -38,7 +38,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-surface/90 backdrop-blur-md border-b border-border shadow-sm sticky top-0 z-50">
+    <nav className="bg-surface/90 backdrop-blur-md border-b border-border shadow-card sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         <Link
           href="/"

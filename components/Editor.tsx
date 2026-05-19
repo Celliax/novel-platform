@@ -179,21 +179,21 @@ function Toolbar({ editor }: { editor: Editor | null }) {
             <button
               type="button"
               onClick={() => editor.chain().focus().updateAttributes("image", { width: "100%" }).run()}
-              className="px-1.5 py-0.5 text-[10px] bg-white rounded shadow-sm hover:bg-gray-50"
+              className="px-1.5 py-0.5 text-[10px] bg-surface rounded shadow-card hover:bg-canvas"
             >
               꽉차게
             </button>
             <button
               type="button"
               onClick={() => editor.chain().focus().updateAttributes("image", { width: "50%" }).run()}
-              className="px-1.5 py-0.5 text-[10px] bg-white rounded shadow-sm hover:bg-gray-50"
+              className="px-1.5 py-0.5 text-[10px] bg-surface rounded shadow-card hover:bg-canvas"
             >
               중간
             </button>
             <button
               type="button"
               onClick={() => editor.chain().focus().updateAttributes("image", { width: "25%" }).run()}
-              className="px-1.5 py-0.5 text-[10px] bg-white rounded shadow-sm hover:bg-gray-50"
+              className="px-1.5 py-0.5 text-[10px] bg-surface rounded shadow-card hover:bg-canvas"
             >
               작게
             </button>

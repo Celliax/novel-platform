@@ -155,7 +155,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
   const currentFavorites = user.favorites.slice((favPage - 1) * itemsPerPage, favPage * itemsPerPage);
 
   const renderNovels = (novels: Novel[], title: string) => (
-    <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border flex flex-col h-[300px]">
+    <div className="bg-surface rounded-2xl p-6 shadow-card border border-border flex flex-col h-[300px]">
       <div className="flex justify-between items-center mb-6">
         <h2 className="font-bold text-lg text-foreground">{title}</h2>
         {isOwnProfile && (
@@ -196,7 +196,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
             {isOwnProfile ? (
               <AvatarUpload user={{ id: user.id, avatar: user.avatar, name: user.nickname }} />
             ) : (
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border bg-gray-50 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border bg-canvas flex items-center justify-center">
                 {user.avatar ? (
                   <img src={user.avatar} className="w-full h-full object-cover" alt={user.nickname || ""} />
                 ) : (
@@ -205,7 +205,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
               </div>
             )}
             {isOwnProfile && (
-              <button className="absolute bottom-0 right-0 p-1.5 bg-surface border border-border rounded-full shadow-sm hover:bg-canvas transition-colors">
+              <button className="absolute bottom-0 right-0 p-1.5 bg-surface border border-border rounded-full shadow-card hover:bg-canvas transition-colors">
                 <Settings size={16} className="text-muted" />
               </button>
             )}
@@ -274,7 +274,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
       <div className="mt-8">
         {/* Privacy Check */}
         {!isOwnProfile && isPrivate ? (
-          <div className="bg-surface rounded-3xl border border-border shadow-sm p-20 flex flex-col items-center text-center">
+          <div className="bg-surface rounded-3xl border border-border shadow-card p-20 flex flex-col items-center text-center">
             <div className="w-20 h-20 bg-canvas rounded-3xl flex items-center justify-center text-muted/30 mb-6 border border-border">
               <Lock size={32} />
             </div>
@@ -286,7 +286,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
             {activeTab === "profile" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isOwnProfile && (
-                  <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border flex flex-col h-[300px]">
+                  <div className="bg-surface rounded-2xl p-6 shadow-card border border-border flex flex-col h-[300px]">
                     <h2 className="font-bold text-lg text-foreground mb-6">프로필 설정</h2>
                     <div className="flex items-center justify-between p-4 border border-border rounded-xl">
                       <div>
@@ -298,7 +298,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
                         disabled={savingPrivate}
                         className={`w-11 h-6 rounded-full transition-colors relative ${isPrivate ? "bg-brand-600" : "bg-border"}`}
                       >
-                        <span className={`absolute top-1 bg-white w-4 h-4 rounded-full transition-all ${isPrivate ? "left-6" : "left-1"}`} />
+                        <span className={`absolute top-1 bg-surface w-4 h-4 rounded-full transition-all ${isPrivate ? "left-6" : "left-1"}`} />
                       </button>
                     </div>
                   </div>
@@ -317,7 +317,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
             {activeTab === "taste" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left: Radar Chart */}
-                <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border flex flex-col items-center">
+                <div className="bg-surface rounded-2xl p-6 shadow-card border border-border flex flex-col items-center">
                   <h2 className="w-full font-bold text-lg text-foreground flex items-center gap-2 mb-6">
                     <BookOpen size={18} className="text-muted" /> 취향 <span className="text-sm font-normal text-muted">({isOwnProfile ? '나의 분석' : '사용자 분석'})</span>
                   </h2>
@@ -338,7 +338,7 @@ export default function ProfileClient({ user, isOwnProfile = false }: { user: Us
                 </div>
 
                 {/* Right: Favorited Novels List */}
-                <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border flex flex-col h-full min-h-[400px]">
+                <div className="bg-surface rounded-2xl p-6 shadow-card border border-border flex flex-col h-full min-h-[400px]">
                   <h2 className="w-full font-bold text-lg text-foreground flex items-center gap-2 mb-6">
                     <BookOpen size={18} className="text-muted" /> 선호하는 소설
                   </h2>

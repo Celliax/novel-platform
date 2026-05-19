@@ -11,7 +11,7 @@ import { ChevronLeft, Loader2, Save, BookOpen, Settings } from "lucide-react";
 const Editor = dynamic(() => import("@/components/Editor"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[60vh] bg-white animate-pulse" aria-hidden />
+    <div className="min-h-[60vh] bg-surface animate-pulse" aria-hidden />
   ),
 });
 
@@ -167,19 +167,19 @@ export default function EpisodeCreatePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={32} className="animate-spin text-purple-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
 
   if (!isAuthor) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center bg-white p-12 rounded-2xl border border-gray-200 shadow-sm max-w-sm">
+      <div className="flex items-center justify-center min-h-screen bg-canvas">
+        <div className="text-center bg-surface p-12 rounded-2xl border border-border shadow-card max-w-sm">
           <BookOpen size={32} className="text-red-400 mx-auto mb-4" />
-          <p className="text-gray-900 text-xl font-extrabold">권한이 없습니다</p>
-          <p className="text-gray-500 mt-2 text-sm">이 작품의 작가만 회차를 추가할 수 있습니다.</p>
-          <Link href={`/novel/${novelId}`} className="mt-6 inline-block px-6 py-2.5 bg-purple-600 text-white font-bold rounded-xl text-sm hover:bg-purple-700 transition-colors">
+          <p className="text-foreground text-xl font-extrabold">권한이 없습니다</p>
+          <p className="text-muted mt-2 text-sm">이 작품의 작가만 회차를 추가할 수 있습니다.</p>
+          <Link href={`/novel/${novelId}`} className="mt-6 inline-block px-6 py-2.5 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition-colors">
             작품으로 돌아가기
           </Link>
         </div>
@@ -188,33 +188,33 @@ export default function EpisodeCreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-surface">
       <form id="episode-form" onSubmit={handleSubmit}>
         {/* ─── Header breadcrumb ─── */}
-        <div className="border-b border-gray-200 px-4 py-3 bg-white">
-          <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-gray-500 font-medium">
-            <Link href={`/novel/${novelId}`} className="hover:text-purple-600 flex items-center gap-1">
+        <div className="border-b border-border px-4 py-3 bg-surface">
+          <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-muted font-medium">
+            <Link href={`/novel/${novelId}`} className="hover:text-brand-600 flex items-center gap-1">
               <ChevronLeft size={15} /> {novelTitle || "소설"}
             </Link>
             <span>∷</span>
-            <span className="text-gray-900 font-extrabold">새 글 작성하기</span>
+            <span className="text-foreground font-extrabold">새 글 작성하기</span>
           </div>
         </div>
 
         {/* ─── Episode Title (full-width input) ─── */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <div className="max-w-4xl mx-auto px-4">
             <input
               value={epTitle}
               onChange={(e) => setEpTitle(e.target.value)}
               placeholder="에피소드 번호를 입력해주세요."
-              className="w-full py-4 text-base text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none font-medium"
+              className="w-full py-4 text-base text-foreground/90 placeholder:text-muted/80 bg-transparent focus:outline-none font-medium"
             />
           </div>
         </div>
 
         {/* ─── Episode Image Upload ─── */}
-        <div className="border-b border-gray-100 bg-gray-50/30">
+        <div className="border-b border-border bg-canvas/30">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <input 
               type="file" 
@@ -228,17 +228,17 @@ export default function EpisodeCreatePage() {
                 type="button" 
                 disabled={isUploading}
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors font-medium border border-dashed border-gray-300 rounded-lg px-4 py-2 bg-white disabled:opacity-50"
+                className="flex items-center gap-2 text-sm text-muted hover:text-brand-600 transition-colors font-medium border border-dashed border-border/80 rounded-lg px-4 py-2 bg-surface disabled:opacity-50"
               >
                 {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />}
                 {isUploading ? "업로드 중..." : "메인 삽화 설정 (선택)"}
               </button>
             ) : (
-              <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
+              <div className="relative w-40 aspect-[4/3] rounded-lg overflow-hidden border border-border group">
                 <img src={image} alt="메인 삽화" className="w-full h-full object-cover" />
                 {isUploading && (
-                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                    <Loader2 size={20} className="animate-spin text-purple-600" />
+                  <div className="absolute inset-0 bg-surface/60 flex items-center justify-center">
+                    <Loader2 size={20} className="animate-spin text-brand-600" />
                   </div>
                 )}
                 <button 
@@ -255,16 +255,16 @@ export default function EpisodeCreatePage() {
         </div>
 
         {/* ─── Settings bar ─── */}
-        <div className="border-b border-gray-200 bg-gray-50/70">
+        <div className="border-b border-border bg-canvas/70">
           <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap items-center gap-3">
-            <select className="text-xs border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-700 font-medium focus:outline-none">
+            <select className="text-xs border border-border/80 rounded px-2 py-1.5 bg-surface text-foreground/80 font-medium focus:outline-none">
               <option>연재회차</option>
             </select>
-            <select className="text-xs border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-700 font-medium focus:outline-none">
+            <select className="text-xs border border-border/80 rounded px-2 py-1.5 bg-surface text-foreground/80 font-medium focus:outline-none">
               <option>전체 열람가능</option>
               <option>구독자 전용</option>
             </select>
-            <label className="flex items-center gap-1.5 text-xs text-purple-600 font-bold cursor-pointer bg-purple-50 px-2 py-1 rounded-md border border-purple-100">
+            <label className="flex items-center gap-1.5 text-xs text-brand-600 font-bold cursor-pointer bg-brand-50 px-2 py-1 rounded-md border border-brand-100">
               <input 
                 type="checkbox" 
                 checked={isSideStory}
@@ -282,22 +282,22 @@ export default function EpisodeCreatePage() {
               />
               19세 이용가(성인)
             </label>
-            <label className="flex items-center gap-1.5 text-xs text-gray-600 font-medium cursor-pointer">
+            <label className="flex items-center gap-1.5 text-xs text-muted font-medium cursor-pointer">
               <input type="checkbox" className="rounded" />
               연재예약
             </label>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-xs bg-white focus:outline-none" />
-              <select className="border border-gray-300 rounded px-2 py-1.5 bg-white focus:outline-none">
+            <div className="flex items-center gap-2 text-xs text-muted/80">
+              <input type="date" className="border border-border/80 rounded px-2 py-1.5 text-xs bg-surface focus:outline-none" />
+              <select className="border border-border/80 rounded px-2 py-1.5 bg-surface focus:outline-none">
                 {Array.from({length:24},(_,i)=><option key={i}>{i}시</option>)}
               </select>
-              <select className="border border-gray-300 rounded px-2 py-1.5 bg-white focus:outline-none">
+              <select className="border border-border/80 rounded px-2 py-1.5 bg-surface focus:outline-none">
                 <option>0분</option><option>30분</option>
               </select>
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-              <Link href={`/novel/${novelId}`} className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300 rounded bg-white text-gray-600 font-bold hover:bg-gray-50 transition-colors">
+              <Link href={`/novel/${novelId}`} className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border/80 rounded bg-surface text-muted font-bold hover:bg-canvas transition-colors">
                 <Settings size={13} /> 작품설정
               </Link>
             </div>
@@ -305,19 +305,19 @@ export default function EpisodeCreatePage() {
         </div>
 
         {/* ─── Author info row ─── */}
-        <div className="border-b border-gray-200">
-          <div className="max-w-4xl mx-auto px-4 py-2 flex items-center gap-3 text-xs text-gray-500">
+        <div className="border-b border-border">
+          <div className="max-w-4xl mx-auto px-4 py-2 flex items-center gap-3 text-xs text-muted">
             <label className="flex items-center gap-1 cursor-pointer">
               <input type="radio" name="indent" defaultChecked className="accent-purple-600" />
               <span className="font-medium">문단글</span>
             </label>
-            <select className="border border-gray-300 rounded px-2 py-1 bg-white text-xs focus:outline-none text-gray-700 font-medium">
+            <select className="border border-border/80 rounded px-2 py-1 bg-surface text-xs focus:outline-none text-foreground/80 font-medium">
               <option>큰폰 들여쓰기</option>
               <option>일반 들여쓰기</option>
               <option>들여쓰기 없음</option>
             </select>
-            <span className="text-gray-700 font-extrabold ml-1">작가명</span>
-            <span className="ml-auto text-gray-400">{wordCount.toLocaleString()}자</span>
+            <span className="text-foreground/80 font-extrabold ml-1">작가명</span>
+            <span className="ml-auto text-muted/80">{wordCount.toLocaleString()}자</span>
           </div>
         </div>
 
@@ -334,8 +334,8 @@ export default function EpisodeCreatePage() {
         </div>
 
         {/* ─── Auto-save notice & bottom bar ─── */}
-        <div className="border-t border-gray-200 bg-gray-50/60">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
+        <div className="border-t border-border bg-canvas/60">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
             <span>
               {savedAt
                 ? `${savedAt} 자동 저장 되었습니다.`
@@ -346,38 +346,38 @@ export default function EpisodeCreatePage() {
         </div>
 
         {/* ─── Author note ─── */}
-        <div className="border-t border-gray-200">
+        <div className="border-t border-border">
           <div className="max-w-4xl mx-auto px-4 py-4">
-            <label className="block text-xs font-extrabold text-gray-600 mb-2">
-              작가글 <span className="font-normal text-gray-400">[작가만]</span>
+            <label className="block text-xs font-extrabold text-muted mb-2">
+              작가글 <span className="font-normal text-muted/80">[작가만]</span>
             </label>
             <textarea
               value={authorNote}
               onChange={(e) => setAuthorNote(e.target.value)}
               rows={3}
               placeholder="독자분들에게 남기고 싶은 말을 작성해주세요. (선택)"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400 resize-none"
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-foreground/90 bg-surface placeholder:text-muted/80 focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-600 resize-none"
             />
             <div className="flex flex-wrap items-center gap-4 mt-3">
-              <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+              <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                 <input type="checkbox" className="rounded accent-purple-600" />
                 자동저장공지
               </label>
-              <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+              <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                 <input type="checkbox" className="rounded accent-purple-600" />
                 댓글공지
               </label>
               <div className="ml-auto flex gap-2">
                 <Link
                   href={`/novel/${novelId}`}
-                  className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="px-5 py-2.5 border border-border/80 rounded-lg text-sm font-bold text-muted hover:bg-canvas transition-colors"
                 >
                   취소
                 </Link>
                 <button
                   type="submit"
                   disabled={pending}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm rounded-lg transition-colors shadow-sm disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-sm rounded-lg transition-colors shadow-card disabled:opacity-50"
                 >
                   {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                   {pending ? "저장 중…" : "작성완료"}

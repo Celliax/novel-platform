@@ -94,9 +94,9 @@ export default function AvatarUpload({ user }: { user: { id: string; avatar: str
       {/* 오버레이 (마우스 올렸을 때 카메라 아이콘 표시) */}
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-black/30">
         {uploading ? (
-          <Loader2 className="animate-spin text-white drop-shadow-md" size={28} />
+          <Loader2 className="animate-spin text-white drop-shadow-card" size={28} />
         ) : (
-          <Camera className="text-white drop-shadow-md" size={28} />
+          <Camera className="text-white drop-shadow-card" size={28} />
         )}
       </div>
 

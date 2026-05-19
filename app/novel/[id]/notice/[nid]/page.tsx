@@ -43,7 +43,7 @@ export default function NoticeDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={32} className="animate-spin text-purple-600" />
+        <Loader2 size={32} className="animate-spin text-brand-600" />
       </div>
     );
   }
@@ -52,9 +52,9 @@ export default function NoticeDetailPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
         <AlertCircle size={48} className="text-red-400 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-gray-900 mb-2">에러 발생</h2>
-        <p className="text-gray-500 mb-6">{error}</p>
-        <Link href={`/novel/${novelId}`} className="px-6 py-2.5 bg-purple-600 text-white font-bold rounded-xl text-sm">
+        <h2 className="text-xl font-bold text-foreground mb-2">에러 발생</h2>
+        <p className="text-muted mb-6">{error}</p>
+        <Link href={`/novel/${novelId}`} className="px-6 py-2.5 bg-brand-600 text-white font-bold rounded-xl text-sm">
           작품으로 돌아가기
         </Link>
       </div>
@@ -67,28 +67,28 @@ export default function NoticeDetailPage() {
         <Link href={`/novel/${novelId}`} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ChevronLeft size={24} />
         </Link>
-        <h1 className="text-2xl font-extrabold text-gray-900 flex-1">작가 공지사항</h1>
+        <h1 className="text-2xl font-extrabold text-foreground flex-1">작가 공지사항</h1>
         {currentUserId && notice.novel?.authorId === currentUserId && (
           <Link
             href={`/novel/${novelId}/notice/${noticeId}/edit`}
-            className="px-4 py-2 text-sm font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-bold bg-gray-100 hover:bg-gray-200 text-foreground/80 rounded-lg transition-colors"
           >
             수정
           </Link>
         )}
       </div>
 
-      <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <header className="p-8 border-b border-gray-50 bg-gray-50/30">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{notice.title}</h2>
-          <div className="flex items-center gap-4 text-xs text-gray-500 font-bold">
+      <article className="bg-surface rounded-2xl border border-border shadow-card overflow-hidden">
+        <header className="p-8 border-b border-gray-50 bg-canvas/30">
+          <h2 className="text-2xl font-bold text-foreground mb-4">{notice.title}</h2>
+          <div className="flex items-center gap-4 text-xs text-muted font-bold">
             <span className="flex items-center gap-1.5"><Calendar size={14}/> {new Date(notice.createdAt).toLocaleDateString()}</span>
             <span className="flex items-center gap-1.5"><Eye size={14}/> {notice.views.toLocaleString()}</span>
           </div>
         </header>
         {/* 첨부 이미지 */}
         {notice.image && (
-          <div className="border-b border-gray-50 bg-gray-50/20 flex justify-center p-4">
+          <div className="border-b border-gray-50 bg-canvas/20 flex justify-center p-4">
             <img
               src={notice.image}
               alt="공지 첨부 이미지"
@@ -97,7 +97,7 @@ export default function NoticeDetailPage() {
           </div>
         )}
         <div 
-          className="p-8 text-gray-800 leading-relaxed text-[15px] prose prose-purple max-w-none tiptap"
+          className="p-8 text-foreground/90 leading-relaxed text-[15px] prose prose-purple max-w-none tiptap"
           dangerouslySetInnerHTML={{ __html: notice.content }}
         />
       </article>
@@ -105,7 +105,7 @@ export default function NoticeDetailPage() {
       <div className="mt-8 flex justify-center">
         <Link 
           href={`/novel/${novelId}`}
-          className="px-8 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+          className="px-8 py-3 border border-border rounded-xl text-sm font-bold text-muted hover:bg-canvas transition-colors"
         >
           목록으로 돌아가기
         </Link>

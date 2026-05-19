@@ -129,35 +129,35 @@ export default function CommentSection({
   return (
     <div className="mt-12">
       <div className="flex justify-between items-end border-b-2 border-gray-900 pb-3 mb-6">
-        <h2 className="text-[19px] font-extrabold text-gray-900">{title} <span className="text-purple-600 ml-1">{comments.length}</span></h2>
+        <h2 className="text-[19px] font-extrabold text-foreground">{title} <span className="text-brand-600 ml-1">{comments.length}</span></h2>
       </div>
 
       {/* Comment Input */}
       {showInput && (
         user ? (
           <form onSubmit={(e) => handleSubmit(e)} className="mb-8">
-            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-200 shadow-sm transition-all focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100">
+            <div className="bg-canvas rounded-2xl p-5 border border-border shadow-card transition-all focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-100">
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="따뜻한 댓글은 작가에게 큰 힘이 됩니다."
-                className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none h-24 placeholder:text-gray-400 font-medium"
+                className="w-full bg-transparent border-none focus:ring-0 text-sm resize-none h-24 placeholder:text-muted/80 font-medium"
               />
-              <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200/50">
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/50">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200">
                     {user.user_metadata?.avatar_url ? (
                       <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="me" />
                     ) : (
-                      <UserIcon size={12} className="w-full h-full p-1 text-gray-400" />
+                      <UserIcon size={12} className="w-full h-full p-1 text-muted/80" />
                     )}
                   </div>
-                  <span className="text-xs font-bold text-gray-600">{user.user_metadata?.nickname || "나"}</span>
+                  <span className="text-xs font-bold text-muted">{user.user_metadata?.nickname || "나"}</span>
                 </div>
                 <button
                   type="submit"
                   disabled={submitting || !newComment.trim()}
-                  className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-black rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
                 >
                   {submitting ? <Loader2 size={14} className="animate-spin" /> : "등록"}
                 </button>
@@ -165,8 +165,8 @@ export default function CommentSection({
             </div>
           </form>
         ) : (
-          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 text-center mb-8 border-dashed">
-            <p className="text-sm text-gray-500 font-bold">로그인 후 댓글을 작성할 수 있습니다.</p>
+          <div className="bg-canvas rounded-2xl p-8 border border-border text-center mb-8 border-dashed">
+            <p className="text-sm text-muted font-bold">로그인 후 댓글을 작성할 수 있습니다.</p>
           </div>
         )
       )}
@@ -175,7 +175,7 @@ export default function CommentSection({
       <div className="space-y-0 divide-y divide-gray-100">
         {loading ? (
           <div className="py-20 flex justify-center">
-            <Loader2 size={32} className="animate-spin text-purple-600" />
+            <Loader2 size={32} className="animate-spin text-brand-600" />
           </div>
         ) : mainComments.length > 0 ? (
           mainComments.map(comment => (
@@ -183,7 +183,7 @@ export default function CommentSection({
               {/* Main Comment */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100 shadow-sm group-hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-2xl overflow-hidden bg-gray-100 border border-border shadow-card group-hover:shadow-card transition-all">
                     {comment.userAvatar ? (
                       <img src={comment.userAvatar} className="w-full h-full object-cover" alt={comment.userName} />
                     ) : (
@@ -193,25 +193,25 @@ export default function CommentSection({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <Link href={`/profile/${comment.userId}`} className="font-black text-[15px] text-gray-900 tracking-tight hover:text-purple-600 hover:underline transition-colors">{comment.userName}</Link>
+                    <Link href={`/profile/${comment.userId}`} className="font-black text-[15px] text-foreground tracking-tight hover:text-brand-600 hover:underline transition-colors">{comment.userName}</Link>
                     {authorId && comment.userId === authorId && (
-                      <span className="px-2 py-0.5 bg-purple-600 text-white text-[9px] rounded-md font-black uppercase tracking-tighter shadow-sm">Author</span>
+                      <span className="px-2 py-0.5 bg-brand-600 text-white text-[9px] rounded-md font-black uppercase tracking-tighter shadow-card">Author</span>
                     )}
                     {comment.episodeNo && (
-                      <span className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] rounded font-bold border border-gray-200/50">EP.{comment.episodeNo}</span>
+                      <span className="px-1.5 py-0.5 bg-gray-100 text-muted text-[10px] rounded font-bold border border-border/50">EP.{comment.episodeNo}</span>
                     )}
-                    <span className="text-[11px] font-bold text-gray-400">
+                    <span className="text-[11px] font-bold text-muted/80">
                       {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : '방금 전'}
                     </span>
                   </div>
-                  <div className="text-[14px] text-gray-800 leading-relaxed font-medium mb-4">
+                  <div className="text-[14px] text-foreground/90 leading-relaxed font-medium mb-4">
                     {comment.content}
                   </div>
-                  <div className="flex items-center gap-4 text-[11px] text-gray-400 font-black">
-                    <div className="flex items-center gap-3 bg-gray-50 rounded-full px-3 py-1.5 border border-gray-100">
+                  <div className="flex items-center gap-4 text-[11px] text-muted/80 font-black">
+                    <div className="flex items-center gap-3 bg-canvas rounded-full px-3 py-1.5 border border-border">
                       <button 
                         onClick={() => handleAction(comment.id, 'recommend')}
-                        className="flex items-center gap-1.5 hover:text-purple-600 transition-colors"
+                        className="flex items-center gap-1.5 hover:text-brand-600 transition-colors"
                       >
                         <ThumbsUp size={13} /> <span>{comment.recommends}</span>
                       </button>
@@ -225,7 +225,7 @@ export default function CommentSection({
                     </div>
                     <button 
                       onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
-                      className={`flex items-center gap-1 hover:text-purple-600 transition-colors px-2 py-1 rounded-md ${replyTo === comment.id ? 'text-purple-600 bg-purple-50' : ''}`}
+                      className={`flex items-center gap-1 hover:text-brand-600 transition-colors px-2 py-1 rounded-md ${replyTo === comment.id ? 'text-brand-600 bg-brand-50' : ''}`}
                     >
                       <MessageSquare size={13} /> 답글
                     </button>
@@ -237,7 +237,7 @@ export default function CommentSection({
                   {/* Reply Input */}
                   {replyTo === comment.id && (
                     <form onSubmit={(e) => handleSubmit(e, comment.id)} className="mt-4 animate-in slide-in-from-top-2 duration-200">
-                      <div className="bg-purple-50/50 rounded-xl p-4 border border-purple-100">
+                      <div className="bg-brand-50/50 rounded-xl p-4 border border-brand-100">
                         <textarea
                           autoFocus
                           value={replyContent}
@@ -249,14 +249,14 @@ export default function CommentSection({
                           <button 
                             type="button"
                             onClick={() => setReplyTo(null)}
-                            className="px-4 py-2 text-gray-500 text-xs font-bold hover:bg-gray-100 rounded-lg transition-colors"
+                            className="px-4 py-2 text-muted text-xs font-bold hover:bg-gray-100 rounded-lg transition-colors"
                           >
                             취소
                           </button>
                           <button
                             type="submit"
                             disabled={submitting || !replyContent.trim()}
-                            className="px-5 py-2 bg-purple-600 text-white text-xs font-black rounded-lg transition-all shadow-md active:scale-95 disabled:opacity-50"
+                            className="px-5 py-2 bg-brand-600 text-white text-xs font-black rounded-lg transition-all shadow-card active:scale-95 disabled:opacity-50"
                           >
                             {submitting ? <Loader2 size={12} className="animate-spin" /> : "답글 등록"}
                           </button>
@@ -268,12 +268,12 @@ export default function CommentSection({
                   {/* Replies List */}
                   <div className="mt-4 space-y-4">
                     {getReplies(comment.id).map(reply => (
-                      <div key={reply.id} className="flex gap-3 pl-4 border-l-2 border-gray-50 bg-gray-50/30 p-4 rounded-r-2xl">
+                      <div key={reply.id} className="flex gap-3 pl-4 border-l-2 border-gray-50 bg-canvas/30 p-4 rounded-r-2xl">
                         <div className="flex-shrink-0 mt-1">
                           <CornerDownRight size={14} className="text-gray-300" />
                         </div>
                         <div className="flex-shrink-0">
-                          <div className="w-8 h-8 rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                          <div className="w-8 h-8 rounded-xl overflow-hidden bg-surface border border-border shadow-card">
                             {reply.userAvatar ? (
                               <img src={reply.userAvatar} className="w-full h-full object-cover" alt={reply.userName} />
                             ) : (
@@ -283,21 +283,21 @@ export default function CommentSection({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <Link href={`/profile/${reply.userId}`} className="font-black text-[13px] text-gray-900 tracking-tight hover:text-purple-600 hover:underline transition-colors">{reply.userName}</Link>
+                            <Link href={`/profile/${reply.userId}`} className="font-black text-[13px] text-foreground tracking-tight hover:text-brand-600 hover:underline transition-colors">{reply.userName}</Link>
                             {authorId && reply.userId === authorId && (
-                              <span className="px-1.5 py-0.5 bg-purple-600 text-white text-[8px] rounded font-black uppercase tracking-tighter">Author</span>
+                              <span className="px-1.5 py-0.5 bg-brand-600 text-white text-[8px] rounded font-black uppercase tracking-tighter">Author</span>
                             )}
-                            <span className="text-[10px] font-bold text-gray-400">
+                            <span className="text-[10px] font-bold text-muted/80">
                               {new Date(reply.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <div className="text-[13px] text-gray-700 leading-relaxed font-medium">
+                          <div className="text-[13px] text-foreground/80 leading-relaxed font-medium">
                             {reply.content}
                           </div>
-                          <div className="flex gap-3 mt-2 text-[10px] text-gray-400 font-bold justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-3 mt-2 text-[10px] text-muted/80 font-bold justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
                               onClick={() => handleAction(reply.id, 'recommend')}
-                              className="hover:text-purple-600 transition-colors"
+                              className="hover:text-brand-600 transition-colors"
                             >
                               추천 {reply.recommends}
                             </button>
@@ -317,7 +317,7 @@ export default function CommentSection({
             </div>
           ))
         ) : (
-          <p className="py-20 text-center text-gray-400 text-sm font-bold border-t border-gray-50">아직 댓글이 없습니다. 첫 댓글을 남겨보세요! ✨</p>
+          <p className="py-20 text-center text-muted/80 text-sm font-bold border-t border-gray-50">아직 댓글이 없습니다. 첫 댓글을 남겨보세요! ✨</p>
         )}
       </div>
     </div>
