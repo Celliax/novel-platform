@@ -1,44 +1,15 @@
-"use client";
-
 import Link from "next/link";
-import { BookOpen, PenTool, User, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getSupabaseClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
-import { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import { BookOpen, PenTool, User } from "lucide-react";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "./ThemeToggle";
+import LogoutButton from "./LogoutButton";
 
-export default function Navbar() {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    const supabase = getSupabaseClient();
-    
-    // 현재 세션 확인
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // 로그인 상태 변경 구독
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    const supabase = getSupabaseClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  };
+export default async function Navbar() {
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <nav className="bg-surface/90 backdrop-blur-md border-b border-border shadow-card sticky top-0 z-50">
+    <nav className="bg-surface/90 backdrop-blur-md border-b border-border shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         <Link
           href="/"
@@ -60,35 +31,27 @@ export default function Navbar() {
             소설 쓰기
           </Link>
           
-          {!loading && (
-            user ? (
-              <>
-                <Link href="/profile" className="hover:text-brand-600 transition-colors flex items-center gap-1">
-                  <User size={18} aria-hidden />
-                  {user.user_metadata?.nickname || user.user_metadata?.full_name || "프로필"}
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1 hover:text-red-600 transition-colors"
-                >
-                  <LogOut size={18} aria-hidden />
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/signup" className="hover:text-brand-600 transition-colors hidden sm:inline">
-                  회원가입
-                </Link>
-                <Link
-                  href="/login"
-                  className="flex items-center gap-1 hover:text-brand-600 transition-colors"
-                >
-                  <User size={18} aria-hidden />
-                  로그인
-                </Link>
-              </>
-            )
+          {user ? (
+            <>
+              <Link href="/profile" className="hover:text-brand-600 transition-colors flex items-center gap-1">
+                <User size={18} aria-hidden />
+                {user.user_metadata?.nickname || user.user_metadata?.full_name || "프로필"}
+              </Link>
+              <LogoutButton />
+            </>
+          ) : (
+            <>
+              <Link href="/signup" className="hover:text-brand-600 transition-colors hidden sm:inline">
+                회원가입
+              </Link>
+              <Link
+                href="/login"
+                className="flex items-center gap-1 hover:text-brand-600 transition-colors"
+              >
+                <User size={18} aria-hidden />
+                로그인
+              </Link>
+            </>
           )}
           <ThemeToggle />
         </div>
