@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -89,6 +90,7 @@ export default function Navbar() {
               </>
             )
           )}
+          <ThemeToggle />
         </div>
       </div>
     </nav>

@@ -37,21 +37,25 @@ export const metadata: Metadata = {
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col bg-canvas text-foreground antialiased`}>
-        <Navbar />
-        <main className="flex-1 w-full">{children}</main>
-        <footer className="bg-ink text-canvas/90 py-8 text-center text-sm">
-          <p>© 2026 FPT 소설 플랫폼</p>
-        </footer>
-        <SpeedInsights />
-        <Analytics />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Navbar />
+          <main className="flex-1 w-full">{children}</main>
+          <footer className="bg-ink text-canvas/90 py-8 text-center text-sm">
+            <p>© 2026 FPT 소설 플랫폼</p>
+          </footer>
+          <SpeedInsights />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );
